@@ -1,16 +1,24 @@
+import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
+import {
+  selectNewItemImg,
+  updateNewItemImg,
+} from "@/features/camera/redux/cameraSlice";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Button, Pressable, StyleSheet, Text, View } from "react-native";
-import { removeBackground } from "react-native-background-remover";
 
 export function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | undefined>(undefined);
   const [facing, setFacing] = useState<CameraType>("back");
+  const dispatch = useAppDispatch();
+  const imgUri = useAppSelector(selectNewItemImg);
+  const router = useRouter();
 
   if (!permission) {
     return null;
@@ -29,12 +37,15 @@ export function Camera() {
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
+    // if (photo?.uri) {
+    //   removeBackground(photo.uri).then((backgroundRemovedImageURI) => {
+    //     setUri(backgroundRemovedImageURI);
+    //   });
+    // }
     if (photo?.uri) {
-      removeBackground(photo.uri).then((backgroundRemovedImageURI) => {
-        setUri(backgroundRemovedImageURI);
-      });
+      //setUri(photo.uri);
+      dispatch(updateNewItemImg(photo.uri));
     }
-    //setUri(photo.uri);
   };
 
   const toggleFacing = () => {
@@ -45,13 +56,17 @@ export function Camera() {
     return (
       <View>
         <Image
-          source={{ uri }}
+          source={{ uri: imgUri }}
           contentFit="contain"
           style={{ width: 500, aspectRatio: 1 }}
         />
         <Button
-          onPress={() => setUri(undefined)}
+          onPress={() => dispatch(updateNewItemImg(""))}
           title="Take another picture"
+        />
+        <Button
+          title="Keep picture"
+          onPress={() => router.navigate("/(tabs)/add-item")}
         />
       </View>
     );
@@ -99,7 +114,7 @@ export function Camera() {
 
   return (
     <View style={styles.container}>
-      {uri ? renderPicture() : renderCamera()}
+      {imgUri == "" ? renderCamera() : renderPicture()}
     </View>
   );
 }

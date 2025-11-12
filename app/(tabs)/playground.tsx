@@ -1,4 +1,4 @@
-import Camera from "@/components/Camera";
+import Camera from "@/features/camera/components/Camera";
 import React from "react";
 import { StyleSheet } from "react-native";
 

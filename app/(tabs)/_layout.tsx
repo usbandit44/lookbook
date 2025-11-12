@@ -1,13 +1,15 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#fff",
-        headerShown: false,
+        tabBarActiveTintColor: "#000",
+        headerShown: true,
+        headerStyle: Platform.select({ ios: styles.iosHeader }),
+        headerTitle: "",
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
@@ -24,6 +26,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="add-item"
+        options={{
+          title: "Add Item",
+        }}
+      />
+      <Tabs.Screen
         name="playground"
         options={{
           title: "Play",
@@ -32,3 +40,7 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  iosHeader: { height: 60, backgroundColor: "rgba(0, 0, 0, 0)" },
+});
