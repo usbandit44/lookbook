@@ -1,4 +1,4 @@
-import cameraReducer from "@/features/camera/redux/cameraSlice";
+import cameraReducer from "@/redux/slices/cameraSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 export const store = configureStore({

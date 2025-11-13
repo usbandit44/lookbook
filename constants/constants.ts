@@ -25,13 +25,13 @@ export const Colors = {
   },
 };
 
-export const itemTypes = [
-  "Tops",
-  "Bottoms",
-  "Outerwear",
-  "Shoes",
-  "Eyewear",
-  "Headwear",
-  "Necklaces",
-  "Wrist Wear",
-];
+export enum itemTypes {
+  Tops = "Tops",
+  Bottoms = "Bottoms",
+  Outerwear = "Outerwear",
+  Shoes = "Shoes",
+  Eyewear = "Eyewear",
+  Headwear = "Headwear",
+  Necklaces = "Necklaces",
+  WristWear = "Wrist Wear",
+}

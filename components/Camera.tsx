@@ -1,10 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
-import {
-  selectNewItemImg,
-  updateNewItemImg,
-} from "@/features/camera/redux/cameraSlice";
+import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -14,7 +11,6 @@ import { Button, Pressable, StyleSheet, Text, View } from "react-native";
 export function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef<CameraView>(null);
-  const [uri, setUri] = useState<string | undefined>(undefined);
   const [facing, setFacing] = useState<CameraType>("back");
   const dispatch = useAppDispatch();
   const imgUri = useAppSelector(selectNewItemImg);
@@ -37,13 +33,7 @@ export function Camera() {
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
-    // if (photo?.uri) {
-    //   removeBackground(photo.uri).then((backgroundRemovedImageURI) => {
-    //     setUri(backgroundRemovedImageURI);
-    //   });
-    // }
     if (photo?.uri) {
-      //setUri(photo.uri);
       dispatch(updateNewItemImg(photo.uri));
     }
   };
