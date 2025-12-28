@@ -1,4 +1,4 @@
-import AddItemForm from "@/features/add-item/components/add-item-form";
+import AddItemForm from "@/features/add-item/components/AddItemForm";
 import { useAppSelector } from "@/hooks/redux-hooks";
 import { selectNewItemImg } from "@/redux/slices/cameraSlice";
 import { useRouter } from "expo-router";
