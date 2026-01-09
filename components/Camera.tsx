@@ -116,8 +116,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   camera: {
-    flex: 1,
-    width: "100%",
+    // flex: 1,
+    width: 400,
+    height: 450,
   },
   shutterContainer: {
     position: "absolute",
