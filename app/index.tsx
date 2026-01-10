@@ -13,14 +13,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export class LoginPage extends Component {
   render() {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.background }}>
-        <TopBar />
-        <Text className="text-xl font-bold text-blue-500">
-        Welcome to Nativewind!
-        </Text>
-        <Text>LoginPage</Text>
-        <Link href="/(tabs)/home">View App</Link>
-      </SafeAreaView>
+    
+        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.background }}>
+          <TopBar />
+          <Text>LoginPage</Text>
+          <Link href="/(tabs)/home">View App</Link>
+        </SafeAreaView>
     );
   }
 }
