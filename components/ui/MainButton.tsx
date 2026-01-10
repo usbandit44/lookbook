@@ -26,7 +26,7 @@ export default function MainButton({
         },
         style,
     ]}>
-        <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>
+        <Text style={{ color: textColor,fontFamily: "lora-SemiBold",fontSize: 16, fontWeight: '600' }}>
             {title}
         </Text>
     </TouchableOpacity>
