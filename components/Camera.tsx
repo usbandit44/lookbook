@@ -7,6 +7,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { removeBackground } from "react-native-background-remover";
 
 export function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -34,7 +35,10 @@ export function Camera() {
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
-      dispatch(updateNewItemImg(photo.uri));
+      console.log("test1");
+      const backgroundRemovedImageURI = await removeBackground(photo.uri);
+      dispatch(updateNewItemImg(backgroundRemovedImageURI));
+      // dispatch(updateNewItemImg(photo.uri));
     }
   };
 

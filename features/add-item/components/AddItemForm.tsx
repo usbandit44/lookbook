@@ -145,6 +145,7 @@ const AddItemForm = () => {
           setValue={setValue}
           setItems={setItems}
           style={{ backgroundColor: Colors.light.background }}
+          placeholder="Select Type"
         />
         <FormErrorAlert show={showTypeError}>Select a type</FormErrorAlert>
       </View>
@@ -153,7 +154,7 @@ const AddItemForm = () => {
         title="Add Item"
         onPress={() => {
           createItem();
-          setVisablity(true);
+          // setVisablity(true);
         }}
       />
       <Snackbar

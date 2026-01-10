@@ -16,6 +16,7 @@ const Snackbar: React.FC<{
   type: "default" | "success" | "error";
   visibility: boolean;
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  icon?: 
 }> = (props) => {
   let icon;
   let bgColor;
