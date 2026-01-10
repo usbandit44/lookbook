@@ -4,6 +4,9 @@ import { Image } from "expo-image";
 import { useSQLiteContext } from "expo-sqlite";
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { Component } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Home = () => {
   const db = useSQLiteContext();
@@ -31,6 +34,9 @@ const Home = () => {
           style={{ width: 500, aspectRatio: 1 }}
         />
       </View>
+      <SafeAreaView>
+        <Text>home</Text>
+      </SafeAreaView>
     );
   };
 

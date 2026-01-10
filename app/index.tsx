@@ -7,28 +7,20 @@ import { Text, View } from "react-native";
 import icons from "../constants/icons";
 import { Image } from "react-native";
 import TopBar from "@/components/ui/TopBar";
+import { Colors } from "@/constants/Colors";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export class LoginPage extends Component {
   render() {
     return (
-      <View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.background }}>
         <TopBar />
-        <MainButton
-        title="Submit"
-        onPress={() => alert('Submitted!')}
-        />
-        <IconButton
-        onPress={() => alert('Icon Pressed!')}
-        backgroundColor="#ADD8E6"
-        icon={<Image source={icons.logo} style={{ width: 180, height: 180 }} />}
-        style={{ height: 180, width: 180 }}
-        />
         <Text className="text-xl font-bold text-blue-500">
         Welcome to Nativewind!
         </Text>
         <Text>LoginPage</Text>
         <Link href="/(tabs)/home">View App</Link>
-      </View>
+      </SafeAreaView>
     );
   }
 }

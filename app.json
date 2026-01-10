@@ -64,6 +64,28 @@
           }
         }
       ]
+      ],
+    [
+      "expo-font",
+      {
+        "fonts": [
+          "./assets/fonts/InriaSerif-Bold.ttf",
+          "./assets/fonts/InriaSerif-BoldItalic.ttf",
+          "./assets/fonts/InriaSerif-Italic.ttf",
+          "./assets/fonts/InriaSerif-Light.ttf",
+          "./assets/fonts/InriaSerif-LightItalic.ttf",
+          "./assets/fonts/InriaSerif-Regular.ttf",
+          "./assets/fonts/Lora-Bold.ttf",
+          "./assets/fonts/Lora-BoldItalic.ttf",
+          "./assets/fonts/Lora-Italic.ttf",
+          "./assets/fonts/Lora-Medium.ttf",
+          "./assets/fonts/Lora-MediumItalic.ttf",
+          "./assets/fonts/Lora-Regular.ttf",
+          "./assets/fonts/Lora-SemiBold.ttf",
+          "./assets/fonts/Lora-SemiBoldItalic.ttf"
+      ]
+      }
+    ]
     ],
     "experiments": {
       "typedRoutes": true

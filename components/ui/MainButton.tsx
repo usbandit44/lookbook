@@ -1,11 +1,12 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
+import { Colors } from '@/constants/Colors'
 
 export default function MainButton({
     title = 'Button', 
     onPress = () => {},
-    backgroundColor = '#4C4242',
-    textColor = '#FFFFFF',
+    backgroundColor = Colors.light.text,
+    textColor = Colors.light.background,
     style = {},
 }) {
   return (
