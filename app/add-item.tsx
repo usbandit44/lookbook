@@ -11,14 +11,6 @@ const AddItemPage = () => {
   const router = useRouter();
   const imgUri = useAppSelector(selectNewItemImg);
 
-  const renderPicture = () => {
-    return (
-      <View>
-        <AddItemForm />
-      </View>
-    );
-  };
-
   return (
     <View style={styles.screen}>
       <AddItemForm />

@@ -7,7 +7,11 @@ class SqliteItemRepo extends ItemRepo {
   private db = useSQLiteContext();
   private drizzleDb = drizzle(this.db);
 
-  async addItem(item: { type: string; imgUrl: string }): Promise<number> {
+  async addItem(item: {
+    name: string;
+    type: string;
+    imgUrl: string;
+  }): Promise<number> {
     try {
       const result = await this.drizzleDb
         .insert(items)
@@ -20,6 +24,19 @@ class SqliteItemRepo extends ItemRepo {
     } catch (err) {
       console.error("Failed to add item:", err);
       throw err;
+    }
+  }
+
+  async countNumberOfItem(): Promise<number> {
+    try {
+      const result = await this.drizzleDb.$count(items);
+      if (result == null) {
+        throw new Error("Count failed");
+      }
+      return result;
+    } catch (error) {
+      console.error("Failed to add item:", error);
+      throw error;
     }
   }
 }

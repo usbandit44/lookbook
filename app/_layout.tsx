@@ -1,14 +1,17 @@
+import TopBar from "@/components/ui/TopBar";
+import { Colors } from "@/constants/constants";
 import migrations from "@/drizzle/migrations";
+import BottomNav from "@/features/navigation/components/BottomNav";
 import { store } from "@/redux/store";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Slot } from "expo-router";
 import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import { Suspense } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import "react-native-reanimated";
 import { Provider } from "react-redux";
 
@@ -37,11 +40,18 @@ export default function RootLayout() {
       >
         <ThemeProvider value={DefaultTheme}>
           <Provider store={store}>
-            <Stack>
-              <Stack.Screen name="index" />
+            {/* <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="pages" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
-            </Stack>
+            </Stack> */}
+            <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+              <TopBar />
+              <Slot />
+
+              <BottomNav />
+            </View>
             <StatusBar style="auto" />
           </Provider>
         </ThemeProvider>

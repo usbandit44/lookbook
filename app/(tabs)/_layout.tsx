@@ -1,3 +1,4 @@
+import TopBar from "@/components/ui/TopBar";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet } from "react-native";
@@ -8,6 +9,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: "#000",
         headerShown: true,
+        header: (props) => <TopBar />,
         headerStyle: Platform.select({ ios: styles.iosHeader }),
         headerTitle: "",
         tabBarStyle: Platform.select({

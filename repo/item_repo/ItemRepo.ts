@@ -1,7 +1,13 @@
 abstract class ItemRepo {
   constructor() {}
 
-  abstract addItem(item: { type: string; imgUrl: string }): Promise<number>;
+  abstract addItem(item: {
+    name: string;
+    type: string;
+    imgUrl: string;
+  }): Promise<number>;
+
+  abstract countNumberOfItem(): Promise<number>;
 }
 
 export default ItemRepo;

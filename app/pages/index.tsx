@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
 import ItemPreview from "@/features/items-page/components/ItemPreview";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -15,10 +16,10 @@ const Home = () => {
 
   // setItemsData(data);
   useEffect(() => {
-    // const fetchItems = async () => {
-    //   await drizzleDb.delete(items);
-    // };
-    // fetchItems();
+    const fetchItems = async () => {
+      await drizzleDb.delete(items);
+    };
+    fetchItems();
   }, []);
 
   const renderPicture = (imgUri: string) => {
@@ -37,7 +38,7 @@ const Home = () => {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
       <Text>home</Text>
       <FlatList
         data={itemsData}

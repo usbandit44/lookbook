@@ -35,7 +35,6 @@ export function Camera() {
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
-      console.log("test1");
       const backgroundRemovedImageURI = await removeBackground(photo.uri);
       dispatch(updateNewItemImg(backgroundRemovedImageURI));
       // dispatch(updateNewItemImg(photo.uri));
@@ -60,7 +59,7 @@ export function Camera() {
         />
         <Button
           title="Keep picture"
-          onPress={() => router.navigate("/(tabs)/add-item")}
+          onPress={() => router.navigate("/add-item")}
         />
       </View>
     );
@@ -75,6 +74,7 @@ export function Camera() {
         facing={facing}
         mute={false}
         responsiveOrientationWhenOrientationLocked
+        zoom={0.15}
       >
         <View style={styles.shutterContainer}>
           <Pressable onPress={takePicture}>
