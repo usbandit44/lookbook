@@ -1,8 +1,10 @@
 import { Colors } from "@/constants/constants";
-import { usePathname, useRouter } from "expo-router";
+import icons from "@/constants/icons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -12,8 +14,6 @@ import {
 import { Icon } from "react-native-elements";
 
 const BottomNav = () => {
-  const pathname = usePathname();
-
   const { width } = useWindowDimensions();
   const router = useRouter();
   const [active, setActive] = useState(false);
@@ -23,7 +23,7 @@ const BottomNav = () => {
   useEffect(() => {
     Animated.timing(navHeight, {
       toValue: active ? 160 : 80,
-      duration: 250,
+      duration: 300,
       useNativeDriver: false, // Required for height
     }).start();
     // Animated.timing(navCorner, {
@@ -34,9 +34,7 @@ const BottomNav = () => {
   }, [active]);
 
   // Counter-scale for children to stay normal size
-  if (!pathname.includes("pages")) {
-    return null;
-  }
+
   return (
     <Animated.View
       style={[
@@ -70,25 +68,34 @@ const BottomNav = () => {
           >
             <Icon name="close" type="material"></Icon>
           </Pressable>
-          <Pressable
-            onPress={() => {
-              setActive(false);
-              setTimeout(() => {
-                router.navigate("/add-item");
-              }, 260);
-            }}
-            style={styles.navButton}
-          >
-            <Icon name="shirt-outline" type="ionicon" size={35}></Icon>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              setActive(false);
-            }}
-            style={styles.navButton}
-          >
-            <Text>Heldlo</Text>
-          </Pressable>
+          <View style={styles.navButtonContainer}>
+            <Pressable
+              onPress={() => {
+                setActive(false);
+                setTimeout(() => {
+                  router.navigate("/add-item");
+                }, 260);
+              }}
+              style={styles.navButton}
+            >
+              <Icon name="shirt-outline" type="ionicon" size={35}></Icon>
+            </Pressable>
+            <Text>Add Item</Text>
+          </View>
+          <View style={styles.navButtonContainer}>
+            <Pressable
+              onPress={() => {
+                router.navigate("/create-outfit");
+              }}
+              style={styles.navButton}
+            >
+              <Image
+                source={icons.createOutfitIcon}
+                style={{ width: 45, height: 45, resizeMode: "contain" }}
+              />
+            </Pressable>
+            <Text>Create Outfit</Text>
+          </View>
         </View>
       ) : (
         <Pressable
@@ -121,6 +128,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
+  },
+  navButtonContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
   },
   navButton: {
     height: 70,

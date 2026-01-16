@@ -4,6 +4,7 @@ export const items = sqliteTable("items", {
   id: integer().primaryKey({ autoIncrement: true }),
   name: text(),
   type: text(),
+  size: text(),
   imgUrl: text(),
 });
 

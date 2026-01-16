@@ -4,6 +4,7 @@ abstract class ItemRepo {
   abstract addItem(item: {
     name: string;
     type: string;
+    size: string;
     imgUrl: string;
   }): Promise<number>;
 

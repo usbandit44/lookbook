@@ -3,7 +3,7 @@ import { useAppSelector } from "@/hooks/redux-hooks";
 import { selectNewItemImg } from "@/redux/slices/cameraSlice";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 const AddItemPage = () => {
   const [selectedItem, setSelectedItem] = React.useState("");
@@ -11,15 +11,12 @@ const AddItemPage = () => {
   const router = useRouter();
   const imgUri = useAppSelector(selectNewItemImg);
 
-  return (
-    <View style={styles.screen}>
-      <AddItemForm />
-    </View>
-  );
+  return <AddItemForm />;
 };
 
 export default AddItemPage;
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  iosHeader: { height: 60, backgroundColor: "rgba(0, 0, 0, 0)" },
 });

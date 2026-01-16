@@ -1,15 +1,15 @@
-// import TopBar from "@/components/ui/TopBar";
-// import BottomNav from "@/features/navigation/components/BottomNav";
-// import { Slot } from "expo-router";
-// import { View } from "react-native";
+import BottomNav from "@/features/navigation/components/BottomNav";
+import TopBar from "@/features/navigation/components/TopBar";
+import { Slot } from "expo-router";
+import { View } from "react-native";
 
-// export default function Layout() {
-//   return (
-//     <View style={{ flex: 1 }}>
-//       <TopBar />
-//       <Slot />
+export default function Layout() {
+  return (
+    <View style={{ flex: 1 }}>
+      <TopBar />
+      <Slot />
 
-//       <BottomNav />
-//     </View>
-//   );
-// }
+      <BottomNav />
+    </View>
+  );
+}

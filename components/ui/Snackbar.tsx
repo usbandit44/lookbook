@@ -16,6 +16,7 @@ const Snackbar: React.FC<{
   type: "default" | "success" | "error";
   visibility: boolean;
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClear?: () => void;
 }> = (props) => {
   let icon;
   let bgColor;
@@ -85,6 +86,7 @@ const Snackbar: React.FC<{
           <Pressable
             onPress={() => {
               props.setVisibility(false);
+              if (props.onClear) props.onClear();
             }}
           >
             <Icon name="close" type="material" color="#ffffff" size={24} />

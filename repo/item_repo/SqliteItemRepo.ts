@@ -10,6 +10,7 @@ class SqliteItemRepo extends ItemRepo {
   async addItem(item: {
     name: string;
     type: string;
+    size: string;
     imgUrl: string;
   }): Promise<number> {
     try {

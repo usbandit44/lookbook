@@ -3,7 +3,7 @@ import icons from "@/constants/icons";
 import { usePathname, useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import IconButton from "./IconButton";
+import IconButton from "../../../components/ui/IconButton";
 
 export default function TopBar({ backgroundColor = Colors.light.background }) {
   const pathname = usePathname();
@@ -15,14 +15,9 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
     isItems = true;
   }
   const router = useRouter();
-  if (!pathname.includes("pages")) {
-    return null;
-  }
+
   return (
     <>
-      <View
-        style={{ height: 50, backgroundColor: Colors.light.background }}
-      ></View>
       <View
         style={{
           flexDirection: "row",

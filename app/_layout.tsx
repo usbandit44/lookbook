@@ -1,61 +1,84 @@
-import TopBar from "@/components/ui/TopBar";
 import { Colors } from "@/constants/constants";
 import migrations from "@/drizzle/migrations";
-import BottomNav from "@/features/navigation/components/BottomNav";
 import { store } from "@/redux/store";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
+import { Slot, usePathname } from "expo-router";
 import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import { Suspense } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 
 export const DATABASE_NAME = "tasks";
 
-export default function RootLayout() {
+/* ------------------ INNER APP ------------------ */
+
+function AppShell() {
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
+
+  const isCamera = pathname.includes("/camera-screen");
+
+  const backgroundColor = isCamera ? "black" : Colors.light.background;
+
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   const expoDb = openDatabaseSync(DATABASE_NAME);
   const db = drizzle(expoDb);
-  const { success, error } = useMigrations(db, migrations);
+  useMigrations(db, migrations);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
-    <Suspense fallback={<ActivityIndicator size="large" />}>
-      <SQLiteProvider
-        databaseName={DATABASE_NAME}
-        options={{ enableChangeListener: true }}
-        useSuspense
-      >
-        <ThemeProvider value={DefaultTheme}>
-          <Provider store={store}>
-            {/* <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="pages" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack> */}
-            <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
-              <TopBar />
-              <Slot />
+    <View style={{ flex: 1 }}>
+      {/* 🔹 Paint status bar background */}
+      <View
+        style={{
+          height: insets.top,
+          backgroundColor,
+        }}
+      />
 
-              <BottomNav />
-            </View>
-            <StatusBar style="auto" />
-          </Provider>
-        </ThemeProvider>
-      </SQLiteProvider>
-    </Suspense>
+      {/* 🔹 App content */}
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
+        <Slot />
+      </GestureHandlerRootView>
+
+      {/* 🔹 Status bar text */}
+      <StatusBar style={isCamera ? "light" : "dark"} />
+    </View>
+  );
+}
+
+/* ------------------ ROOT ------------------ */
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <Suspense fallback={<ActivityIndicator size="large" />}>
+        <SQLiteProvider
+          databaseName={DATABASE_NAME}
+          options={{ enableChangeListener: true }}
+          useSuspense
+        >
+          <ThemeProvider value={DefaultTheme}>
+            <Provider store={store}>
+              <AppShell />
+            </Provider>
+          </ThemeProvider>
+        </SQLiteProvider>
+      </Suspense>
+    </SafeAreaProvider>
   );
 }

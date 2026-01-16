@@ -10,7 +10,14 @@ import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Pressable, StyleSheet, View } from "react-native";
+import {
+  Button,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Icon } from "react-native-elements";
 
@@ -26,6 +33,7 @@ const AddItemForm = () => {
         setShowImgError(false);
         setShowTypeError(false);
         setshowNameError(false);
+        setshowSizeError(false);
       };
     }, [])
   );
@@ -59,12 +67,15 @@ const AddItemForm = () => {
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
   const [showNameError, setshowNameError] = useState(false);
+  const [showSizeError, setshowSizeError] = useState(false);
 
   const [name, setName] = useState("");
+  const [size, setSize] = useState("");
 
   const insertItem = async (item: {
     name: string;
     type: string;
+    size: string;
     imgUrl: string;
   }) => {
     try {
@@ -82,11 +93,17 @@ const AddItemForm = () => {
       if (imgUri === "") setShowImgError(true);
       if (value == null) setShowTypeError(true);
       if (name == "") setshowNameError(true);
+      if (size == "") setshowSizeError(true);
       return;
     }
     try {
       await FileSystem.copyAsync({ from: imgUri, to: dest });
-      const newItem = { name: name, type: selectedItem, imgUrl: dest };
+      const newItem = {
+        name: name,
+        type: selectedItem,
+        size: size.charAt(0).toUpperCase() + size.slice(1),
+        imgUrl: dest,
+      };
       insertItem(newItem);
       setValue(null);
       dispatch(updateNewItemImg(""));
@@ -117,77 +134,90 @@ const AddItemForm = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.form}>
-        <FormElement showError={showImgError} errorMsg="Add a Image">
-          {imgUri ? (
-            <View style={styles.imageWrapper}>
-              <Image
-                source={{ uri: imgUri }}
-                contentFit="cover"
-                style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
-              />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      >
+        <View style={styles.form}>
+          <FormElement showError={showImgError} errorMsg="Add a Image">
+            {imgUri ? (
+              <View style={styles.imageWrapper}>
+                <Image
+                  source={{ uri: imgUri }}
+                  contentFit="cover"
+                  style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
+                />
+                <Pressable
+                  onPress={() => dispatch(updateNewItemImg(""))}
+                  style={styles.clearIcon}
+                  hitSlop={10}
+                >
+                  <Icon
+                    reverse
+                    name="close"
+                    type="material"
+                    color="black"
+                    size={15}
+                  />
+                </Pressable>
+              </View>
+            ) : (
               <Pressable
-                onPress={() => dispatch(updateNewItemImg(""))}
-                style={styles.clearIcon}
-                hitSlop={10}
+                onPress={() => router.navigate("/camera-screen")}
+                style={styles.cameraButton}
               >
                 <Icon
-                  reverse
-                  name="close"
+                  name="add-photo-alternate"
                   type="material"
-                  color="black"
-                  size={15}
+                  color="#3c3636ff"
+                  size={50}
                 />
               </Pressable>
-            </View>
-          ) : (
-            <Pressable
-              onPress={() => router.navigate("/camera-screen")}
-              style={styles.cameraButton}
-            >
-              <Icon
-                name="add-photo-alternate"
-                type="material"
-                color="#3c3636ff"
-                size={50}
-              />
-            </Pressable>
-          )}
-        </FormElement>
-        <FormElement showError={showNameError} errorMsg="Enter a name">
-          <Input onChangeText={setName} value={name} />
-        </FormElement>
-        <FormElement showError={showTypeError} errorMsg="Select a type">
-          <DropDownPicker
-            open={open}
-            value={value}
-            items={items}
-            setOpen={setOpen}
-            setValue={setValue}
-            setItems={setItems}
-            style={{ backgroundColor: Colors.light.background }}
-            placeholder="Select Type"
-          />
-        </FormElement>
+            )}
+          </FormElement>
+          <FormElement showError={showNameError} errorMsg="Enter a name">
+            <Input onChangeText={setName} value={name} />
+          </FormElement>
+          <FormElement showError={showSizeError} errorMsg="Enter a size">
+            <Input onChangeText={setSize} value={size} placeholder="Size" />
+          </FormElement>
+          <FormElement showError={showTypeError} errorMsg="Select a type">
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              style={{ backgroundColor: Colors.light.background }}
+              placeholder="Select Type"
+            />
+          </FormElement>
+        </View>
+      </KeyboardAvoidingView>
+      <View>
+        <Button
+          title="Add Item"
+          onPress={() => {
+            createItem();
+            // setVisablity(true);
+          }}
+        />
+        <Button
+          title="Cancel"
+          onPress={() => {
+            router.navigate("/pages");
+          }}
+        />
       </View>
 
-      <Button
-        title="Add Item"
-        onPress={() => {
-          createItem();
-          // setVisablity(true);
-        }}
-      />
-      <Button
-        title="Go Back"
-        onPress={() => {
-          router.navigate("/pages");
-        }}
-      />
       <Snackbar
         visibility={visablity}
         setVisibility={setVisablity}
         type="success"
+        onClear={() => {
+          router.navigate("/pages");
+        }}
       >
         Item successfully added
       </Snackbar>
@@ -202,8 +232,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
     padding: 20,
-    justifyContent: "center",
-    gap: 100,
+    justifyContent: "space-around",
+    paddingTop: 50,
   },
   form: {
     width: "100%",

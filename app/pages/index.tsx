@@ -5,7 +5,7 @@ import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Image } from "expo-image";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 const Home = () => {
   const db = useSQLiteContext();
@@ -16,10 +16,10 @@ const Home = () => {
 
   // setItemsData(data);
   useEffect(() => {
-    const fetchItems = async () => {
-      await drizzleDb.delete(items);
-    };
-    fetchItems();
+    // const fetchItems = async () => {
+    //   await drizzleDb.delete(items);
+    // };
+    // fetchItems();
   }, []);
 
   const renderPicture = (imgUri: string) => {
@@ -39,11 +39,11 @@ const Home = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
-      <Text>home</Text>
       <FlatList
         data={itemsData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
+        columnWrapperStyle={styles.itemsGrid}
         renderItem={({ item }) => (
           // <View>
           //   <Image
@@ -52,7 +52,11 @@ const Home = () => {
           //     style={{ width: 500, aspectRatio: 1 }}
           //   />
           // </View>
-          <ItemPreview imgUri={item.imgUrl ?? ""} />
+          <ItemPreview
+            imgUri={item.imgUrl ?? ""}
+            name={item.name ?? ""}
+            size={item.size ?? ""}
+          />
         )}
       />
     </View>
@@ -61,4 +65,11 @@ const Home = () => {
 
 export default Home;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  itemsGrid: {
+    justifyContent: "space-between",
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingTop: 15,
+  },
+});
