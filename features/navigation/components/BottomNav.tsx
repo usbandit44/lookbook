@@ -72,9 +72,7 @@ const BottomNav = () => {
             <Pressable
               onPress={() => {
                 setActive(false);
-                setTimeout(() => {
-                  router.navigate("/add-item");
-                }, 260);
+                router.navigate("/add-item");
               }}
               style={styles.navButton}
             >
@@ -85,7 +83,7 @@ const BottomNav = () => {
           <View style={styles.navButtonContainer}>
             <Pressable
               onPress={() => {
-                router.navigate("/create-outfit");
+                router.navigate("/outfit/create-outfit");
               }}
               style={styles.navButton}
             >

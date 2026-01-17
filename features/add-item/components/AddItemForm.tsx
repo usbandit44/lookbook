@@ -35,7 +35,7 @@ const AddItemForm = () => {
         setshowNameError(false);
         setshowSizeError(false);
       };
-    }, [])
+    }, []),
   );
   const [visablity, setVisablity] = useState(false);
 
@@ -100,7 +100,7 @@ const AddItemForm = () => {
       await FileSystem.copyAsync({ from: imgUri, to: dest });
       const newItem = {
         name: name,
-        type: selectedItem,
+        type: value,
         size: size.charAt(0).toUpperCase() + size.slice(1),
         imgUrl: dest,
       };
@@ -195,7 +195,7 @@ const AddItemForm = () => {
           </FormElement>
         </View>
       </KeyboardAvoidingView>
-      <View>
+      <View style={{ zIndex: -10 }}>
         <Button
           title="Add Item"
           onPress={() => {

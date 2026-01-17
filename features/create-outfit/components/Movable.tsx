@@ -1,69 +1,94 @@
-// import { StyleSheet, View } from "react-native";
+// import React from "react";
+// import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 // import { Gesture, GestureDetector } from "react-native-gesture-handler";
 // import Animated, {
 //   useAnimatedStyle,
 //   useSharedValue,
-//   withSpring,
 // } from "react-native-reanimated";
 
-// const BOX_SIZE = 100;
+// const BASE_SIZE = 100;
+// const MIN_SCALE = 0.5;
+// const MAX_SCALE = 2.5;
 
-// const Movable: React.FC<{
-//   children?: React.ReactNode;
-// }> = (props) => {
-//   // Translation for drag
-//   const translationX = useSharedValue(0);
-//   const translationY = useSharedValue(0);
+// const Movable: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+//   const [parentW, setParentW] = React.useState(0);
+//   const [parentH, setParentH] = React.useState(0);
+
+//   const x = useSharedValue(0);
+//   const y = useSharedValue(0);
 //   const prevX = useSharedValue(0);
 //   const prevY = useSharedValue(0);
 
-//   // Scale for pinch
 //   const scale = useSharedValue(1);
 //   const baseScale = useSharedValue(1);
 
-//   // Pan gesture (drag)
+//   const didInit = useSharedValue(false);
+
+//   const clamp = (v: number, min: number, max: number) => {
+//     "worklet";
+//     return Math.min(Math.max(v, min), max);
+//   };
+
 //   const pan = Gesture.Pan()
 //     .onStart(() => {
-//       prevX.value = translationX.value;
-//       prevY.value = translationY.value;
+//       prevX.value = x.value;
+//       prevY.value = y.value;
 //     })
-//     .onUpdate((event) => {
-//       translationX.value = prevX.value + event.translationX;
-//       translationY.value = prevY.value + event.translationY;
+//     .onUpdate((e) => {
+//       const size = BASE_SIZE * scale.value;
+
+//       x.value = clamp(prevX.value + e.translationX, 0, parentW - size);
+//       y.value = clamp(prevY.value + e.translationY, 0, parentH - size);
 //     });
 
-//   // Pinch gesture (scale)
 //   const pinch = Gesture.Pinch()
-//     .onUpdate((event) => {
-//       scale.value = baseScale.value * event.scale;
+//     .onUpdate((e) => {
+//       scale.value = clamp(baseScale.value * e.scale, MIN_SCALE, MAX_SCALE);
 //     })
 //     .onEnd(() => {
-//       // Smoothly snap scale back if needed
 //       baseScale.value = scale.value;
-//       scale.value = withSpring(baseScale.value, {
-//         damping: 15,
-//         stiffness: 120,
-//       });
+
+//       const size = BASE_SIZE * scale.value;
+
+//       x.value = clamp(x.value, 0, parentW - size);
+//       y.value = clamp(y.value, 0, parentH - size);
 //     });
 
-//   // Combine gestures: pinch + pan
 //   const gesture = Gesture.Simultaneous(pan, pinch);
 
-//   // Animated style
-//   const animatedStyle = useAnimatedStyle(() => ({
-//     transform: [
-//       { translateX: translationX.value },
-//       { translateY: translationY.value },
-//       { scale: scale.value },
-//     ],
-//   }));
+//   const style = useAnimatedStyle(() => {
+//     const size = BASE_SIZE * scale.value;
+
+//     return {
+//       width: size,
+//       height: size,
+//       transform: [{ translateX: x.value }, { translateY: y.value }],
+//     };
+//   });
 
 //   return (
-//     <View style={styles.container}>
+//     <View
+//       style={styles.container}
+//       onLayout={(e: LayoutChangeEvent) => {
+//         const w = e.nativeEvent.layout.width;
+//         const h = e.nativeEvent.layout.height;
+
+//         setParentW(w);
+//         setParentH(h);
+
+//         if (!didInit.value) {
+//           didInit.value = true;
+
+//           x.value = (w - BASE_SIZE) / 2;
+//           y.value = (h - BASE_SIZE) / 2;
+
+//           prevX.value = x.value;
+//           prevY.value = y.value;
+//         }
+//       }}
+//     >
 //       <GestureDetector gesture={gesture}>
-//         <Animated.View style={[styles.box, animatedStyle]}>
-//           {props.children}
-//         </Animated.View>
+//         <Animated.View style={[styles.box, style]}>{children}</Animated.View>
 //       </GestureDetector>
 //     </View>
 //   );
@@ -77,8 +102,6 @@
 //     position: "relative",
 //   },
 //   box: {
-//     width: BOX_SIZE,
-//     height: BOX_SIZE,
 //     backgroundColor: "tomato",
 //     borderRadius: 8,
 //     position: "absolute",
@@ -88,123 +111,94 @@
 // });
 
 import React from "react";
-import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
 } from "react-native-reanimated";
 
-const BOX_SIZE = 100;
+const BASE_SIZE = 100;
+const MIN_SCALE = 0.5;
+const MAX_SCALE = 2.5;
 
-const Movable: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const [parentWidth, setParentWidth] = React.useState(0);
-  const [parentHeight, setParentHeight] = React.useState(0);
+export interface MovableProps {
+  children?: React.ReactNode;
+  parentW: number;
+  parentH: number;
+  initialX?: number;
+  initialY?: number;
+}
 
-  const translationX = useSharedValue(0);
-  const translationY = useSharedValue(0);
-  const prevX = useSharedValue(0);
-  const prevY = useSharedValue(0);
+const Movable: React.FC<MovableProps> = ({
+  children,
+  parentW,
+  parentH,
+  initialX = 0,
+  initialY = 0,
+}) => {
+  // Hooks are unconditional
+  const x = useSharedValue(initialX);
+  const y = useSharedValue(initialY);
+  const prevX = useSharedValue(initialX);
+  const prevY = useSharedValue(initialY);
 
   const scale = useSharedValue(1);
   const baseScale = useSharedValue(1);
 
-  // Worklet clamp function
-  const clamp = (value: number, min: number, max: number) => {
+  const clamp = (v: number, min: number, max: number) => {
     "worklet";
-    return Math.min(Math.max(value, min), max);
+    return Math.min(Math.max(v, min), max);
   };
 
+  // Pan gesture
   const pan = Gesture.Pan()
     .onStart(() => {
-      prevX.value = translationX.value;
-      prevY.value = translationY.value;
+      prevX.value = x.value;
+      prevY.value = y.value;
     })
-    .onUpdate((event) => {
-      const scaledSize = BOX_SIZE * scale.value;
-      translationX.value = clamp(
-        prevX.value + event.translationX,
-        0,
-        Math.max(parentWidth - scaledSize, 0)
-      );
-      translationY.value = clamp(
-        prevY.value + event.translationY,
-        0,
-        Math.max(parentHeight - scaledSize, 0)
-      );
+    .onUpdate((e) => {
+      const size = BASE_SIZE * scale.value;
+      x.value = clamp(prevX.value + e.translationX, 0, parentW - size);
+      y.value = clamp(prevY.value + e.translationY, 0, parentH - size);
     });
 
+  // Pinch gesture
   const pinch = Gesture.Pinch()
-    .onUpdate((event) => {
-      scale.value = baseScale.value * event.scale;
+    .onUpdate((e) => {
+      scale.value = clamp(baseScale.value * e.scale, MIN_SCALE, MAX_SCALE);
     })
     .onEnd(() => {
       baseScale.value = scale.value;
-      scale.value = withSpring(baseScale.value, {
-        damping: 15,
-        stiffness: 120,
-      });
-
-      // Clamp after scaling
-      const scaledSize = BOX_SIZE * scale.value;
-      translationX.value = clamp(
-        translationX.value,
-        0,
-        Math.max(parentWidth - scaledSize, 0)
-      );
-      translationY.value = clamp(
-        translationY.value,
-        0,
-        Math.max(parentHeight - scaledSize, 0)
-      );
+      const size = BASE_SIZE * scale.value;
+      x.value = clamp(x.value, 0, parentW - size);
+      y.value = clamp(y.value, 0, parentH - size);
     });
 
   const gesture = Gesture.Simultaneous(pan, pinch);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translationX.value },
-      { translateY: translationY.value },
-      { scale: scale.value },
-    ],
-  }));
+  const style = useAnimatedStyle(() => {
+    const size = BASE_SIZE * scale.value;
+    return {
+      width: size,
+      height: size,
+      transform: [{ translateX: x.value }, { translateY: y.value }],
+    };
+  });
 
   return (
-    <View
-      style={styles.container}
-      onLayout={(e: LayoutChangeEvent) => {
-        setParentWidth(e.nativeEvent.layout.width);
-        setParentHeight(e.nativeEvent.layout.height);
-
-        // Optional: start centered
-        translationX.value = (e.nativeEvent.layout.width - BOX_SIZE) / 2;
-        translationY.value = (e.nativeEvent.layout.height - BOX_SIZE) / 2;
-      }}
-    >
-      <GestureDetector gesture={gesture}>
-        <Animated.View style={[styles.box, animatedStyle]}>
-          {children}
-        </Animated.View>
-      </GestureDetector>
-    </View>
+    <GestureDetector gesture={gesture}>
+      <Animated.View style={[styles.box, style]}>{children}</Animated.View>
+    </GestureDetector>
   );
 };
 
 export default Movable;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
   box: {
-    width: BOX_SIZE,
-    height: BOX_SIZE,
-    backgroundColor: "tomato",
-    borderRadius: 8,
     position: "absolute",
-    top: 0,
-    left: 0,
+    borderRadius: 8,
+    backgroundColor: "transparent",
   },
 });
