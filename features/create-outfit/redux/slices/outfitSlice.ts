@@ -1,33 +1,13 @@
 import { RootState } from "@/redux/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export type GenerateOutfitConfig = {
-  top: boolean;
-  bottom: boolean;
-  outerwear: boolean;
-  shoes: boolean;
-  eyewear: boolean;
-  headwear: boolean;
-  necklaces: boolean;
-  wristWear: boolean;
-};
-
 type OutfitState = {
   items: number[];
-  genrateOutfitConfig: GenerateOutfitConfig;
+  currentOutfit: number;
 };
 const initialState: OutfitState = {
   items: [],
-  genrateOutfitConfig: {
-    top: false,
-    bottom: false,
-    outerwear: false,
-    shoes: false,
-    eyewear: false,
-    headwear: false,
-    necklaces: false,
-    wristWear: false,
-  },
+  currentOutfit: -1,
 };
 
 const outfitSlice = createSlice({
@@ -47,18 +27,19 @@ const outfitSlice = createSlice({
     clearAllItems(state) {
       state.items = [];
     },
-    setGenerateOutfitConfig(
-      state,
-      action: PayloadAction<GenerateOutfitConfig>,
-    ) {
-      state.genrateOutfitConfig = action.payload;
+    setCurrentOutfit(state, action: PayloadAction<number>) {
+      state.currentOutfit = action.payload;
+    },
+    clearCurrentOutfit(state) {
+      state.currentOutfit = -1;
     },
   },
 });
 
 export const selectOutfit = (state: RootState) => state.outfit.items;
-export const selectGenerateOutfitConfig = (state: RootState) =>
-  state.outfit.genrateOutfitConfig;
+
+export const selectCurrentOutfitId = (state: RootState) =>
+  state.outfit.currentOutfit;
 
 export const itemInOutfit =
   (id: number) =>
@@ -70,6 +51,12 @@ export const itemInOutfit =
     }
   };
 
-export const { addNewItem, removeItem, clearAllItems } = outfitSlice.actions;
+export const {
+  addNewItem,
+  removeItem,
+  clearAllItems,
+  setCurrentOutfit,
+  clearCurrentOutfit,
+} = outfitSlice.actions;
 
 export default outfitSlice.reducer;

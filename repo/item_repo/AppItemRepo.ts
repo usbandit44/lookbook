@@ -36,6 +36,72 @@ class AppItemRepo extends ItemRepo {
       throw error;
     }
   }
+
+  async getAllTopIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllTopIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllBottomIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllBottomIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllOuterwearIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllOuterwearIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllShoeIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllShoeIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllEyewearIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllEyewearIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllHeadwearIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllHeadwearIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllNecklaceIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllNecklaceIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllWristwearIds(): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getAllWristwearIds();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default AppItemRepo;

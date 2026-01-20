@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Icon } from "react-native-elements";
 
@@ -8,11 +8,13 @@ const CreateOutfitHeader: React.FC<{
   value: string | undefined;
 }> = (props) => {
   const router = useRouter();
+  const [saved, setSaved] = useState(false);
+
   return (
-    <View style={styles.container}>
+    <View style={styles.headerContainer}>
       <Pressable
         onPress={() => {
-          router.back();
+          router.navigate("/pages");
         }}
       >
         <Icon name="arrow-back-ios" type="material" size={24}></Icon>
@@ -23,8 +25,16 @@ const CreateOutfitHeader: React.FC<{
         placeholderTextColor="black"
         style={styles.name}
       />
-      <Pressable>
-        <Icon name="bookmark-border" type="material" size={30}></Icon>
+      <Pressable
+        onPress={() => {
+          setSaved(!saved);
+        }}
+      >
+        {saved ? (
+          <Icon name="bookmark" type="material" size={30}></Icon>
+        ) : (
+          <Icon name="bookmark-border" type="material" size={30}></Icon>
+        )}
       </Pressable>
     </View>
   );
@@ -33,7 +43,7 @@ const CreateOutfitHeader: React.FC<{
 export default CreateOutfitHeader;
 
 const styles = StyleSheet.create({
-  container: {
+  headerContainer: {
     width: "100%",
     paddingTop: 30,
     paddingBottom: 30,

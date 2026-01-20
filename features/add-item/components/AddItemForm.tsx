@@ -33,7 +33,7 @@ const AddItemForm = () => {
         setShowImgError(false);
         setShowTypeError(false);
         setshowNameError(false);
-        setshowSizeError(false);
+        // setshowSizeError(false);
       };
     }, []),
   );
@@ -67,7 +67,7 @@ const AddItemForm = () => {
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
   const [showNameError, setshowNameError] = useState(false);
-  const [showSizeError, setshowSizeError] = useState(false);
+  // const [showSizeError, setshowSizeError] = useState(false);
 
   const [name, setName] = useState("");
   const [size, setSize] = useState("");
@@ -93,7 +93,7 @@ const AddItemForm = () => {
       if (imgUri === "") setShowImgError(true);
       if (value == null) setShowTypeError(true);
       if (name == "") setshowNameError(true);
-      if (size == "") setshowSizeError(true);
+      // if (size == "") setshowSizeError(true);
       return;
     }
     try {
@@ -178,9 +178,9 @@ const AddItemForm = () => {
           <FormElement showError={showNameError} errorMsg="Enter a name">
             <Input onChangeText={setName} value={name} />
           </FormElement>
-          <FormElement showError={showSizeError} errorMsg="Enter a size">
-            <Input onChangeText={setSize} value={size} placeholder="Size" />
-          </FormElement>
+
+          <Input onChangeText={setSize} value={size} placeholder="Size" />
+
           <FormElement showError={showTypeError} errorMsg="Select a type">
             <DropDownPicker
               open={open}

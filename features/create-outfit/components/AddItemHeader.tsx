@@ -13,7 +13,7 @@ const AddItemHeader = () => {
     <View style={styles.container}>
       <Pressable
         onPress={() => {
-          router.back();
+          router.navigate("/outfit/create-outfit");
         }}
         hitSlop={10}
       >

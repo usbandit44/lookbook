@@ -97,7 +97,6 @@ export function Camera() {
           facing={facing}
           mute={false}
           responsiveOrientationWhenOrientationLocked={false}
-          zoom={0.1}
         ></CameraView>
         <View style={styles.shutterContainer}>
           <View

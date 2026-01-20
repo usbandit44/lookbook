@@ -58,7 +58,7 @@ class SqliteItemRepo extends ItemRepo {
     }
   }
 
-  async getAllTops(): Promise<ItemsType[]> {
+  async getAllTopIds(): Promise<number[]> {
     try {
       const result = await this.drizzleDb
         .select()
@@ -67,32 +67,124 @@ class SqliteItemRepo extends ItemRepo {
       if (result == null) {
         throw new Error("No Tops have been saved");
       }
-      return result;
+      const ids = result.map((item) => item.id);
+      return ids;
     } catch (error) {
       console.error("Failed to get item:", error);
       throw error;
     }
   }
-  getAllBottoms(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllBottomIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Bottoms"));
+      if (result == null) {
+        throw new Error("No Bottoms have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
-  getAllOuterwear(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllOuterwearIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Outerwear"));
+      if (result == null) {
+        throw new Error("No Outerwear have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
-  getAllShoes(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllShoeIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Shoes"));
+      if (result == null) {
+        throw new Error("No Shoes have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
-  getAllEyewear(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllEyewearIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Eyewear"));
+      if (result == null) {
+        throw new Error("No Eyewear have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
-  getAllHeadwear(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllHeadwearIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Headwear"));
+      if (result == null) {
+        throw new Error("No Headwear have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
-  getAllNecklaces(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllNecklaceIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Necklaces"));
+      if (result == null) {
+        throw new Error("No Necklaces have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
-  getAllWristwear(): Promise<ItemsType[]> {
-    throw new Error("Method not implemented.");
+  async getAllWristwearIds(): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb
+        .select()
+        .from(items)
+        .where(eq(items.type, "Wrist Wear"));
+      if (result == null) {
+        throw new Error("No Wrist Wear have been saved");
+      }
+      const ids = result.map((item) => item.id);
+      return ids;
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
   }
 }
 

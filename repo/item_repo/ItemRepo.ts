@@ -14,14 +14,14 @@ abstract class ItemRepo {
 
   abstract countNumberOfItem(): Promise<number>;
 
-  abstract getAllTops(): Promise<ItemsType[]>;
-  abstract getAllBottoms(): Promise<ItemsType[]>;
-  abstract getAllOuterwear(): Promise<ItemsType[]>;
-  abstract getAllShoes(): Promise<ItemsType[]>;
-  abstract getAllEyewear(): Promise<ItemsType[]>;
-  abstract getAllHeadwear(): Promise<ItemsType[]>;
-  abstract getAllNecklaces(): Promise<ItemsType[]>;
-  abstract getAllWristwear(): Promise<ItemsType[]>;
+  abstract getAllTopIds(): Promise<number[]>;
+  abstract getAllBottomIds(): Promise<number[]>;
+  abstract getAllOuterwearIds(): Promise<number[]>;
+  abstract getAllShoeIds(): Promise<number[]>;
+  abstract getAllEyewearIds(): Promise<number[]>;
+  abstract getAllHeadwearIds(): Promise<number[]>;
+  abstract getAllNecklaceIds(): Promise<number[]>;
+  abstract getAllWristwearIds(): Promise<number[]>;
 }
 
 export default ItemRepo;
