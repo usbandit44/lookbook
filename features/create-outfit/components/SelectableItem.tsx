@@ -1,9 +1,9 @@
+import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import {
   addNewItem,
   itemInOutfit,
   removeItem,
-} from "@/features/create-outfit/redux/slices/outfitSlice";
-import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+} from "@/redux/slices/outfitSlice";
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import {

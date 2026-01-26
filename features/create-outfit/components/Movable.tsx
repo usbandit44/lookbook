@@ -200,5 +200,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     borderRadius: 8,
     backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

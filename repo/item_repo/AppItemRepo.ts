@@ -102,6 +102,21 @@ class AppItemRepo extends ItemRepo {
       throw error;
     }
   }
+  async updateItem(item: ItemsType): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateItem(item);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+  async deleteItem(id: number): Promise<void> {
+    try {
+      const result = await this.sqliteRepo.deleteItem(id);
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default AppItemRepo;

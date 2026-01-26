@@ -17,4 +17,11 @@ const FormElement: React.FC<{
 
 export default FormElement;
 
-const styles = StyleSheet.create({ container: { width: "100%", gap: 5 } });
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    gap: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

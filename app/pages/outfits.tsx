@@ -1,6 +1,6 @@
+import ItemPreview from "@/components/ItemPreview";
 import { Colors } from "@/constants/constants";
 import { outfits } from "@/db/schemas/outfits";
-import ItemPreview from "@/features/items-page/components/ItemPreview";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect } from "react";
@@ -38,9 +38,11 @@ const OutfitsPage = () => {
           //   />
           // </View>
           <ItemPreview
+            id={item.id}
             imgUri={item.imgUrl ?? ""}
             name={item.name ?? ""}
             size={""}
+            type={"outfit"}
           />
         )}
       />

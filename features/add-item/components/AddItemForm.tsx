@@ -1,9 +1,12 @@
+import AppButton from "@/components/ui/AppButton";
 import FormElement from "@/components/ui/FormElement";
 import Input from "@/components/ui/Input";
 import Snackbar from "@/components/ui/Snackbar";
 import { Colors, itemTypes } from "@/constants/constants";
+import { ItemsType } from "@/db/schemas/items";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
+import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
@@ -11,11 +14,11 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Button,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   StyleSheet,
+  Text,
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -27,6 +30,10 @@ type FormValues = {
 };
 
 const AddItemForm = () => {
+  const repo = new AppItemRepo();
+
+  const currentItemId = useAppSelector(selectCurrentItem);
+
   useFocusEffect(
     useCallback(() => {
       return () => {
@@ -38,22 +45,39 @@ const AddItemForm = () => {
     }, []),
   );
   const [visablity, setVisablity] = useState(false);
-
+  const [updateVisablity, setUpdateVisablity] = useState(false);
+  let imgUri = useAppSelector(selectNewItemImg);
+  const [currentItem, setCurrentItem] = useState<ItemsType | null>(null);
+  let gap = { gap: 180 };
+  if (currentItemId != -1) {
+    gap = { gap: 150 };
+  }
   useEffect(() => {
-    async function getItemCount() {
-      const count = await repo.countNumberOfItem();
-      setName("Item #" + (Number(count) + 1));
-    }
-    getItemCount();
-  }, [visablity]);
+    if (currentItemId != -1) {
+      async function getCurrentItem() {
+        const item = await repo.getItem(currentItemId);
+        setCurrentItem(item);
 
-  const repo = new AppItemRepo();
+        console.log(item.name);
+        setName(item.name);
+        dispatch(updateNewItemImg(item.imgUrl));
+        setSize(item.size ?? "");
+        setType(item.type);
+      }
+      getCurrentItem();
+    } else {
+      async function getItemCount() {
+        const count = await repo.countNumberOfItem();
+        setName("Item #" + (Number(count) + 1));
+      }
+      getItemCount();
+    }
+  }, [visablity]);
 
   const [selectedItem, setSelectedItem] = React.useState("");
   const dispatch = useAppDispatch();
 
   const router = useRouter();
-  const imgUri = useAppSelector(selectNewItemImg);
 
   const itemsArray = Object.entries(itemTypes).map(([key, label]) => ({
     label: String(label),
@@ -61,7 +85,7 @@ const AddItemForm = () => {
   }));
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [type, setType] = useState<string | null>(null);
   const [items, setItems] = useState(itemsArray);
 
   const [showImgError, setShowImgError] = useState(false);
@@ -89,9 +113,9 @@ const AddItemForm = () => {
     const fileName = `photo_${Date.now()}.jpg`; // Unique filename
     const dest = (FileSystem.documentDirectory ?? "") + fileName;
     let quit = false;
-    if (imgUri === "" || value == null || name == "") {
+    if (imgUri === "" || type == null || name == "") {
       if (imgUri === "") setShowImgError(true);
-      if (value == null) setShowTypeError(true);
+      if (type == null) setShowTypeError(true);
       if (name == "") setshowNameError(true);
       // if (size == "") setshowSizeError(true);
       return;
@@ -100,17 +124,45 @@ const AddItemForm = () => {
       await FileSystem.copyAsync({ from: imgUri, to: dest });
       const newItem = {
         name: name,
-        type: value,
+        type: type,
         size: size.charAt(0).toUpperCase() + size.slice(1),
         imgUrl: dest,
       };
       insertItem(newItem);
-      setValue(null);
+      setType(null);
       dispatch(updateNewItemImg(""));
-      setVisablity(true);
+      setVisablity(!visablity);
+      setTimeout(() => setVisablity(false), 3000);
     } catch (error) {
       console.log(imgUri);
       console.error("Failed to copy photo:", error);
+    }
+  };
+
+  const updateItem = () => {
+    if (imgUri === "" || type == null || name == "") {
+      if (imgUri === "") setShowImgError(true);
+      if (type == null) setShowTypeError(true);
+      if (name == "") setshowNameError(true);
+      // if (size == "") setshowSizeError(true);
+      return;
+    }
+    if (
+      currentItem?.imgUrl != imgUri ||
+      currentItem?.name != name ||
+      currentItem?.size != size ||
+      currentItem.type != type
+    ) {
+      const newItem: ItemsType = {
+        id: currentItemId,
+        name: name,
+        type: type,
+        size: size,
+        imgUrl: imgUri,
+      };
+      repo.updateItem(newItem);
+      setUpdateVisablity(!updateVisablity);
+      setTimeout(() => setVisablity(false), 3000);
     }
   };
 
@@ -133,7 +185,7 @@ const AddItemForm = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, gap]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
@@ -184,10 +236,10 @@ const AddItemForm = () => {
           <FormElement showError={showTypeError} errorMsg="Select a type">
             <DropDownPicker
               open={open}
-              value={value}
+              value={type}
               items={items}
               setOpen={setOpen}
-              setValue={setValue}
+              setValue={setType}
               setItems={setItems}
               style={{ backgroundColor: Colors.light.background }}
               placeholder="Select Type"
@@ -195,31 +247,64 @@ const AddItemForm = () => {
           </FormElement>
         </View>
       </KeyboardAvoidingView>
-      <View style={{ zIndex: -10 }}>
-        <Button
-          title="Add Item"
-          onPress={() => {
-            createItem();
-            // setVisablity(true);
-          }}
-        />
-        <Button
-          title="Cancel"
+      <View style={{ zIndex: -10, gap: 15, paddingBottom: 15 }}>
+        {currentItemId == -1 ? (
+          <AppButton
+            onPress={() => {
+              createItem();
+              // setVisablity(true);
+            }}
+          >
+            <Text style={{ color: "white" }}>Create Item</Text>
+          </AppButton>
+        ) : (
+          <AppButton
+            onPress={() => {
+              updateItem();
+            }}
+          >
+            <Text style={{ color: "white" }}>Update Item</Text>
+          </AppButton>
+        )}
+
+        <AppButton
+          type="secondary"
           onPress={() => {
             router.navigate("/pages");
+            dispatch(clearCurrentItem());
+            dispatch(updateNewItemImg(""));
           }}
-        />
+        >
+          <Text>Cancel</Text>
+        </AppButton>
+        {currentItemId != -1 ? (
+          <AppButton
+            type="text"
+            onPress={() => {
+              router.navigate("/pages");
+              repo.deleteItem(currentItemId);
+              dispatch(clearCurrentItem());
+              dispatch(updateNewItemImg(""));
+            }}
+          >
+            <Text style={{ color: "red" }}>Delete</Text>
+          </AppButton>
+        ) : null}
       </View>
 
       <Snackbar
         visibility={visablity}
         setVisibility={setVisablity}
         type="success"
-        onClear={() => {
-          router.navigate("/pages");
-        }}
       >
         Item successfully added
+      </Snackbar>
+      <Snackbar
+        visibility={updateVisablity}
+        setVisibility={setUpdateVisablity}
+        type="success"
+      >
+        Item successfully updated
       </Snackbar>
     </View>
   );
@@ -232,7 +317,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
     padding: 20,
-    justifyContent: "space-around",
+    justifyContent: "flex-end",
     paddingTop: 50,
   },
   form: {

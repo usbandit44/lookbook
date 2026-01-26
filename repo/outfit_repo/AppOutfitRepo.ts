@@ -5,12 +5,48 @@ class AppOutfitRepo extends OutfitRepo {
   private sqliteRepo = new SqliteOutfitRepo();
 
   async addOutfit(outfit: {
-    items: string[];
+    items: number[];
     name: string;
     imgUrl: string;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.addOutfit(outfit);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getOutfit(id: number): Promise<{
+    id: number;
+    name: string;
+    items: number[];
+    imgUrl: string;
+  }> {
+    try {
+      const result = await this.sqliteRepo.getOutfit(id);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+  async updateOutfitItems(id: number, items: number[]): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateOutfitItems(id, items);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateOutfit(outfit: {
+    id: number;
+    name: string;
+    imgUrl: string;
+    items: number[];
+  }): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateOutfit(outfit);
       return result;
     } catch (err) {
       throw err;

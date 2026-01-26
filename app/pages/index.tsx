@@ -1,18 +1,12 @@
+import ItemPreview from "@/components/ItemPreview";
 import AppButton from "@/components/ui/AppButton";
+import AppModal from "@/components/ui/AppModal";
 import { Colors } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
-import ItemPreview from "@/features/items-page/components/ItemPreview";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -70,11 +64,10 @@ const Home = () => {
         numColumns={2}
         columnWrapperStyle={styles.itemsGrid}
         ListHeaderComponent={
-          <View style={{ paddingTop: 15, paddingLeft: 15 }}>
-            <AppButton
-              onPress={() => setModalVisible(true)}
-              containWidth={true}
-            >
+          <View
+            style={{ paddingTop: 15, paddingLeft: 15, alignSelf: "flex-start" }}
+          >
+            <AppButton onPress={() => setModalVisible(true)}>
               <Icon
                 name="filter-menu-outline"
                 type="material-community"
@@ -96,280 +89,251 @@ const Home = () => {
           <ItemPreview
             imgUri={item.imgUrl ?? ""}
             name={item.name ?? ""}
-            size={item.type ?? ""}
+            size={item.size ?? ""}
+            type="item"
+            id={item.id}
           />
         )}
       />
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <Pressable
-          style={styles.centeredView}
+
+      <AppModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
+        <Text>Filter</Text>
+        <ScrollView>
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (topSelected) {
+                setFilter(filter.filter((type) => type !== "Tops"));
+              } else {
+                setFilter([...filter, "Tops"]);
+              }
+              setTopSelected(!topSelected);
+            }}
+          >
+            <Text>Tops</Text>
+            <CheckBox
+              checked={topSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (topSelected) {
+                  setFilter(filter.filter((type) => type !== "Tops"));
+                } else {
+                  setFilter([...filter, "Tops"]);
+                }
+                setTopSelected(!topSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (bottomSelected) {
+                setFilter(filter.filter((type) => type !== "Bottoms"));
+              } else {
+                setFilter([...filter, "Bottoms"]);
+              }
+              setBottomSelected(!bottomSelected);
+            }}
+          >
+            <Text>Bottoms</Text>
+            <CheckBox
+              checked={bottomSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (bottomSelected) {
+                  setFilter(filter.filter((type) => type !== "Bottoms"));
+                } else {
+                  setFilter([...filter, "Bottoms"]);
+                }
+                setBottomSelected(!bottomSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (outerwearSelected) {
+                setFilter(filter.filter((type) => type !== "Outerwear"));
+              } else {
+                setFilter([...filter, "Outerwear"]);
+              }
+              setOuterwearSelected(!outerwearSelected);
+            }}
+          >
+            <Text>Outerwear</Text>
+            <CheckBox
+              checked={outerwearSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (outerwearSelected) {
+                  setFilter(filter.filter((type) => type !== "Outerwear"));
+                } else {
+                  setFilter([...filter, "Outerwear"]);
+                }
+                setOuterwearSelected(!outerwearSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (shoesSelected) {
+                setFilter(filter.filter((type) => type !== "Shoes"));
+              } else {
+                setFilter([...filter, "Shoes"]);
+              }
+              setShoesSelected(!shoesSelected);
+            }}
+          >
+            <Text>Shoes</Text>
+            <CheckBox
+              checked={shoesSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (shoesSelected) {
+                  setFilter(filter.filter((type) => type !== "Shoes"));
+                } else {
+                  setFilter([...filter, "Shoes"]);
+                }
+                setShoesSelected(!shoesSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (eyewearSelected) {
+                setFilter(filter.filter((type) => type !== "Eyewear"));
+              } else {
+                setFilter([...filter, "Eyewear"]);
+              }
+              setEyewearSelected(!eyewearSelected);
+            }}
+          >
+            <Text>Eyewear</Text>
+            <CheckBox
+              checked={eyewearSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (eyewearSelected) {
+                  setFilter(filter.filter((type) => type !== "Eyewear"));
+                } else {
+                  setFilter([...filter, "Eyewear"]);
+                }
+                setEyewearSelected(!eyewearSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (headwearSelected) {
+                setFilter(filter.filter((type) => type !== "Headwear"));
+              } else {
+                setFilter([...filter, "Headwear"]);
+              }
+              setHeadwearSelected(!headwearSelected);
+            }}
+          >
+            <Text>Headwear</Text>
+            <CheckBox
+              checked={headwearSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (headwearSelected) {
+                  setFilter(filter.filter((type) => type !== "Headwear"));
+                } else {
+                  setFilter([...filter, "Headwear"]);
+                }
+                setHeadwearSelected(!headwearSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (necklacesSelected) {
+                setFilter(filter.filter((type) => type !== "Necklaces"));
+              } else {
+                setFilter([...filter, "Necklaces"]);
+              }
+              setNecklacesSelected(!necklacesSelected);
+            }}
+          >
+            <Text>Necklaces</Text>
+            <CheckBox
+              checked={necklacesSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (necklacesSelected) {
+                  setFilter(filter.filter((type) => type !== "Necklaces"));
+                } else {
+                  setFilter([...filter, "Necklaces"]);
+                }
+                setNecklacesSelected(!necklacesSelected);
+              }}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.option}
+            onPress={() => {
+              if (wristWearSelected) {
+                setFilter(filter.filter((type) => type !== "Wrist Wear"));
+              } else {
+                setFilter([...filter, "Wrist Wear"]);
+              }
+              setWristWearSelected(!wristWearSelected);
+            }}
+          >
+            <Text>Wrist Wear</Text>
+            <CheckBox
+              checked={wristWearSelected}
+              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+              onPress={() => {
+                if (wristWearSelected) {
+                  setFilter(filter.filter((type) => type !== "Wrist Wear"));
+                } else {
+                  setFilter([...filter, "Wrist Wear"]);
+                }
+                setWristWearSelected(!wristWearSelected);
+              }}
+            />
+          </Pressable>
+        </ScrollView>
+
+        <AppButton
           onPress={() => {
+            setApplyFilter(applyFilter + 1);
             setModalVisible(!modalVisible);
           }}
         >
-          <View style={styles.modalView}>
-            <Text>Filter</Text>
-            <ScrollView>
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (topSelected) {
-                    setFilter(filter.filter((type) => type !== "Tops"));
-                  } else {
-                    setFilter([...filter, "Tops"]);
-                  }
-                  setTopSelected(!topSelected);
-                }}
-              >
-                <Text>Tops</Text>
-                <CheckBox
-                  checked={topSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (topSelected) {
-                      setFilter(filter.filter((type) => type !== "Tops"));
-                    } else {
-                      setFilter([...filter, "Tops"]);
-                    }
-                    setTopSelected(!topSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (bottomSelected) {
-                    setFilter(filter.filter((type) => type !== "Bottoms"));
-                  } else {
-                    setFilter([...filter, "Bottoms"]);
-                  }
-                  setBottomSelected(!bottomSelected);
-                }}
-              >
-                <Text>Bottoms</Text>
-                <CheckBox
-                  checked={bottomSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (bottomSelected) {
-                      setFilter(filter.filter((type) => type !== "Bottoms"));
-                    } else {
-                      setFilter([...filter, "Bottoms"]);
-                    }
-                    setBottomSelected(!bottomSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (outerwearSelected) {
-                    setFilter(filter.filter((type) => type !== "Outerwear"));
-                  } else {
-                    setFilter([...filter, "Outerwear"]);
-                  }
-                  setOuterwearSelected(!outerwearSelected);
-                }}
-              >
-                <Text>Outerwear</Text>
-                <CheckBox
-                  checked={outerwearSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (outerwearSelected) {
-                      setFilter(filter.filter((type) => type !== "Outerwear"));
-                    } else {
-                      setFilter([...filter, "Outerwear"]);
-                    }
-                    setOuterwearSelected(!outerwearSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (shoesSelected) {
-                    setFilter(filter.filter((type) => type !== "Shoes"));
-                  } else {
-                    setFilter([...filter, "Shoes"]);
-                  }
-                  setShoesSelected(!shoesSelected);
-                }}
-              >
-                <Text>Shoes</Text>
-                <CheckBox
-                  checked={shoesSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (shoesSelected) {
-                      setFilter(filter.filter((type) => type !== "Shoes"));
-                    } else {
-                      setFilter([...filter, "Shoes"]);
-                    }
-                    setShoesSelected(!shoesSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (eyewearSelected) {
-                    setFilter(filter.filter((type) => type !== "Eyewear"));
-                  } else {
-                    setFilter([...filter, "Eyewear"]);
-                  }
-                  setEyewearSelected(!eyewearSelected);
-                }}
-              >
-                <Text>Eyewear</Text>
-                <CheckBox
-                  checked={eyewearSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (eyewearSelected) {
-                      setFilter(filter.filter((type) => type !== "Eyewear"));
-                    } else {
-                      setFilter([...filter, "Eyewear"]);
-                    }
-                    setEyewearSelected(!eyewearSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (headwearSelected) {
-                    setFilter(filter.filter((type) => type !== "Headwear"));
-                  } else {
-                    setFilter([...filter, "Headwear"]);
-                  }
-                  setHeadwearSelected(!headwearSelected);
-                }}
-              >
-                <Text>Headwear</Text>
-                <CheckBox
-                  checked={headwearSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (headwearSelected) {
-                      setFilter(filter.filter((type) => type !== "Headwear"));
-                    } else {
-                      setFilter([...filter, "Headwear"]);
-                    }
-                    setHeadwearSelected(!headwearSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (necklacesSelected) {
-                    setFilter(filter.filter((type) => type !== "Necklaces"));
-                  } else {
-                    setFilter([...filter, "Necklaces"]);
-                  }
-                  setNecklacesSelected(!necklacesSelected);
-                }}
-              >
-                <Text>Necklaces</Text>
-                <CheckBox
-                  checked={necklacesSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (necklacesSelected) {
-                      setFilter(filter.filter((type) => type !== "Necklaces"));
-                    } else {
-                      setFilter([...filter, "Necklaces"]);
-                    }
-                    setNecklacesSelected(!necklacesSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (wristWearSelected) {
-                    setFilter(filter.filter((type) => type !== "Wrist Wear"));
-                  } else {
-                    setFilter([...filter, "Wrist Wear"]);
-                  }
-                  setWristWearSelected(!wristWearSelected);
-                }}
-              >
-                <Text>Wrist Wear</Text>
-                <CheckBox
-                  checked={wristWearSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (wristWearSelected) {
-                      setFilter(filter.filter((type) => type !== "Wrist Wear"));
-                    } else {
-                      setFilter([...filter, "Wrist Wear"]);
-                    }
-                    setWristWearSelected(!wristWearSelected);
-                  }}
-                />
-              </Pressable>
-            </ScrollView>
-
-            <AppButton
-              onPress={() => {
-                setApplyFilter(applyFilter + 1);
-                setModalVisible(!modalVisible);
-              }}
-            >
-              <Text style={{ color: "white" }}>Apply</Text>
-            </AppButton>
-            <AppButton
-              onPress={() => {
-                setTopSelected(false);
-                setBottomSelected(false);
-                setOuterwearSelected(false);
-                setShoesSelected(false);
-                setEyewearSelected(false);
-                setHeadwearSelected(false);
-                setNecklacesSelected(false);
-                setWristWearSelected(false);
-                setFilter([]);
-                setApplyFilter(applyFilter + 1);
-              }}
-              type="text"
-            >
-              <Text>Reset</Text>
-            </AppButton>
-          </View>
-        </Pressable>
-      </Modal>
+          <Text style={{ color: "white" }}>Apply</Text>
+        </AppButton>
+        <AppButton
+          onPress={() => {
+            setTopSelected(false);
+            setBottomSelected(false);
+            setOuterwearSelected(false);
+            setShoesSelected(false);
+            setEyewearSelected(false);
+            setHeadwearSelected(false);
+            setNecklacesSelected(false);
+            setWristWearSelected(false);
+            setFilter([]);
+            setApplyFilter(applyFilter + 1);
+          }}
+          type="text"
+        >
+          <Text>Reset</Text>
+        </AppButton>
+      </AppModal>
     </View>
   );
 };

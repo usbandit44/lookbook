@@ -50,7 +50,7 @@ const Snackbar: React.FC<{
   useEffect(() => {
     if (props.visibility) {
       Animated.timing(moveUpAnim, {
-        toValue: 0,
+        toValue: 20,
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -88,6 +88,7 @@ const Snackbar: React.FC<{
               props.setVisibility(false);
               if (props.onClear) props.onClear();
             }}
+            hitSlop={10}
           >
             <Icon name="close" type="material" color="#ffffff" size={24} />
           </Pressable>

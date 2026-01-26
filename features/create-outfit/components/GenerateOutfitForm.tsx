@@ -1,8 +1,5 @@
-import {
-  addNewItem,
-  clearAllItems,
-} from "@/features/create-outfit/redux/slices/outfitSlice";
 import { useAppDispatch } from "@/hooks/redux-hooks";
+import { addNewItem, clearAllItems } from "@/redux/slices/outfitSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";

@@ -67,11 +67,10 @@ const AddItem = () => {
         numColumns={2}
         columnWrapperStyle={styles.itemsGrid}
         ListHeaderComponent={
-          <View style={{ paddingTop: 15, paddingLeft: 15 }}>
-            <AppButton
-              onPress={() => setModalVisible(true)}
-              containWidth={true}
-            >
+          <View
+            style={{ paddingTop: 15, paddingLeft: 15, alignSelf: "flex-start" }}
+          >
+            <AppButton onPress={() => setModalVisible(true)}>
               <Icon
                 name="filter-menu-outline"
                 type="material-community"

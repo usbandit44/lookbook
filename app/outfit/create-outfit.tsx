@@ -1,4 +1,3 @@
-import CreateOutfitFooter from "@/features/create-outfit/components/CreateOutfitFooter";
 import OutfitEditor from "@/features/create-outfit/components/OutfitEditor";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -8,7 +7,7 @@ const CreateOutfit = () => {
   return (
     <View style={{ flex: 1 }}>
       <OutfitEditor />
-      <CreateOutfitFooter />
+      {/* <CreateOutfitFooter /> */}
     </View>
   );
 };

@@ -1,5 +1,6 @@
-import outfitReducer from "@/features/create-outfit/redux/slices/outfitSlice";
 import cameraReducer from "@/redux/slices/cameraSlice";
+import itemReducer from "@/redux/slices/itemSlice";
+import outfitReducer from "@/redux/slices/outfitSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 export const store = configureStore({
@@ -7,6 +8,7 @@ export const store = configureStore({
     // Define a top-level state field named `todos`, handled by `todosReducer`
     camera: cameraReducer,
     outfit: outfitReducer,
+    item: itemReducer,
   },
 });
 

@@ -22,6 +22,10 @@ abstract class ItemRepo {
   abstract getAllHeadwearIds(): Promise<number[]>;
   abstract getAllNecklaceIds(): Promise<number[]>;
   abstract getAllWristwearIds(): Promise<number[]>;
+
+  abstract updateItem(item: ItemsType): Promise<number>;
+
+  abstract deleteItem(id: number): Promise<void>;
 }
 
 export default ItemRepo;

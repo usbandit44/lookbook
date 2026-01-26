@@ -1,5 +1,5 @@
-import { clearAllItems } from "@/features/create-outfit/redux/slices/outfitSlice";
 import { useAppDispatch } from "@/hooks/redux-hooks";
+import { clearAllItems } from "@/redux/slices/outfitSlice";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";

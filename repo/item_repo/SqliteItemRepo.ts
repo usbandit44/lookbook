@@ -186,6 +186,40 @@ class SqliteItemRepo extends ItemRepo {
       throw error;
     }
   }
+
+  async updateItem(item: ItemsType): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(items)
+        .set({
+          imgUrl: item.imgUrl,
+          name: item.name,
+          size: item.size,
+          type: item.type,
+        })
+        .where(eq(items.id, item.id))
+        .returning();
+      if (result == null) {
+        throw new Error("Item doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      throw error;
+    }
+  }
+  async deleteItem(id: number): Promise<void> {
+    try {
+      const result = await this.drizzleDb.delete(items).where(eq(items.id, id));
+      console.log(result);
+      if (result == null) {
+        throw new Error("Count failed");
+      }
+    } catch (error) {
+      console.error("Failed to add item:", error);
+      throw error;
+    }
+  }
 }
 
 export default SqliteItemRepo;
