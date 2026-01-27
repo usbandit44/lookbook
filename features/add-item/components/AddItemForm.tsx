@@ -157,7 +157,7 @@ const AddItemForm = () => {
         id: currentItemId,
         name: name,
         type: type,
-        size: size,
+        size: size.charAt(0).toUpperCase() + size.slice(1),
         imgUrl: imgUri,
       };
       repo.updateItem(newItem);

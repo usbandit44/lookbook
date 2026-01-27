@@ -41,7 +41,7 @@ function AppShell() {
   if (!loaded) return null;
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
       {/* 🔹 Paint status bar background */}
       <View
         style={{
