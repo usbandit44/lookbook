@@ -7,7 +7,7 @@
     "icon": "./assets/icons/logo.png",
     "scheme": "lookbook",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ae.lookbook"
