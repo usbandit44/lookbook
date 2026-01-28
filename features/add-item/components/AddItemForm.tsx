@@ -1,4 +1,6 @@
 import AppButton from "@/components/ui/AppButton";
+import AppModal from "@/components/ui/AppModal";
+import AppText from "@/components/ui/AppText";
 import FormElement from "@/components/ui/FormElement";
 import Input from "@/components/ui/Input";
 import Snackbar from "@/components/ui/Snackbar";
@@ -8,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
+import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
@@ -18,7 +21,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -30,7 +32,8 @@ type FormValues = {
 };
 
 const AddItemForm = () => {
-  const repo = new AppItemRepo();
+  const itemRepo = new AppItemRepo();
+  const outfitRepo = new AppOutfitRepo();
 
   const currentItemId = useAppSelector(selectCurrentItem);
 
@@ -45,6 +48,7 @@ const AddItemForm = () => {
     }, []),
   );
   const [visablity, setVisablity] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [updateVisablity, setUpdateVisablity] = useState(false);
   let imgUri = useAppSelector(selectNewItemImg);
   const [currentItem, setCurrentItem] = useState<ItemsType | null>(null);
@@ -55,7 +59,7 @@ const AddItemForm = () => {
   useEffect(() => {
     if (currentItemId != -1) {
       async function getCurrentItem() {
-        const item = await repo.getItem(currentItemId);
+        const item = await itemRepo.getItem(currentItemId);
         setCurrentItem(item);
 
         console.log(item.name);
@@ -67,7 +71,7 @@ const AddItemForm = () => {
       getCurrentItem();
     } else {
       async function getItemCount() {
-        const count = await repo.countNumberOfItem();
+        const count = await itemRepo.countNumberOfItem();
         setName("Item #" + (Number(count) + 1));
       }
       getItemCount();
@@ -103,7 +107,7 @@ const AddItemForm = () => {
     imgUrl: string;
   }) => {
     try {
-      await repo.addItem(item);
+      await itemRepo.addItem(item);
     } catch (err) {
       console.log(err);
     }
@@ -160,7 +164,7 @@ const AddItemForm = () => {
         size: size.charAt(0).toUpperCase() + size.slice(1),
         imgUrl: imgUri,
       };
-      repo.updateItem(newItem);
+      itemRepo.updateItem(newItem);
       setUpdateVisablity(!updateVisablity);
       setTimeout(() => setVisablity(false), 3000);
     }
@@ -241,7 +245,10 @@ const AddItemForm = () => {
               setOpen={setOpen}
               setValue={setType}
               setItems={setItems}
-              style={{ backgroundColor: Colors.light.background }}
+              style={{
+                backgroundColor: "transparent",
+              }}
+              textStyle={{ fontFamily: "Lora-Regular" }}
               placeholder="Select Type"
             />
           </FormElement>
@@ -255,7 +262,7 @@ const AddItemForm = () => {
               // setVisablity(true);
             }}
           >
-            <Text style={{ color: "white" }}>Create Item</Text>
+            <AppText style={{ color: "white" }}>Create Item</AppText>
           </AppButton>
         ) : (
           <AppButton
@@ -263,7 +270,7 @@ const AddItemForm = () => {
               updateItem();
             }}
           >
-            <Text style={{ color: "white" }}>Update Item</Text>
+            <AppText style={{ color: "white" }}>Update Item</AppText>
           </AppButton>
         )}
 
@@ -275,19 +282,18 @@ const AddItemForm = () => {
             dispatch(updateNewItemImg(""));
           }}
         >
-          <Text>Cancel</Text>
+          <AppText>Cancel</AppText>
         </AppButton>
         {currentItemId != -1 ? (
           <AppButton
             type="text"
             onPress={() => {
-              router.navigate("/pages");
-              repo.deleteItem(currentItemId);
-              dispatch(clearCurrentItem());
-              dispatch(updateNewItemImg(""));
+              setDeleteModal(!deleteModal);
             }}
           >
-            <Text style={{ color: "red" }}>Delete</Text>
+            <AppText style={{ color: Colors.light.destructive }}>
+              Delete
+            </AppText>
           </AppButton>
         ) : null}
       </View>
@@ -306,6 +312,30 @@ const AddItemForm = () => {
       >
         Item successfully updated
       </Snackbar>
+      <AppModal modalVisible={deleteModal} setModalVisible={setDeleteModal}>
+        <AppText>Do you delete this item</AppText>
+        <AppButton
+          fullWidth={true}
+          onPress={async () => {
+            router.navigate("/pages");
+            itemRepo.deleteItem(currentItemId);
+            outfitRepo.removeItemFromAllOutfits(currentItemId);
+            dispatch(clearCurrentItem());
+            dispatch(updateNewItemImg(""));
+          }}
+        >
+          <AppText style={{ color: "white" }}>Delete</AppText>
+        </AppButton>
+        <AppButton
+          fullWidth={true}
+          onPress={() => {
+            setDeleteModal(!deleteModal);
+          }}
+          type="secondary"
+        >
+          <AppText>Cancel</AppText>
+        </AppButton>
+      </AppModal>
     </View>
   );
 };
@@ -315,7 +345,6 @@ export default AddItemForm;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
     padding: 20,
     justifyContent: "flex-end",
     paddingTop: 50,

@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/constants";
+import AppText from "@/components/ui/AppText";
 import icons from "@/constants/icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -7,7 +7,6 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -78,7 +77,7 @@ const BottomNav = () => {
             >
               <Icon name="shirt-outline" type="ionicon" size={35}></Icon>
             </Pressable>
-            <Text>Add Item</Text>
+            <AppText type="p3SemiBold">Add Item</AppText>
           </View>
           <View style={styles.navButtonContainer}>
             <Pressable
@@ -92,7 +91,7 @@ const BottomNav = () => {
                 style={{ width: 45, height: 45, resizeMode: "contain" }}
               />
             </Pressable>
-            <Text>Create Outfit</Text>
+            <AppText type="p3SemiBold">Create Outfit</AppText>
           </View>
         </View>
       ) : (
@@ -122,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopColor: "black",
     borderWidth: 1,
-    backgroundColor: Colors.light.background,
+
     overflow: "hidden",
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,

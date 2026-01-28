@@ -9,6 +9,9 @@ export const outfits = sqliteTable("outfits", {
     .$type<string[]>()
     .default(sql`(json_array())`),
   imgUrl: text().notNull(),
+  updateImgUrl: integer("updateImgUrl", { mode: "boolean" })
+    .notNull()
+    .default(false),
 });
 
 export type OutfitType = typeof outfits.$inferSelect;

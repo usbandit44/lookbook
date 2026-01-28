@@ -1,6 +1,6 @@
 import { outfits } from "@/db/schemas/outfits";
 import OutfitRepo from "@/repo/outfit_repo/OutfitRepo";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 
@@ -40,6 +40,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     name: string;
     items: number[];
     imgUrl: string;
+    updateImgUrl: boolean;
   }> {
     try {
       const result = await this.drizzleDb
@@ -55,7 +56,8 @@ class SqliteOutfitRepo extends OutfitRepo {
         items: result[0].items.map((item) => {
           return parseInt(item, 10);
         }),
-        imgUrl: result[0].imgUrl,
+        imgUrl: result[0].imgUrl ?? "",
+        updateImgUrl: result[0].updateImgUrl,
       };
       return returningOutfit;
     } catch (error) {
@@ -89,6 +91,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     name: string;
     imgUrl: string;
     items: number[];
+    updateImgUrl: boolean;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -102,6 +105,23 @@ class SqliteOutfitRepo extends OutfitRepo {
       if (result == null) {
         throw new Error("Outfit doesn't exist");
       }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update outfit:", error);
+      throw error;
+    }
+  }
+
+  async updateOutfitImgUrl(id: number, imgUrl: string): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(outfits)
+        .set({ imgUrl: imgUrl })
+        .returning();
+      if (result == null) {
+        throw new Error("Outfit doesn't exist");
+      }
+      console.log(result);
       return result[0].id;
     } catch (error) {
       console.error("Failed to update outfit:", error);
@@ -133,6 +153,54 @@ class SqliteOutfitRepo extends OutfitRepo {
       }
     } catch (error) {
       console.error("Failed to add item:", error);
+      throw error;
+    }
+  }
+
+  async removeItemFromAllOutfits(itemId: number): Promise<void> {
+    try {
+      const itemIdToRemove = itemId.toString();
+
+      const result = await this.drizzleDb
+        .update(outfits)
+        .set({
+          items: sql`(
+          SELECT json_group_array(value)
+          FROM json_each(items)
+          WHERE value != ${itemIdToRemove}
+        )`,
+          updateImgUrl: true,
+        })
+        .where(
+          sql`EXISTS (
+          SELECT 1 FROM json_each(items)
+          WHERE value = ${itemIdToRemove}
+        )`,
+        )
+        .returning({ id: outfits.id, items: outfits.items }); // optional, for debugging
+      console.log(result);
+    } catch (error) {
+      console.error("Failed to remove item from outfits:", error);
+      throw error;
+    }
+  }
+
+  async updateOutfitUpdateImgUrl(
+    id: number,
+    updateImgUrl: boolean,
+  ): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(outfits)
+        .set({ updateImgUrl: updateImgUrl })
+        .where(eq(outfits.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Outfit doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update outfit:", error);
       throw error;
     }
   }

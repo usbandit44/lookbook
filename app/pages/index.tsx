@@ -1,12 +1,12 @@
 import ItemPreview from "@/components/ItemPreview";
 import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
-import { Colors } from "@/constants/constants";
+import AppText from "@/components/ui/AppText";
 import { items } from "@/db/schemas/items";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -57,7 +57,7 @@ const Home = () => {
   }, [applyFilter, itemsData]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+    <View style={{ flex: 1 }}>
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
@@ -74,7 +74,9 @@ const Home = () => {
                 color="white"
                 size={20}
               />
-              <Text style={{ color: "white" }}>Filter</Text>
+              <AppText style={{ color: "white", letterSpacing: 1 }}>
+                Filter
+              </AppText>
             </AppButton>
           </View>
         }
@@ -97,7 +99,7 @@ const Home = () => {
       />
 
       <AppModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
-        <Text>Filter</Text>
+        <AppText>Filter</AppText>
         <ScrollView>
           <Pressable
             style={styles.option}
@@ -110,7 +112,7 @@ const Home = () => {
               setTopSelected(!topSelected);
             }}
           >
-            <Text>Tops</Text>
+            <AppText>Tops</AppText>
             <CheckBox
               checked={topSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -136,7 +138,7 @@ const Home = () => {
               setBottomSelected(!bottomSelected);
             }}
           >
-            <Text>Bottoms</Text>
+            <AppText>Bottoms</AppText>
             <CheckBox
               checked={bottomSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -162,7 +164,7 @@ const Home = () => {
               setOuterwearSelected(!outerwearSelected);
             }}
           >
-            <Text>Outerwear</Text>
+            <AppText>Outerwear</AppText>
             <CheckBox
               checked={outerwearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -188,7 +190,7 @@ const Home = () => {
               setShoesSelected(!shoesSelected);
             }}
           >
-            <Text>Shoes</Text>
+            <AppText>Shoes</AppText>
             <CheckBox
               checked={shoesSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -214,7 +216,7 @@ const Home = () => {
               setEyewearSelected(!eyewearSelected);
             }}
           >
-            <Text>Eyewear</Text>
+            <AppText>Eyewear</AppText>
             <CheckBox
               checked={eyewearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -240,7 +242,7 @@ const Home = () => {
               setHeadwearSelected(!headwearSelected);
             }}
           >
-            <Text>Headwear</Text>
+            <AppText>Headwear</AppText>
             <CheckBox
               checked={headwearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -266,7 +268,7 @@ const Home = () => {
               setNecklacesSelected(!necklacesSelected);
             }}
           >
-            <Text>Necklaces</Text>
+            <AppText>Necklaces</AppText>
             <CheckBox
               checked={necklacesSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -292,7 +294,7 @@ const Home = () => {
               setWristWearSelected(!wristWearSelected);
             }}
           >
-            <Text>Wrist Wear</Text>
+            <AppText>Wrist Wear</AppText>
             <CheckBox
               checked={wristWearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -314,7 +316,7 @@ const Home = () => {
             setModalVisible(!modalVisible);
           }}
         >
-          <Text style={{ color: "white" }}>Apply</Text>
+          <AppText style={{ color: "white" }}>Apply</AppText>
         </AppButton>
         <AppButton
           onPress={() => {
@@ -331,7 +333,7 @@ const Home = () => {
           }}
           type="text"
         >
-          <Text>Reset</Text>
+          <AppText>Reset</AppText>
         </AppButton>
       </AppModal>
     </View>

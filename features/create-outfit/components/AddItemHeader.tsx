@@ -1,8 +1,11 @@
+import AppButton from "@/components/ui/AppButton";
+import AppText from "@/components/ui/AppText";
+import { Colors } from "@/constants/constants";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { clearAllItems } from "@/redux/slices/outfitSlice";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 
 const AddItemHeader = () => {
@@ -11,23 +14,26 @@ const AddItemHeader = () => {
   const dispatch = useAppDispatch();
   return (
     <View style={styles.container}>
-      <Pressable
+      <AppButton
         onPress={() => {
           router.navigate("/outfit/create-outfit");
         }}
-        hitSlop={10}
+        type="icon"
       >
-        <Icon name="arrow-back-ios" type="material" size={24}></Icon>
-      </Pressable>
-      <Text>Add Item</Text>
-      <Pressable
+        <Icon name="arrow-back-ios" type="material" size={20}></Icon>
+      </AppButton>
+      <AppText type="p2">Add Item</AppText>
+      <AppButton
         onPress={() => {
           dispatch(clearAllItems());
         }}
-        hitSlop={10}
+        type="text"
+        style
       >
-        <Text>Reset</Text>
-      </Pressable>
+        <AppText type="p3Bold" style={{ color: Colors.light.destructive }}>
+          Reset
+        </AppText>
+      </AppButton>
     </View>
   );
 };
@@ -39,7 +45,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingTop: 30,
     paddingBottom: 30,
-    padding: 15,
+    padding: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

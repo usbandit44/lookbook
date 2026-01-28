@@ -28,5 +28,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     color: "black",
     padding: 8,
+    fontFamily: "Lora-Regular",
   },
 });

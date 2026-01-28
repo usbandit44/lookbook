@@ -38,6 +38,29 @@ function AppShell() {
   const db = drizzle(expoDb);
   useMigrations(db, migrations);
 
+  const [fontsLoaded] = useFonts({
+    "InriaSerif-Bold": require("@/assets/fonts/InriaSerif-Bold.ttf"),
+    "InriaSerif-BoldItalic": require("@/assets/fonts/InriaSerif-BoldItalic.ttf"),
+    "InriaSerif-Italic": require("@/assets/fonts/InriaSerif-Italic.ttf"),
+    "InriaSerif-Light": require("@/assets/fonts/InriaSerif-Light.ttf"),
+    "InriaSerif-LightItalic": require("@/assets/fonts/InriaSerif-LightItalic.ttf"),
+    "InriaSerif-Regular": require("@/assets/fonts/InriaSerif-Regular.ttf"),
+    "Lora-Bold": require("@/assets/fonts/Lora-Bold.ttf"),
+    "Lora-BoldItalic": require("@/assets/fonts/Lora-BoldItalic.ttf"),
+    "Lora-Italic-VariableFont_wght": require("@/assets/fonts/Lora-Italic-VariableFont_wght.ttf"),
+    "Lora-Italic": require("@/assets/fonts/Lora-Italic.ttf"),
+    "Lora-Medium": require("@/assets/fonts/Lora-Medium.ttf"),
+    "Lora-MediumItalic": require("@/assets/fonts/Lora-MediumItalic.ttf"),
+    "Lora-SemiBold": require("@/assets/fonts/Lora-SemiBold.ttf"),
+    "Lora-SemiBoldItalic": require("@/assets/fonts/Lora-SemiBoldItalic.ttf"),
+    "Lora-Regular": require("@/assets/fonts/Lora-Regular.ttf"),
+    "Lora-VariableFont_wght": require("@/assets/fonts/Lora-VariableFont_wght.ttf"),
+    "SpaceMono-Regular": require("@/assets/fonts/SpaceMono-Regular.ttf"),
+    "Nunito-VariableFont_wght": require("@/assets/fonts/Nunito-VariableFont_wght.ttf"),
+  });
+
+  if (!fontsLoaded) return null;
+
   if (!loaded) return null;
 
   return (

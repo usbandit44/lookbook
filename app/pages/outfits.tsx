@@ -1,5 +1,4 @@
 import ItemPreview from "@/components/ItemPreview";
-import { Colors } from "@/constants/constants";
 import { outfits } from "@/db/schemas/outfits";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
@@ -16,14 +15,14 @@ const OutfitsPage = () => {
   // setItemsData(data);
   useEffect(() => {
     // const fetchItems = async () => {
-    //   await drizzleDb.delete(items);
+    //   await drizzleDb.delete(outfits);
     // };
     // fetchItems();
     console.log(itemsData);
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+    <View style={{ flex: 1 }}>
       <FlatList
         data={itemsData}
         keyExtractor={(item) => item.id.toString()}

@@ -1,3 +1,4 @@
+import AppText from "@/components/ui/AppText";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { setCurrentItem } from "@/redux/slices/itemSlice";
 import { setCurrentOutfit, setItems } from "@/redux/slices/outfitSlice";
@@ -6,7 +7,7 @@ import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
 
 const ItemPreview: React.FC<{
   imgUri: string;
@@ -20,6 +21,7 @@ const ItemPreview: React.FC<{
   const dispatch = useAppDispatch();
   const outfitRepo = new AppOutfitRepo();
   const itemRepo = new AppItemRepo();
+  console.log("Hello" + props.imgUri);
   return (
     <Pressable
       style={{
@@ -46,8 +48,8 @@ const ItemPreview: React.FC<{
         contentFit="cover"
         style={styles.img}
       />
-      <Text>{props.name}</Text>
-      <Text>{props.size}</Text>
+      <AppText>{props.name}</AppText>
+      <AppText>{props.size}</AppText>
     </Pressable>
   );
 };
@@ -59,7 +61,6 @@ const styles = StyleSheet.create({
   img: {
     aspectRatio: 4 / 5,
     width: "100%",
-    backgroundColor: "grey",
     borderRadius: 10,
   },
 });

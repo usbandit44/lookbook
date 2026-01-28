@@ -1,5 +1,5 @@
 import AppButton from "@/components/ui/AppButton";
-import { Colors } from "@/constants/constants";
+import AppText from "@/components/ui/AppText";
 import { items } from "@/db/schemas/items";
 import AddItemHeader from "@/features/create-outfit/components/AddItemHeader";
 import SelectableItem from "@/features/create-outfit/components/SelectableItem";
@@ -12,7 +12,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
@@ -58,7 +57,7 @@ const AddItem = () => {
   }, [applyFilter, itemsData]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+    <View style={{ flex: 1 }}>
       <AddItemHeader />
 
       <FlatList
@@ -77,7 +76,7 @@ const AddItem = () => {
                 color="white"
                 size={20}
               />
-              <Text style={{ color: "white" }}>Filter</Text>
+              <AppText style={{ color: "white" }}>Filter</AppText>
             </AppButton>
           </View>
         }
@@ -105,7 +104,7 @@ const AddItem = () => {
           }}
         >
           <View style={styles.modalView}>
-            <Text>Filter</Text>
+            <AppText>Filter</AppText>
             <ScrollView>
               <Pressable
                 style={styles.option}
@@ -118,7 +117,7 @@ const AddItem = () => {
                   setTopSelected(!topSelected);
                 }}
               >
-                <Text>Tops</Text>
+                <AppText>Tops</AppText>
                 <CheckBox
                   checked={topSelected}
                   checkedIcon={
@@ -146,7 +145,7 @@ const AddItem = () => {
                   setBottomSelected(!bottomSelected);
                 }}
               >
-                <Text>Bottoms</Text>
+                <AppText>Bottoms</AppText>
                 <CheckBox
                   checked={bottomSelected}
                   checkedIcon={
@@ -174,7 +173,7 @@ const AddItem = () => {
                   setOuterwearSelected(!outerwearSelected);
                 }}
               >
-                <Text>Outerwear</Text>
+                <AppText>Outerwear</AppText>
                 <CheckBox
                   checked={outerwearSelected}
                   checkedIcon={
@@ -202,7 +201,7 @@ const AddItem = () => {
                   setShoesSelected(!shoesSelected);
                 }}
               >
-                <Text>Shoes</Text>
+                <AppText>Shoes</AppText>
                 <CheckBox
                   checked={shoesSelected}
                   checkedIcon={
@@ -230,7 +229,7 @@ const AddItem = () => {
                   setEyewearSelected(!eyewearSelected);
                 }}
               >
-                <Text>Eyewear</Text>
+                <AppText>Eyewear</AppText>
                 <CheckBox
                   checked={eyewearSelected}
                   checkedIcon={
@@ -258,7 +257,7 @@ const AddItem = () => {
                   setHeadwearSelected(!headwearSelected);
                 }}
               >
-                <Text>Headwear</Text>
+                <AppText>Headwear</AppText>
                 <CheckBox
                   checked={headwearSelected}
                   checkedIcon={
@@ -286,7 +285,7 @@ const AddItem = () => {
                   setNecklacesSelected(!necklacesSelected);
                 }}
               >
-                <Text>Necklaces</Text>
+                <AppText>Necklaces</AppText>
                 <CheckBox
                   checked={necklacesSelected}
                   checkedIcon={
@@ -314,7 +313,7 @@ const AddItem = () => {
                   setWristWearSelected(!wristWearSelected);
                 }}
               >
-                <Text>Wrist Wear</Text>
+                <AppText>Wrist Wear</AppText>
                 <CheckBox
                   checked={wristWearSelected}
                   checkedIcon={
@@ -338,7 +337,7 @@ const AddItem = () => {
                 setModalVisible(!modalVisible);
               }}
             >
-              <Text style={{ color: "white" }}>Apply</Text>
+              <AppText style={{ color: "white" }}>Apply</AppText>
             </AppButton>
             <AppButton
               onPress={() => {
@@ -355,7 +354,7 @@ const AddItem = () => {
               }}
               type="text"
             >
-              <Text>Reset</Text>
+              <AppText>Reset</AppText>
             </AppButton>
           </View>
         </Pressable>

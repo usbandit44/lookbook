@@ -18,5 +18,4 @@ export default AddItemPage;
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  iosHeader: { height: 60, backgroundColor: "rgba(0, 0, 0, 0)" },
 });

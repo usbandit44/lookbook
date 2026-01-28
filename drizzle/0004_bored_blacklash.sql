@@ -1,0 +1,1 @@
+ALTER TABLE `outfits` ADD `updateImgUrl` integer DEFAULT false NOT NULL;

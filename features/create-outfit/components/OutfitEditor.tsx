@@ -1,6 +1,8 @@
 import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
+import AppText from "@/components/ui/AppText";
 import Snackbar from "@/components/ui/Snackbar";
+import { Colors } from "@/constants/constants";
 import icons from "@/constants/icons";
 import { ItemsType } from "@/db/schemas/items";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
@@ -17,7 +19,7 @@ import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { captureRef } from "react-native-view-shot";
 import Movable from "./Movable";
@@ -91,6 +93,7 @@ const OutfitEditor: React.FC = () => {
       name: outfitName,
       imgUrl: dest,
       items: items,
+      updateImgUrl: false,
     };
     outfitRepo.updateOutfit(newOutfit);
   };
@@ -115,7 +118,7 @@ const OutfitEditor: React.FC = () => {
           }}
         >
           {/* <Icon name="done" type="material" size={26}></Icon> */}
-          <Text>Delete</Text>
+          <AppText style={{ color: Colors.light.destructive }}>Delete</AppText>
         </AppButton>
       );
     } else {
@@ -178,6 +181,22 @@ const OutfitEditor: React.FC = () => {
               ) {
                 setModalVisible(!modalVisible);
               } else {
+                if (oldOutfit.updateImgUrl) {
+                  const imgUri = await captureRef(viewRef, {
+                    format: "jpg",
+                    quality: 0.9,
+                  });
+
+                  // Your exact FileSystem pattern
+                  const fileName = `screenshot_${Date.now()}.jpg`;
+                  const dest = (FileSystem.documentDirectory ?? "") + fileName;
+
+                  // Copy screenshot to your destination
+                  await FileSystem.copyAsync({ from: imgUri, to: dest });
+                  outfitRepo.updateOutfitImgUrl(currentOutfit.id, dest);
+                  outfitRepo.updateOutfitUpdateImgUrl(currentOutfit.id, true);
+                }
+
                 dispatch(clearAllItems());
                 dispatch(clearCurrentOutfit());
                 router.navigate("/pages");
@@ -230,7 +249,7 @@ const OutfitEditor: React.FC = () => {
                 contentFit="contain"
                 style={{ width: "100%", height: "100%", borderRadius: 8 }}
               />
-              <Text>{item.name}</Text>
+              <AppText>{item.name}</AppText>
             </Movable>
           ))}
       </View>
@@ -253,7 +272,7 @@ const OutfitEditor: React.FC = () => {
           >
             <Icon name="shirt-outline" type="ionicon" size={35}></Icon>
           </Pressable>
-          <Text>Add Item</Text>
+          <AppText type="p3SemiBold">Add Item</AppText>
         </View>
         <View style={styles.navButtonContainer}>
           <Pressable
@@ -267,7 +286,7 @@ const OutfitEditor: React.FC = () => {
               style={{ width: 45, height: 45, resizeMode: "contain" }}
             />
           </Pressable>
-          <Text>Create Outfit</Text>
+          <AppText type="p3SemiBold">Create Outfit</AppText>
         </View>
       </View>
       <Snackbar
@@ -279,7 +298,7 @@ const OutfitEditor: React.FC = () => {
       </Snackbar>
 
       <AppModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
-        <Text>Do you want to save your edits</Text>
+        <AppText>Do you want to save your edits</AppText>
         <AppButton
           fullWidth={true}
           onPress={async () => {
@@ -289,7 +308,7 @@ const OutfitEditor: React.FC = () => {
             setTimeout(() => setSnackbarVisiblity(false), 3000);
           }}
         >
-          <Text style={{ color: "white" }}>Save</Text>
+          <AppText style={{ color: "white" }}>Save</AppText>
         </AppButton>
         <AppButton
           fullWidth={true}
@@ -298,14 +317,14 @@ const OutfitEditor: React.FC = () => {
             setModalVisible(!modalVisible);
           }}
         >
-          <Text style={{ color: "white" }}>Undo</Text>
+          <AppText style={{ color: "white" }}>Undo</AppText>
         </AppButton>
       </AppModal>
       <AppModal
         modalVisible={deleteModalVisible}
         setModalVisible={setDeleteModalVisible}
       >
-        <Text>Do you want to delete this outfit?</Text>
+        <AppText>Do you want to delete this outfit?</AppText>
 
         <AppButton
           fullWidth={true}
@@ -317,7 +336,7 @@ const OutfitEditor: React.FC = () => {
             router.navigate("/pages");
           }}
         >
-          <Text style={{ color: "white" }}>Yes</Text>
+          <AppText style={{ color: "white" }}>Yes</AppText>
         </AppButton>
         <AppButton
           fullWidth={true}
@@ -325,7 +344,7 @@ const OutfitEditor: React.FC = () => {
             setDeleteModalVisible(!deleteModalVisible);
           }}
         >
-          <Text style={{ color: "white" }}>Cancel</Text>
+          <AppText style={{ color: "white" }}>Cancel</AppText>
         </AppButton>
       </AppModal>
     </View>
@@ -359,6 +378,8 @@ const styles = StyleSheet.create({
     padding: 8,
     textAlign: "center",
     fontSize: 25,
+    fontFamily: "Lora-SemiBold",
+    letterSpacing: 1,
   },
   footerContainer: {
     width: "100%",

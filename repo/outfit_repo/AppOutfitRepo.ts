@@ -22,6 +22,7 @@ class AppOutfitRepo extends OutfitRepo {
     name: string;
     items: number[];
     imgUrl: string;
+    updateImgUrl: boolean;
   }> {
     try {
       const result = await this.sqliteRepo.getOutfit(id);
@@ -44,9 +45,19 @@ class AppOutfitRepo extends OutfitRepo {
     name: string;
     imgUrl: string;
     items: number[];
+    updateImgUrl: boolean;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateOutfit(outfit);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateOutfitImgUrl(id: number, imgUrl: string): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateOutfitImgUrl(id, imgUrl);
       return result;
     } catch (err) {
       throw err;
@@ -67,6 +78,29 @@ class AppOutfitRepo extends OutfitRepo {
       const result = await this.sqliteRepo.deleteOutfit(id);
     } catch (error) {
       throw error;
+    }
+  }
+
+  async removeItemFromAllOutfits(itemId: number): Promise<void> {
+    try {
+      const result = await this.sqliteRepo.removeItemFromAllOutfits(itemId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateOutfitUpdateImgUrl(
+    id: number,
+    updateImgUrl: boolean,
+  ): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateOutfitUpdateImgUrl(
+        id,
+        updateImgUrl,
+      );
+      return result;
+    } catch (err) {
+      throw err;
     }
   }
 }

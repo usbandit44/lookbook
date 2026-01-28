@@ -1,9 +1,12 @@
+import AppButton from "@/components/ui/AppButton";
+import AppText from "@/components/ui/AppText";
+import { Colors } from "@/constants/constants";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { addNewItem, clearAllItems } from "@/redux/slices/outfitSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
 export enum itemTypes {
   Tops = "Tops",
@@ -60,16 +63,16 @@ const GenerateOutfitForm = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Pressable
+        <AppButton
           onPress={() => {
             router.navigate("/outfit/create-outfit");
           }}
-          hitSlop={10}
+          type="icon"
         >
           <Icon name="arrow-back-ios" type="material" size={24}></Icon>
-        </Pressable>
-        <Text>Generate Outfit</Text>
-        <Pressable
+        </AppButton>
+        <AppText type="p2">Generate Outfit</AppText>
+        <AppButton
           onPress={() => {
             setTopSelected(false);
             setBottomSelected(false);
@@ -80,10 +83,12 @@ const GenerateOutfitForm = () => {
             setNecklacesSelected(false);
             setWristWearSelected(false);
           }}
-          hitSlop={10}
+          type="text"
         >
-          <Text>Reset</Text>
-        </Pressable>
+          <AppText type="p3Bold" style={{ color: Colors.light.destructive }}>
+            Reset
+          </AppText>
+        </AppButton>
       </View>
       <View style={styles.formContainer}>
         <View>
@@ -91,7 +96,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setTopSelected(!topSelected)}
           >
-            <Text>Tops</Text>
+            <AppText style={styles.optionText}>Tops</AppText>
             <CheckBox
               checked={topSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -103,7 +108,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setBottomSelected(!bottomSelected)}
           >
-            <Text>Bottoms</Text>
+            <AppText style={styles.optionText}>Bottoms</AppText>
             <CheckBox
               checked={bottomSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -115,7 +120,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setOuterwearSelected(!outerwearSelected)}
           >
-            <Text>Outerwear</Text>
+            <AppText style={styles.optionText}>Outerwear</AppText>
             <CheckBox
               checked={outerwearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -127,7 +132,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setShoesSelected(!shoesSelected)}
           >
-            <Text>Shoes</Text>
+            <AppText style={styles.optionText}>Shoes</AppText>
             <CheckBox
               checked={shoesSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -139,7 +144,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setEyewearSelected(!eyewearSelected)}
           >
-            <Text>Eyewear</Text>
+            <AppText style={styles.optionText}>Eyewear</AppText>
             <CheckBox
               checked={eyewearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -151,7 +156,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setHeadwearSelected(!headwearSelected)}
           >
-            <Text>Headwear</Text>
+            <AppText style={styles.optionText}>Headwear</AppText>
             <CheckBox
               checked={headwearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -163,7 +168,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setNecklacesSelected(!necklacesSelected)}
           >
-            <Text>Necklaces</Text>
+            <AppText style={styles.optionText}>Necklaces</AppText>
             <CheckBox
               checked={necklacesSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -175,7 +180,7 @@ const GenerateOutfitForm = () => {
             style={styles.option}
             onPress={() => setWristWearSelected(!wristWearSelected)}
           >
-            <Text>Wrist Wear</Text>
+            <AppText style={styles.optionText}>Wrist Wear</AppText>
             <CheckBox
               checked={wristWearSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
@@ -183,14 +188,17 @@ const GenerateOutfitForm = () => {
             />
           </Pressable>
         </View>
-        <Pressable
-          onPress={() => {
-            GenerateOutfit();
-            router.navigate("/outfit/create-outfit");
-          }}
-        >
-          <Text>Generate</Text>
-        </Pressable>
+        <View style={{ width: "100%", paddingLeft: 25, paddingRight: 25 }}>
+          <AppButton
+            onPress={() => {
+              GenerateOutfit();
+              router.navigate("/outfit/create-outfit");
+            }}
+            fullWidth={true}
+          >
+            <AppText style={{ color: "white" }}>Generate</AppText>
+          </AppButton>
+        </View>
       </View>
     </View>
   );
@@ -225,5 +233,10 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     borderTopWidth: 0.5,
     borderColor: "#979C9E",
+  },
+  optionText: {
+    fontFamily: "Nunito-VariableFont_wght",
+    fontWeight: "light",
+    fontSize: 16,
   },
 });
