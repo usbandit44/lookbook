@@ -2,6 +2,7 @@ import ItemPreview from "@/components/ItemPreview";
 import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
+import { Colors } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
@@ -161,7 +162,11 @@ const Home = () => {
         </AppButton>
       </Animated.View>
 
-      <AppModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
+      <AppModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        style={{ height: 500 }}
+      >
         <AppText>Filter</AppText>
         <ScrollView>
           <Pressable
@@ -396,7 +401,7 @@ const Home = () => {
           }}
           type="text"
         >
-          <AppText>Reset</AppText>
+          <AppText style={{ color: Colors.light.destructive }}>Reset</AppText>
         </AppButton>
       </AppModal>
     </View>

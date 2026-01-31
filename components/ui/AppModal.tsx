@@ -5,6 +5,7 @@ const AppModal: React.FC<{
   children: React.ReactNode;
   modalVisible: boolean;
   setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  style?: {};
 }> = (props) => {
   return (
     <Modal
@@ -21,7 +22,7 @@ const AppModal: React.FC<{
           props.setModalVisible(!props.modalVisible);
         }}
       >
-        <View style={styles.modalView}>{props.children}</View>
+        <View style={[styles.modalView, props.style]}>{props.children}</View>
       </Pressable>
     </Modal>
   );

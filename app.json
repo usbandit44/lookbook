@@ -20,8 +20,6 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.anonymous.lookbook"
@@ -45,7 +43,7 @@
           "image": "./assets/icons/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#C8CECE"
+          "backgroundColor": "#fafafa"
         }
       ],
       [
@@ -88,6 +86,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8a3a6c7e-ddf5-481f-9886-2dfcf8867973"
+      }
     }
   }
 }
