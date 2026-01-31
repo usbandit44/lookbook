@@ -5,8 +5,8 @@ import AppText from "@/components/ui/AppText";
 import { items } from "@/db/schemas/items";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
-import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, FlatList, Pressable, StyleSheet, View } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -38,6 +38,38 @@ const Home = () => {
   const [headwearSelected, setHeadwearSelected] = useState(false);
   const [necklacesSelected, setNecklacesSelected] = useState(false);
   const [wristWearSelected, setWristWearSelected] = useState(false);
+  const [showScroolButton, setShowScrollButton] = useState(false);
+  const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
+
+  const flatListRef = useRef<FlatList<any>>(null);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: any[] }) => {
+      const topRowsVisible = viewableItems.some(
+        (vi) => vi.index !== null && vi.index < 4, // 2 rows × 2 columns
+      );
+
+      setShowScrollButton(!topRowsVisible);
+    },
+  ).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
+
+  useEffect(() => {
+    Animated.timing(scrollButtonOpacity, {
+      toValue: showScroolButton ? 1 : 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  }, [showScroolButton]);
+
+  const scrollToTop = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+    }
+  };
 
   // setItemsData(data);
   useEffect(() => {
@@ -59,6 +91,9 @@ const Home = () => {
   return (
     <View style={{ flex: 1 }}>
       <FlatList
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        ref={flatListRef}
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
@@ -97,6 +132,34 @@ const Home = () => {
           />
         )}
       />
+      <Animated.View
+        style={{
+          opacity: scrollButtonOpacity,
+          position: "absolute",
+          bottom: 20,
+          alignSelf: "flex-end",
+          paddingRight: 15,
+        }}
+        pointerEvents={showScroolButton ? "auto" : "none"}
+      >
+        <AppButton
+          onPress={scrollToTop}
+          style={{
+            borderRadius: 100,
+            aspectRatio: 1,
+            padding: 10,
+            backgroundColor: "black",
+          }}
+          type={"custom"}
+        >
+          <Icon
+            name="keyboard-arrow-up"
+            type="material"
+            size={24}
+            color={"white"}
+          />
+        </AppButton>
+      </Animated.View>
 
       <AppModal modalVisible={modalVisible} setModalVisible={setModalVisible}>
         <AppText>Filter</AppText>

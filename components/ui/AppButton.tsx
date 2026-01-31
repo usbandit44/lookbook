@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet } from "react-native";
 
-type ButtonType = "primary" | "secondary" | "icon" | "text";
+type ButtonType = "primary" | "secondary" | "icon" | "text" | "custom";
 
 const AppButton: React.FC<{
   children: React.ReactNode;
@@ -37,6 +37,8 @@ const AppButton: React.FC<{
       break;
     case "text":
       //typeStyling = { padding: 10 };
+      break;
+    case "custom":
       break;
     default:
       break;
