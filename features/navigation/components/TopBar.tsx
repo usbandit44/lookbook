@@ -32,7 +32,7 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
         <View style={{ width: 90 }} />
 
         <IconButton
-          onPress={() => alert("Logo pressed!")}
+          onPress={() => router.replace("/")}
           backgroundColor={backgroundColor}
           icon={
             <Image
@@ -43,8 +43,10 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
           style={{ height: 90, width: 90 }}
         />
 
-        <IconButton
-          onPress={() => router.replace("../profile")}
+        <View style={{ width: 90 }} />
+        
+        {/* <IconButton
+          onPress={() => router.replace("/pages/profile")}
           backgroundColor="transparent"
           icon={
             <Image
@@ -58,7 +60,7 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
             alignItems: "flex-end",
             paddingRight: 8,
           }}
-        />
+        /> */}
       </View>
       <View
         style={{
