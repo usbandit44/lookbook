@@ -7,6 +7,7 @@ import Snackbar from "@/components/ui/Snackbar";
 import { Colors, itemTypes } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { useBackgroundRemoval } from "@/hooks/useBackgroundRemoval";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
@@ -17,6 +18,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -32,6 +34,12 @@ type FormValues = {
 };
 
 const AddItemForm = () => {
+  const { mutate, isPending, isError, error, isSuccess } =
+    useBackgroundRemoval();
+
+  const onRemoveBg = (imageUri: string) => {
+    mutate(imageUri);
+  };
   const itemRepo = new AppItemRepo();
   const outfitRepo = new AppOutfitRepo();
 
@@ -57,16 +65,26 @@ const AddItemForm = () => {
     gap = { gap: 150 };
   }
   useEffect(() => {
+    if (isSuccess) {
+      setBackgroudRemoved(true);
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
     if (currentItemId != -1) {
       async function getCurrentItem() {
         const item = await itemRepo.getItem(currentItemId);
         setCurrentItem(item);
-
-        console.log(item.name);
         setName(item.name);
-        dispatch(updateNewItemImg(item.imgUrl));
+        if (!imgUri) {
+          // <-- only overwrite if no image is selected yet
+          dispatch(updateNewItemImg(item.imgUrl));
+          setBackgroudRemoved(true);
+        }
         setSize(item.size ?? "");
         setType(item.type);
+
+        console.log(backgroundRemoved);
       }
       getCurrentItem();
     } else {
@@ -91,6 +109,7 @@ const AddItemForm = () => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<string | null>(null);
   const [items, setItems] = useState(itemsArray);
+  const [backgroundRemoved, setBackgroudRemoved] = useState(false);
 
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
@@ -163,6 +182,7 @@ const AddItemForm = () => {
         type: type,
         size: size.charAt(0).toUpperCase() + size.slice(1),
         imgUrl: imgUri,
+        backgroundRemoved: backgroundRemoved,
       };
       itemRepo.updateItem(newItem);
       setUpdateVisablity(!updateVisablity);
@@ -197,26 +217,40 @@ const AddItemForm = () => {
         <View style={styles.form}>
           <FormElement showError={showImgError} errorMsg="Add a Image">
             {imgUri ? (
-              <View style={styles.imageWrapper}>
-                <Image
-                  source={{ uri: imgUri }}
-                  contentFit="cover"
-                  style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
-                />
-                <Pressable
-                  onPress={() => dispatch(updateNewItemImg(""))}
-                  style={styles.clearIcon}
-                  hitSlop={10}
-                >
-                  <Icon
-                    reverse
-                    name="close"
-                    type="material"
-                    color="black"
-                    size={15}
+              isPending ? (
+                <View style={styles.imageWrapper}>
+                  <ActivityIndicator size="large" color="black" />
+                </View>
+              ) : (
+                <View style={styles.imageWrapper}>
+                  <Image
+                    source={{ uri: imgUri }}
+                    contentFit="cover"
+                    style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
                   />
-                </Pressable>
-              </View>
+                  <Pressable
+                    onPress={() => {
+                      dispatch(updateNewItemImg(""));
+                      setBackgroudRemoved(false);
+                    }}
+                    style={styles.clearIcon}
+                    hitSlop={10}
+                  >
+                    <Icon
+                      reverse
+                      name="close"
+                      type="material"
+                      color="black"
+                      size={15}
+                    />
+                  </Pressable>
+                  {backgroundRemoved ? null : (
+                    <AppButton type="text" onPress={() => onRemoveBg(imgUri)}>
+                      <AppText>Remove Background</AppText>
+                    </AppButton>
+                  )}
+                </View>
+              )
             ) : (
               <Pressable
                 onPress={() => router.navigate("/camera-screen")}
@@ -259,6 +293,7 @@ const AddItemForm = () => {
           <AppButton
             onPress={() => {
               createItem();
+              setSize("");
               // setVisablity(true);
             }}
           >
@@ -362,6 +397,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 5,
   },
   clearIcon: {
     position: "absolute",

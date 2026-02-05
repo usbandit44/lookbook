@@ -199,7 +199,7 @@ const OutfitEditor: React.FC = () => {
 
                 dispatch(clearAllItems());
                 dispatch(clearCurrentOutfit());
-                router.navigate("/pages");
+                router.navigate("/pages/outfits");
               }
             } else {
               if (saved) {
@@ -207,7 +207,7 @@ const OutfitEditor: React.FC = () => {
               }
               dispatch(clearAllItems());
               dispatch(clearCurrentOutfit());
-              router.navigate("/pages");
+              router.navigate("/pages/outfits");
             }
           }}
         >
@@ -286,7 +286,7 @@ const OutfitEditor: React.FC = () => {
               style={{ width: 45, height: 45, resizeMode: "contain" }}
             />
           </Pressable>
-          <AppText type="p3SemiBold">Create Outfit</AppText>
+          <AppText type="p3SemiBold">Generate Outfit</AppText>
         </View>
       </View>
       <Snackbar
@@ -333,7 +333,7 @@ const OutfitEditor: React.FC = () => {
             setDeleteModalVisible(!deleteModalVisible);
             dispatch(clearAllItems());
             dispatch(clearCurrentOutfit());
-            router.navigate("/pages");
+            router.navigate("/pages/outfits");
           }}
         >
           <AppText style={{ color: "white" }}>Yes</AppText>

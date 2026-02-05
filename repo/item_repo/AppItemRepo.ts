@@ -70,14 +70,6 @@ class AppItemRepo extends ItemRepo {
       throw error;
     }
   }
-  async getAllEyewearIds(): Promise<number[]> {
-    try {
-      const result = await this.sqliteRepo.getAllEyewearIds();
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
   async getAllHeadwearIds(): Promise<number[]> {
     try {
       const result = await this.sqliteRepo.getAllHeadwearIds();
@@ -86,17 +78,19 @@ class AppItemRepo extends ItemRepo {
       throw error;
     }
   }
-  async getAllNecklaceIds(): Promise<number[]> {
+
+  async getAllAccessoriesIds(): Promise<number[]> {
     try {
-      const result = await this.sqliteRepo.getAllNecklaceIds();
+      const result = await this.sqliteRepo.getAllAccessoriesIds();
       return result;
     } catch (error) {
       throw error;
     }
   }
-  async getAllWristwearIds(): Promise<number[]> {
+
+  async getAllBeltIds(): Promise<number[]> {
     try {
-      const result = await this.sqliteRepo.getAllWristwearIds();
+      const result = await this.sqliteRepo.getAllBeltIds();
       return result;
     } catch (error) {
       throw error;

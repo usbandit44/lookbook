@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
   img: {
     aspectRatio: 4 / 5,
     width: "100%",
-    backgroundColor: "grey",
     borderRadius: 10,
   },
 });

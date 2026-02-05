@@ -53,12 +53,14 @@ const OutfitsPage = () => {
     //   await drizzleDb.delete(outfits);
     // };
     // fetchItems();
-    console.log(itemsData);
   }, []);
 
   return (
     <View style={{ flex: 1 }}>
       <FlatList
+        initialNumToRender={6} // render first 3 rows only
+        maxToRenderPerBatch={6} // render 3 more rows per batch
+        windowSize={5}
         data={itemsData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}

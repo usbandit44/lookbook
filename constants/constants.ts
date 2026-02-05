@@ -8,8 +8,8 @@ const tintColorDark = "#fff";
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#fafafa',
+    text: "#000000",
+    background: "#fafafa",
     tint: tintColorLight,
     icon: "#000000",
     tabIconDefault: "#687076",
@@ -31,8 +31,7 @@ export enum itemTypes {
   Bottoms = "Bottoms",
   Outerwear = "Outerwear",
   Shoes = "Shoes",
-  Eyewear = "Eyewear",
+  Belt = "Belt",
   Headwear = "Headwear",
-  Necklaces = "Necklaces",
-  WristWear = "Wrist Wear",
+  Accessories = "Accessories",
 }

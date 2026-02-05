@@ -16,7 +16,24 @@ const Home = () => {
   const drizzleDb = drizzle(db);
   //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
 
-  const { data: itemsData } = useLiveQuery(drizzleDb.select().from(items));
+  //const { data: itemsData } = useLiveQuery(drizzleDb.select().from(items));
+  const { data: liveItems } = useLiveQuery(drizzleDb.select().from(items));
+  const [itemsData, setItemsData] = useState<
+    {
+      id: number;
+      name: string;
+      type: string;
+      size: string | null;
+      imgUrl: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    if (liveItems && JSON.stringify(liveItems) !== JSON.stringify(itemsData)) {
+      setItemsData(liveItems);
+    }
+  }, [liveItems]);
+
   const [filter, setFilter] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<
     | {
@@ -35,10 +52,9 @@ const Home = () => {
   const [bottomSelected, setBottomSelected] = useState(false);
   const [outerwearSelected, setOuterwearSelected] = useState(false);
   const [shoesSelected, setShoesSelected] = useState(false);
-  const [eyewearSelected, setEyewearSelected] = useState(false);
   const [headwearSelected, setHeadwearSelected] = useState(false);
-  const [necklacesSelected, setNecklacesSelected] = useState(false);
-  const [wristWearSelected, setWristWearSelected] = useState(false);
+  const [beltSelected, setBeltSelected] = useState(false);
+  const [accessoriesSelected, setAccessoriesSelected] = useState(false);
   const [showScroolButton, setShowScrollButton] = useState(false);
   const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
 
@@ -81,7 +97,6 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    console.log();
     if (filter.length == 0) {
       setFilteredData(itemsData);
     } else {
@@ -92,6 +107,9 @@ const Home = () => {
   return (
     <View style={{ flex: 1 }}>
       <FlatList
+        initialNumToRender={6} // render first 3 rows only
+        maxToRenderPerBatch={6} // render 3 more rows per batch
+        windowSize={5}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         ref={flatListRef}
@@ -276,25 +294,25 @@ const Home = () => {
           <Pressable
             style={styles.option}
             onPress={() => {
-              if (eyewearSelected) {
-                setFilter(filter.filter((type) => type !== "Eyewear"));
+              if (beltSelected) {
+                setFilter(filter.filter((type) => type !== "Belt"));
               } else {
-                setFilter([...filter, "Eyewear"]);
+                setFilter([...filter, "Belt"]);
               }
-              setEyewearSelected(!eyewearSelected);
+              setBeltSelected(!beltSelected);
             }}
           >
-            <AppText>Eyewear</AppText>
+            <AppText>Belt</AppText>
             <CheckBox
-              checked={eyewearSelected}
+              checked={beltSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
               onPress={() => {
-                if (eyewearSelected) {
-                  setFilter(filter.filter((type) => type !== "Eyewear"));
+                if (beltSelected) {
+                  setFilter(filter.filter((type) => type !== "Belt"));
                 } else {
-                  setFilter([...filter, "Eyewear"]);
+                  setFilter([...filter, "Belt"]);
                 }
-                setEyewearSelected(!eyewearSelected);
+                setBeltSelected(!beltSelected);
               }}
             />
           </Pressable>
@@ -328,51 +346,25 @@ const Home = () => {
           <Pressable
             style={styles.option}
             onPress={() => {
-              if (necklacesSelected) {
-                setFilter(filter.filter((type) => type !== "Necklaces"));
+              if (accessoriesSelected) {
+                setFilter(filter.filter((type) => type !== "Accessories"));
               } else {
-                setFilter([...filter, "Necklaces"]);
+                setFilter([...filter, "Accessories"]);
               }
-              setNecklacesSelected(!necklacesSelected);
+              setAccessoriesSelected(!accessoriesSelected);
             }}
           >
-            <AppText>Necklaces</AppText>
+            <AppText>Accessories</AppText>
             <CheckBox
-              checked={necklacesSelected}
+              checked={accessoriesSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
               onPress={() => {
-                if (necklacesSelected) {
-                  setFilter(filter.filter((type) => type !== "Necklaces"));
+                if (accessoriesSelected) {
+                  setFilter(filter.filter((type) => type !== "Accessories"));
                 } else {
-                  setFilter([...filter, "Necklaces"]);
+                  setFilter([...filter, "Accessories"]);
                 }
-                setNecklacesSelected(!necklacesSelected);
-              }}
-            />
-          </Pressable>
-
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (wristWearSelected) {
-                setFilter(filter.filter((type) => type !== "Wrist Wear"));
-              } else {
-                setFilter([...filter, "Wrist Wear"]);
-              }
-              setWristWearSelected(!wristWearSelected);
-            }}
-          >
-            <AppText>Wrist Wear</AppText>
-            <CheckBox
-              checked={wristWearSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => {
-                if (wristWearSelected) {
-                  setFilter(filter.filter((type) => type !== "Wrist Wear"));
-                } else {
-                  setFilter([...filter, "Wrist Wear"]);
-                }
-                setWristWearSelected(!wristWearSelected);
+                setAccessoriesSelected(!accessoriesSelected);
               }}
             />
           </Pressable>
@@ -392,10 +384,9 @@ const Home = () => {
             setBottomSelected(false);
             setOuterwearSelected(false);
             setShoesSelected(false);
-            setEyewearSelected(false);
             setHeadwearSelected(false);
-            setNecklacesSelected(false);
-            setWristWearSelected(false);
+            setAccessoriesSelected(false);
+            setBeltSelected(false);
             setFilter([]);
             setApplyFilter(applyFilter + 1);
           }}

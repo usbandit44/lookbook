@@ -9,6 +9,9 @@ export const items = sqliteTable("items", {
   }).notNull(),
   size: text(),
   imgUrl: text().notNull(),
+  backgroundRemoved: integer("updateImgUrl", { mode: "boolean" })
+    .notNull()
+    .default(false),
 });
 
 export type ItemsType = typeof items.$inferSelect;

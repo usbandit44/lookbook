@@ -1,12 +1,14 @@
 import AppButton from "@/components/ui/AppButton";
 import AppText from "@/components/ui/AppText";
+import { Colors } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
 import AddItemHeader from "@/features/create-outfit/components/AddItemHeader";
 import SelectableItem from "@/features/create-outfit/components/SelectableItem";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   FlatList,
   Modal,
   Pressable,
@@ -40,27 +42,62 @@ const AddItem = () => {
   const [bottomSelected, setBottomSelected] = useState(false);
   const [outerwearSelected, setOuterwearSelected] = useState(false);
   const [shoesSelected, setShoesSelected] = useState(false);
-  const [eyewearSelected, setEyewearSelected] = useState(false);
+  const [beltSelected, setBeltSelected] = useState(false);
   const [headwearSelected, setHeadwearSelected] = useState(false);
-  const [necklacesSelected, setNecklacesSelected] = useState(false);
-  const [wristWearSelected, setWristWearSelected] = useState(false);
+  const [accessoriesSelected, setAccessoriesSelected] = useState(false);
 
   useEffect(() => {
-    console.log();
     if (filter.length == 0) {
-      console.log("here");
       setFilteredData(itemsData);
     } else {
-      console.log("here2");
       setFilteredData(itemsData.filter((item) => filter.includes(item.type)));
     }
   }, [applyFilter, itemsData]);
+
+  const [showScroolButton, setShowScrollButton] = useState(false);
+  const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
+
+  const flatListRef = useRef<FlatList<any>>(null);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: any[] }) => {
+      const topRowsVisible = viewableItems.some(
+        (vi) => vi.index !== null && vi.index < 4, // 2 rows × 2 columns
+      );
+
+      setShowScrollButton(!topRowsVisible);
+    },
+  ).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
+
+  useEffect(() => {
+    Animated.timing(scrollButtonOpacity, {
+      toValue: showScroolButton ? 1 : 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  }, [showScroolButton]);
+
+  const scrollToTop = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
       <AddItemHeader />
 
       <FlatList
+        initialNumToRender={6} // render first 3 rows only
+        maxToRenderPerBatch={6} // render 3 more rows per batch
+        windowSize={5}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        ref={flatListRef}
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
@@ -89,6 +126,34 @@ const AddItem = () => {
           />
         )}
       />
+      <Animated.View
+        style={{
+          opacity: scrollButtonOpacity,
+          position: "absolute",
+          bottom: 20,
+          alignSelf: "flex-end",
+          paddingRight: 15,
+        }}
+        pointerEvents={showScroolButton ? "auto" : "none"}
+      >
+        <AppButton
+          onPress={scrollToTop}
+          style={{
+            borderRadius: 100,
+            aspectRatio: 1,
+            padding: 10,
+            backgroundColor: "black",
+          }}
+          type={"custom"}
+        >
+          <Icon
+            name="keyboard-arrow-up"
+            type="material"
+            size={24}
+            color={"white"}
+          />
+        </AppButton>
+      </Animated.View>
       <Modal
         animationType="fade"
         transparent={true}
@@ -221,27 +286,27 @@ const AddItem = () => {
               <Pressable
                 style={styles.option}
                 onPress={() => {
-                  if (eyewearSelected) {
-                    setFilter(filter.filter((type) => type !== "Eyewear"));
+                  if (beltSelected) {
+                    setFilter(filter.filter((type) => type !== "Belt"));
                   } else {
-                    setFilter([...filter, "Eyewear"]);
+                    setFilter([...filter, "Belt"]);
                   }
-                  setEyewearSelected(!eyewearSelected);
+                  setBeltSelected(!beltSelected);
                 }}
               >
-                <AppText>Eyewear</AppText>
+                <AppText>Belt</AppText>
                 <CheckBox
-                  checked={eyewearSelected}
+                  checked={beltSelected}
                   checkedIcon={
                     <Icon name="check-box" type="material" size={24} />
                   }
                   onPress={() => {
-                    if (eyewearSelected) {
-                      setFilter(filter.filter((type) => type !== "Eyewear"));
+                    if (beltSelected) {
+                      setFilter(filter.filter((type) => type !== "Belt"));
                     } else {
-                      setFilter([...filter, "Eyewear"]);
+                      setFilter([...filter, "Belt"]);
                     }
-                    setEyewearSelected(!eyewearSelected);
+                    setBeltSelected(!beltSelected);
                   }}
                 />
               </Pressable>
@@ -277,55 +342,29 @@ const AddItem = () => {
               <Pressable
                 style={styles.option}
                 onPress={() => {
-                  if (necklacesSelected) {
-                    setFilter(filter.filter((type) => type !== "Necklaces"));
+                  if (accessoriesSelected) {
+                    setFilter(filter.filter((type) => type !== "Accessories"));
                   } else {
-                    setFilter([...filter, "Necklaces"]);
+                    setFilter([...filter, "Accessories"]);
                   }
-                  setNecklacesSelected(!necklacesSelected);
+                  setAccessoriesSelected(!accessoriesSelected);
                 }}
               >
-                <AppText>Necklaces</AppText>
+                <AppText>Accessories</AppText>
                 <CheckBox
-                  checked={necklacesSelected}
+                  checked={accessoriesSelected}
                   checkedIcon={
                     <Icon name="check-box" type="material" size={24} />
                   }
                   onPress={() => {
-                    if (necklacesSelected) {
-                      setFilter(filter.filter((type) => type !== "Necklaces"));
+                    if (accessoriesSelected) {
+                      setFilter(
+                        filter.filter((type) => type !== "Accessories"),
+                      );
                     } else {
-                      setFilter([...filter, "Necklaces"]);
+                      setFilter([...filter, "Accessories"]);
                     }
-                    setNecklacesSelected(!necklacesSelected);
-                  }}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  if (wristWearSelected) {
-                    setFilter(filter.filter((type) => type !== "Wrist Wear"));
-                  } else {
-                    setFilter([...filter, "Wrist Wear"]);
-                  }
-                  setWristWearSelected(!wristWearSelected);
-                }}
-              >
-                <AppText>Wrist Wear</AppText>
-                <CheckBox
-                  checked={wristWearSelected}
-                  checkedIcon={
-                    <Icon name="check-box" type="material" size={24} />
-                  }
-                  onPress={() => {
-                    if (wristWearSelected) {
-                      setFilter(filter.filter((type) => type !== "Wrist Wear"));
-                    } else {
-                      setFilter([...filter, "Wrist Wear"]);
-                    }
-                    setWristWearSelected(!wristWearSelected);
+                    setAccessoriesSelected(!accessoriesSelected);
                   }}
                 />
               </Pressable>
@@ -345,16 +384,17 @@ const AddItem = () => {
                 setBottomSelected(false);
                 setOuterwearSelected(false);
                 setShoesSelected(false);
-                setEyewearSelected(false);
                 setHeadwearSelected(false);
-                setNecklacesSelected(false);
-                setWristWearSelected(false);
+                setAccessoriesSelected(false);
+                setBeltSelected(false);
                 setFilter([]);
                 setApplyFilter(applyFilter + 1);
               }}
               type="text"
             >
-              <AppText>Reset</AppText>
+              <AppText style={{ color: Colors.light.destructive }}>
+                Reset
+              </AppText>
             </AppButton>
           </View>
         </Pressable>

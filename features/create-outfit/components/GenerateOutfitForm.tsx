@@ -13,10 +13,9 @@ export enum itemTypes {
   Bottoms = "Bottoms",
   Outerwear = "Outerwear",
   Shoes = "Shoes",
-  Eyewear = "Eyewear",
+  Belt = "Belts",
   Headwear = "Headwear",
-  Necklaces = "Necklaces",
-  WristWear = "Wrist Wear",
+  Accessories = "Accessories",
 }
 
 const getRandomInt = (max: number) => {
@@ -31,10 +30,9 @@ const GenerateOutfitForm = () => {
   const [bottomSelected, setBottomSelected] = useState(false);
   const [outerwearSelected, setOuterwearSelected] = useState(false);
   const [shoesSelected, setShoesSelected] = useState(false);
-  const [eyewearSelected, setEyewearSelected] = useState(false);
   const [headwearSelected, setHeadwearSelected] = useState(false);
-  const [necklacesSelected, setNecklacesSelected] = useState(false);
-  const [wristWearSelected, setWristWearSelected] = useState(false);
+  const [accessoriesSelected, setAccessoriesSelected] = useState(false);
+  const [beltSelected, setBeltSelected] = useState(false);
 
   const repo = new AppItemRepo();
 
@@ -54,10 +52,9 @@ const GenerateOutfitForm = () => {
     await RandomItem(bottomSelected, () => repo.getAllBottomIds());
     await RandomItem(outerwearSelected, () => repo.getAllOuterwearIds());
     await RandomItem(shoesSelected, () => repo.getAllShoeIds());
-    await RandomItem(eyewearSelected, () => repo.getAllEyewearIds());
     await RandomItem(headwearSelected, () => repo.getAllHeadwearIds());
-    await RandomItem(necklacesSelected, () => repo.getAllNecklaceIds());
-    await RandomItem(wristWearSelected, () => repo.getAllWristwearIds());
+    await RandomItem(accessoriesSelected, () => repo.getAllAccessoriesIds());
+    await RandomItem(beltSelected, () => repo.getAllBeltIds());
   }
 
   return (
@@ -78,10 +75,9 @@ const GenerateOutfitForm = () => {
             setBottomSelected(false);
             setOuterwearSelected(false);
             setShoesSelected(false);
-            setEyewearSelected(false);
             setHeadwearSelected(false);
-            setNecklacesSelected(false);
-            setWristWearSelected(false);
+            setAccessoriesSelected(false);
+            setBeltSelected(false);
           }}
           type="text"
         >
@@ -142,13 +138,13 @@ const GenerateOutfitForm = () => {
 
           <Pressable
             style={styles.option}
-            onPress={() => setEyewearSelected(!eyewearSelected)}
+            onPress={() => setBeltSelected(!beltSelected)}
           >
-            <AppText style={styles.optionText}>Eyewear</AppText>
+            <AppText style={styles.optionText}>Belt</AppText>
             <CheckBox
-              checked={eyewearSelected}
+              checked={beltSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => setEyewearSelected(!eyewearSelected)}
+              onPress={() => setBeltSelected(!beltSelected)}
             />
           </Pressable>
 
@@ -166,25 +162,13 @@ const GenerateOutfitForm = () => {
 
           <Pressable
             style={styles.option}
-            onPress={() => setNecklacesSelected(!necklacesSelected)}
+            onPress={() => setAccessoriesSelected(!accessoriesSelected)}
           >
-            <AppText style={styles.optionText}>Necklaces</AppText>
+            <AppText style={styles.optionText}>Accessories</AppText>
             <CheckBox
-              checked={necklacesSelected}
+              checked={accessoriesSelected}
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => setNecklacesSelected(!necklacesSelected)}
-            />
-          </Pressable>
-
-          <Pressable
-            style={styles.option}
-            onPress={() => setWristWearSelected(!wristWearSelected)}
-          >
-            <AppText style={styles.optionText}>Wrist Wear</AppText>
-            <CheckBox
-              checked={wristWearSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => setWristWearSelected(!wristWearSelected)}
+              onPress={() => setAccessoriesSelected(!accessoriesSelected)}
             />
           </Pressable>
         </View>

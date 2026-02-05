@@ -13,6 +13,7 @@ class SqliteItemRepo extends ItemRepo {
     type: string;
     size: string;
     imgUrl: string;
+    backgroundRemoved: boolean;
   }): Promise<number> {
     try {
       const result = await this.drizzleDb
@@ -122,22 +123,7 @@ class SqliteItemRepo extends ItemRepo {
       throw error;
     }
   }
-  async getAllEyewearIds(): Promise<number[]> {
-    try {
-      const result = await this.drizzleDb
-        .select()
-        .from(items)
-        .where(eq(items.type, "Eyewear"));
-      if (result == null) {
-        throw new Error("No Eyewear have been saved");
-      }
-      const ids = result.map((item) => item.id);
-      return ids;
-    } catch (error) {
-      console.error("Failed to get item:", error);
-      throw error;
-    }
-  }
+
   async getAllHeadwearIds(): Promise<number[]> {
     try {
       const result = await this.drizzleDb
@@ -154,14 +140,15 @@ class SqliteItemRepo extends ItemRepo {
       throw error;
     }
   }
-  async getAllNecklaceIds(): Promise<number[]> {
+
+  async getAllAccessoriesIds(): Promise<number[]> {
     try {
       const result = await this.drizzleDb
         .select()
         .from(items)
-        .where(eq(items.type, "Necklaces"));
+        .where(eq(items.type, "Accessories"));
       if (result == null) {
-        throw new Error("No Necklaces have been saved");
+        throw new Error("No Accessories have been saved");
       }
       const ids = result.map((item) => item.id);
       return ids;
@@ -170,14 +157,15 @@ class SqliteItemRepo extends ItemRepo {
       throw error;
     }
   }
-  async getAllWristwearIds(): Promise<number[]> {
+
+  async getAllBeltIds(): Promise<number[]> {
     try {
       const result = await this.drizzleDb
         .select()
         .from(items)
-        .where(eq(items.type, "Wrist Wear"));
+        .where(eq(items.type, "Belt"));
       if (result == null) {
-        throw new Error("No Wrist Wear have been saved");
+        throw new Error("No Belt have been saved");
       }
       const ids = result.map((item) => item.id);
       return ids;

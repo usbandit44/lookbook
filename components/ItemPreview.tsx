@@ -21,7 +21,6 @@ const ItemPreview: React.FC<{
   const dispatch = useAppDispatch();
   const outfitRepo = new AppOutfitRepo();
   const itemRepo = new AppItemRepo();
-  console.log("Hello" + props.imgUri);
   return (
     <Pressable
       style={{
@@ -37,7 +36,6 @@ const ItemPreview: React.FC<{
         }
         if (props.type == "item") {
           // const item = await itemRepo.getItem(props.id);
-          console.log(props.id);
           dispatch(setCurrentItem(props.id));
           router.navigate("/add-item");
         }

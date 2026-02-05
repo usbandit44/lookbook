@@ -2,6 +2,7 @@ import { Colors } from "@/constants/constants";
 import migrations from "@/drizzle/migrations";
 import { store } from "@/redux/store";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useFonts } from "expo-font";
@@ -18,7 +19,7 @@ import {
 } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 
-export const DATABASE_NAME = "tasks";
+export const DATABASE_NAME = "lookbook";
 
 /* ------------------ INNER APP ------------------ */
 
@@ -87,6 +88,7 @@ function AppShell() {
 /* ------------------ ROOT ------------------ */
 
 export default function RootLayout() {
+  const queryClient = new QueryClient();
   return (
     <SafeAreaProvider>
       <Suspense fallback={<ActivityIndicator size="large" />}>
@@ -95,11 +97,13 @@ export default function RootLayout() {
           options={{ enableChangeListener: true }}
           useSuspense
         >
-          <ThemeProvider value={DefaultTheme}>
-            <Provider store={store}>
-              <AppShell />
-            </Provider>
-          </ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider value={DefaultTheme}>
+              <Provider store={store}>
+                <AppShell />
+              </Provider>
+            </ThemeProvider>
+          </QueryClientProvider>
         </SQLiteProvider>
       </Suspense>
     </SafeAreaProvider>

@@ -6,6 +6,7 @@ import m0001 from './0001_talented_starhawk.sql';
 import m0002 from './0002_rich_dazzler.sql';
 import m0003 from './0003_zippy_war_machine.sql';
 import m0004 from './0004_bored_blacklash.sql';
+import m0005 from './0005_lying_fenris.sql';
 
   export default {
     journal,
@@ -14,7 +15,8 @@ import m0004 from './0004_bored_blacklash.sql';
 m0001,
 m0002,
 m0003,
-m0004
+m0004,
+m0005
     }
   }
   

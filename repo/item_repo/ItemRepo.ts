@@ -8,6 +8,7 @@ abstract class ItemRepo {
     type: string;
     size: string;
     imgUrl: string;
+    backgroundRemoved: boolean;
   }): Promise<number>;
 
   abstract getItem(id: number): Promise<ItemsType>;
@@ -18,10 +19,9 @@ abstract class ItemRepo {
   abstract getAllBottomIds(): Promise<number[]>;
   abstract getAllOuterwearIds(): Promise<number[]>;
   abstract getAllShoeIds(): Promise<number[]>;
-  abstract getAllEyewearIds(): Promise<number[]>;
   abstract getAllHeadwearIds(): Promise<number[]>;
-  abstract getAllNecklaceIds(): Promise<number[]>;
-  abstract getAllWristwearIds(): Promise<number[]>;
+  abstract getAllAccessoriesIds(): Promise<number[]>;
+  abstract getAllBeltIds(): Promise<number[]>;
 
   abstract updateItem(item: ItemsType): Promise<number>;
 

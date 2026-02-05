@@ -6,20 +6,11 @@ import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import {
-  Button,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { removeBackground } from "react-native-background-remover";
+import { Button, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "react-native-elements";
-import Popover from "react-native-popover-view";
 
 export function Camera() {
+  //const apiHandler = new ApiHandler();
   const [isRemoveBackgroundEnabled, setIsRemoveBackgroundEnabled] =
     useState(false);
   const toggleSwitch = () => {
@@ -55,8 +46,12 @@ export function Camera() {
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
       if (isRemoveBackgroundEnabled) {
-        const backgroundRemovedImageURI = await removeBackground(photo.uri);
-        dispatch(updateNewItemImg(backgroundRemovedImageURI));
+        // const backgroundRemovedImageURI = await removeBackground(photo.uri);
+        // dispatch(updateNewItemImg(backgroundRemovedImageURI));
+
+        // await apiHandler.backgroundRemoval(photo.uri);
+        dispatch(updateNewItemImg(photo.uri));
+        console.log("here");
       } else {
         dispatch(updateNewItemImg(photo.uri));
       }
@@ -73,7 +68,7 @@ export function Camera() {
         <Image
           source={{ uri: imgUri }}
           contentFit="contain"
-          style={{ width: 500, aspectRatio: 4 / 5 }}
+          style={{ width: 500, aspectRatio: 1 }}
         />
         <Button
           onPress={() => dispatch(updateNewItemImg(""))}
@@ -108,7 +103,7 @@ export function Camera() {
               gap: 5,
             }}
           >
-            <Popover
+            {/* <Popover
               from={
                 <TouchableOpacity>
                   <Icon name="info" type="material" color="white" size={24} />
@@ -124,7 +119,7 @@ export function Camera() {
               thumbColor={"#f4f3f4"}
               onValueChange={toggleSwitch}
               value={isRemoveBackgroundEnabled}
-            />
+            /> */}
           </View>
 
           <Pressable onPress={takePicture}>
