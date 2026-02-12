@@ -2,17 +2,14 @@ import AppText from "@/components/ui/AppText";
 import icons from "@/constants/icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Image,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Animated, Image, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { Icon } from "react-native-elements";
+import { CopilotStep, walkthroughable } from "react-native-copilot";
 
 const BottomNav = () => {
+  const CopilotView = walkthroughable(View);
+  const CopilotPressable = walkthroughable(Pressable);
+
   const { width } = useWindowDimensions();
   const router = useRouter();
   const [active, setActive] = useState(false);
@@ -95,7 +92,12 @@ const BottomNav = () => {
           </View>
         </View>
       ) : (
-        <Pressable
+        <CopilotStep
+          text="Tap here to add items or create outfits"
+           order={4}
+          name="addItems"
+        >
+        <CopilotPressable
           onPress={() => {
             setActive(true);
           }}
@@ -106,7 +108,8 @@ const BottomNav = () => {
             color="black"
             size={30}
           />
-        </Pressable>
+        </CopilotPressable>
+        </CopilotStep>
       )}
     </Animated.View>
   );

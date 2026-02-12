@@ -7,11 +7,20 @@ import { items } from "@/db/schemas/items";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Animated, FlatList, Pressable, StyleSheet, View, Text, Dimensions } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
 import { ScrollView } from "react-native-gesture-handler";
+import { CopilotStep, walkthroughable, useCopilot } from "react-native-copilot";
+
+const CopilotPlaceholder = walkthroughable(View);
 
 const Home = () => {
+  const [layoutReady, setLayoutReady] = useState(false);
+  const { start } = useCopilot();
+  const CopilotView = walkthroughable(View);
+
+  const { width, height } = Dimensions.get("window");
+  
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
   //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
@@ -104,8 +113,31 @@ const Home = () => {
     }
   }, [applyFilter, itemsData]);
 
+  useEffect(() => {
+    if (layoutReady) {
+      start();
+    }
+  }, [layoutReady]);
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}
+      onLayout={
+        () => {
+          if (!layoutReady) setLayoutReady(true);
+        }}
+      >
+      <CopilotStep text="Welcome to The Lookbook! Your new closet in your pocket." order={0} name="welcome">
+        <CopilotPlaceholder
+          style={{
+            position: "absolute",
+            top: height / 3, 
+            left: 20, 
+            width: 2,
+            height: 2,
+          }}
+        />
+      </CopilotStep>
+
       <FlatList
         initialNumToRender={6} // render first 3 rows only
         maxToRenderPerBatch={6} // render 3 more rows per batch
@@ -118,7 +150,12 @@ const Home = () => {
         numColumns={2}
         columnWrapperStyle={styles.itemsGrid}
         ListHeaderComponent={
-          <View
+        <CopilotStep
+          text="This is your Filter button. Use it to filter your closet by item type and find what you need faster!"
+          order={4}
+          name="filter"
+        > 
+          <CopilotView
             style={{ paddingTop: 15, paddingLeft: 15, alignSelf: "flex-start" }}
           >
             <AppButton onPress={() => setModalVisible(true)}>
@@ -132,7 +169,8 @@ const Home = () => {
                 Filter
               </AppText>
             </AppButton>
-          </View>
+          </CopilotView>
+        </CopilotStep>
         }
         renderItem={({ item }) => (
           // <View>
