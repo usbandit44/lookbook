@@ -4,11 +4,13 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Image, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { Icon } from "react-native-elements";
-import { CopilotStep, walkthroughable } from "react-native-copilot";
+import { CopilotStep, walkthroughable, useCopilot } from "react-native-copilot";
 
 const BottomNav = () => {
   const CopilotView = walkthroughable(View);
   const CopilotPressable = walkthroughable(Pressable);
+  const { currentStep } = useCopilot();
+  const prevStep = useRef<string | null>(null);
 
   const { width } = useWindowDimensions();
   const router = useRouter();
@@ -31,6 +33,19 @@ const BottomNav = () => {
 
   // Counter-scale for children to stay normal size
 
+  useEffect(() => {
+    if (!currentStep) return;
+
+    const previous = prevStep.current;
+    const current = currentStep.name;
+
+    if (previous === "openBottomNav" && current === "filter") {
+      setActive(true);
+    }
+
+    prevStep.current = current;
+  }, [currentStep]);
+  
   return (
     <Animated.View
       style={[
@@ -52,6 +67,7 @@ const BottomNav = () => {
             gap: 60,
           }}
         >
+          
           <Pressable
             onPress={() => {
               setActive(false);
@@ -65,7 +81,12 @@ const BottomNav = () => {
             <Icon name="close" type="material"></Icon>
           </Pressable>
           <View style={styles.navButtonContainer}>
-            <Pressable
+            <CopilotStep
+              text="Tap here to add items or create outfits"
+              order={5}
+              name="addItems"
+            >
+            <CopilotPressable
               onPress={() => {
                 setActive(false);
                 router.navigate("/add-item");
@@ -73,11 +94,17 @@ const BottomNav = () => {
               style={styles.navButton}
             >
               <Icon name="shirt-outline" type="ionicon" size={35}></Icon>
-            </Pressable>
+            </CopilotPressable>
+            </CopilotStep>
             <AppText type="p3SemiBold">Add Item</AppText>
           </View>
           <View style={styles.navButtonContainer}>
-            <Pressable
+            <CopilotStep
+              text="Tap here to add items or create outfits"
+              order={6}
+              name="createOutfit"
+            >
+            <CopilotPressable
               onPress={() => {
                 router.navigate("/outfit/create-outfit");
               }}
@@ -87,15 +114,16 @@ const BottomNav = () => {
                 source={icons.createOutfitIcon}
                 style={{ width: 45, height: 45, resizeMode: "contain" }}
               />
-            </Pressable>
+            </CopilotPressable>
+            </CopilotStep>
             <AppText type="p3SemiBold">Create Outfit</AppText>
           </View>
         </View>
       ) : (
         <CopilotStep
           text="Tap here to add items or create outfits"
-           order={4}
-          name="addItems"
+           order={3}
+          name="openBottomNav"
         >
         <CopilotPressable
           onPress={() => {

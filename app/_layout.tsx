@@ -18,6 +18,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
+import { CopilotProvider } from "react-native-copilot";
 
 export const DATABASE_NAME = "lookbook";
 
@@ -100,7 +101,24 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <ThemeProvider value={DefaultTheme}>
               <Provider store={store}>
-                <AppShell />
+                <CopilotProvider
+                  labels={{
+                    finish: "Got it!",
+                    next: "Next",
+                    previous: "Back",
+                  }}
+                  tooltipStyle={{
+                    borderRadius: 16,
+                    padding: 16,
+                  }}
+                  backdropColor="rgba(0,0,0,0.4)"
+                  stopOnOutsideClick={true}
+                  stepNumberComponent={() => null}
+                  animated
+                  overlay="svg"
+                >
+                  <AppShell />
+                </CopilotProvider>
               </Provider>
             </ThemeProvider>
           </QueryClientProvider>

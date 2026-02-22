@@ -81,7 +81,7 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
       >
         <CopilotStep
           text="Tap here to add items or create outfits"
-          order={2}
+          order={1}
           name="items"
         >
         <CopilotTouchableOpacity
@@ -113,7 +113,7 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
         </CopilotStep>
         <CopilotStep
           text="This is the outfits tab. Press it to see all the outfits you made."
-          order={3}
+          order={2}
           name="outfits"
         >
         <CopilotTouchableOpacity
