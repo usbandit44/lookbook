@@ -9,7 +9,6 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import {
   clearAllItems,
   clearCurrentOutfit,
-  removeItem,
   selectCurrentOutfitId,
   selectOutfit,
   setItems,
@@ -244,9 +243,6 @@ const OutfitEditor: React.FC = () => {
               parentH={parentSize.height}
               initialX={Math.random() * (parentSize.width - BASE_SIZE)}
               initialY={Math.random() * (parentSize.height - BASE_SIZE)}
-              onClear={() => {
-                dispatch(removeItem(item.id));
-              }}
             >
               <Image
                 source={{ uri: item.imgUrl ?? "" }}

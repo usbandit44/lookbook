@@ -13,59 +13,11 @@ export class ApiHandler {
     return filename.split(".")[0];
   }
 
-  //   private async compressImage(imgUri: string): Promise<string> {
-  //     const result = await ImageManipulator.manipulateAsync(imgUri, [], {
-  //       compress: 0.5,
-  //       format: ImageManipulator.SaveFormat.JPEG,
-  //     });
-  //     return result.uri;
-  //   }
   private async compressImage(imgUri: string): Promise<string> {
-    console.log("[ApiHandler] Compressing image...");
-
-    // Get original image dimensions
-    const imageInfo = await ImageManipulator.manipulateAsync(imgUri, [], {
+    const result = await ImageManipulator.manipulateAsync(imgUri, [], {
+      compress: 0.5,
       format: ImageManipulator.SaveFormat.JPEG,
     });
-
-    const originalWidth = imageInfo.width;
-    const originalHeight = imageInfo.height;
-
-    console.log(
-      `[ApiHandler] Original size: ${originalWidth}×${originalHeight}`,
-    );
-
-    // Resize to max 1024px on longest side
-    const maxDimension = 1024;
-    let resize = {};
-
-    if (originalWidth > maxDimension || originalHeight > maxDimension) {
-      if (originalWidth > originalHeight) {
-        // Landscape: resize width to 1024, height scales proportionally
-        resize = { width: maxDimension };
-      } else {
-        // Portrait: resize height to 1024, width scales proportionally
-        resize = { height: maxDimension };
-      }
-    }
-
-    // Apply resize + compression
-    const result = await ImageManipulator.manipulateAsync(
-      imgUri,
-      resize ? [{ resize }] : [], // Resize if needed
-      {
-        compress: 0.7, // 70% quality (good balance)
-        format: ImageManipulator.SaveFormat.JPEG,
-      },
-    );
-
-    console.log(
-      `[ApiHandler] Compressed size: ${result.width}×${result.height}`,
-    );
-    console.log(
-      `[ApiHandler] File size reduced: ${((1 - result.uri.length / imgUri.length) * 100).toFixed(1)}%`,
-    );
-
     return result.uri;
   }
 
