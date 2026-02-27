@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Button, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "react-native-elements";
+import AppButton from "./ui/AppButton";
 
 export function Camera() {
   //const apiHandler = new ApiHandler();
@@ -70,14 +71,7 @@ export function Camera() {
           contentFit="contain"
           style={{ width: 500, aspectRatio: 1 }}
         />
-        <Button
-          onPress={() => dispatch(updateNewItemImg(""))}
-          title="Take another picture"
-        />
-        <Button
-          title="Keep picture"
-          onPress={() => router.navigate("/add-item")}
-        />
+        <View style={{ height: 50 }}></View>
       </View>
     );
   };
@@ -153,14 +147,41 @@ export function Camera() {
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={() => {
-          router.back();
-        }}
-        style={{ padding: 15, position: "absolute", top: 0, left: 0 }}
-      >
-        <Icon name="close" type="material" color="white" size={30} />
-      </Pressable>
+      {imgUri == "" ? (
+        <AppButton
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: 15, position: "absolute", top: 0, left: 0 }}
+        >
+          <Icon
+            name="arrow-back-ios-new"
+            type="material"
+            color="white"
+            size={24}
+          />
+        </AppButton>
+      ) : (
+        <View
+          style={{
+            padding: 0,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            justifyContent: "space-between",
+            flexDirection: "row",
+            width: "100%",
+          }}
+        >
+          <AppButton onPress={() => dispatch(updateNewItemImg(""))}>
+            <Icon name="close" type="material" color="white" size={30} />
+          </AppButton>
+          <AppButton onPress={() => router.navigate("/add-item")}>
+            <Icon name="check" type="material" color="white" size={30} />
+          </AppButton>
+        </View>
+      )}
+      <Pressable></Pressable>
       {imgUri == "" ? renderCamera() : renderPicture()}
     </View>
   );

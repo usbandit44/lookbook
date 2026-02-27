@@ -2,16 +2,17 @@ import AppText from "@/components/ui/AppText";
 import icons from "@/constants/icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Image, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
+import {
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { Icon } from "react-native-elements";
-import { CopilotStep, walkthroughable, useCopilot } from "react-native-copilot";
 
 const BottomNav = () => {
-  const CopilotView = walkthroughable(View);
-  const CopilotPressable = walkthroughable(Pressable);
-  const { currentStep } = useCopilot();
-  const prevStep = useRef<string | null>(null);
-
   const { width } = useWindowDimensions();
   const router = useRouter();
   const [active, setActive] = useState(false);
@@ -33,19 +34,6 @@ const BottomNav = () => {
 
   // Counter-scale for children to stay normal size
 
-  useEffect(() => {
-    if (!currentStep) return;
-
-    const previous = prevStep.current;
-    const current = currentStep.name;
-
-    if (previous === "openBottomNav" && current === "filter") {
-      setActive(true);
-    }
-
-    prevStep.current = current;
-  }, [currentStep]);
-  
   return (
     <Animated.View
       style={[
@@ -67,7 +55,6 @@ const BottomNav = () => {
             gap: 60,
           }}
         >
-          
           <Pressable
             onPress={() => {
               setActive(false);
@@ -81,12 +68,7 @@ const BottomNav = () => {
             <Icon name="close" type="material"></Icon>
           </Pressable>
           <View style={styles.navButtonContainer}>
-            <CopilotStep
-              text="Tap here to add items or create outfits"
-              order={5}
-              name="addItems"
-            >
-            <CopilotPressable
+            <Pressable
               onPress={() => {
                 setActive(false);
                 router.navigate("/add-item");
@@ -94,17 +76,11 @@ const BottomNav = () => {
               style={styles.navButton}
             >
               <Icon name="shirt-outline" type="ionicon" size={35}></Icon>
-            </CopilotPressable>
-            </CopilotStep>
+            </Pressable>
             <AppText type="p3SemiBold">Add Item</AppText>
           </View>
           <View style={styles.navButtonContainer}>
-            <CopilotStep
-              text="Tap here to add items or create outfits"
-              order={6}
-              name="createOutfit"
-            >
-            <CopilotPressable
+            <Pressable
               onPress={() => {
                 router.navigate("/outfit/create-outfit");
               }}
@@ -114,18 +90,12 @@ const BottomNav = () => {
                 source={icons.createOutfitIcon}
                 style={{ width: 45, height: 45, resizeMode: "contain" }}
               />
-            </CopilotPressable>
-            </CopilotStep>
+            </Pressable>
             <AppText type="p3SemiBold">Create Outfit</AppText>
           </View>
         </View>
       ) : (
-        <CopilotStep
-          text="Tap here to add items or create outfits"
-           order={3}
-          name="openBottomNav"
-        >
-        <CopilotPressable
+        <Pressable
           onPress={() => {
             setActive(true);
           }}
@@ -136,8 +106,7 @@ const BottomNav = () => {
             color="black"
             size={30}
           />
-        </CopilotPressable>
-        </CopilotStep>
+        </Pressable>
       )}
     </Animated.View>
   );

@@ -4,15 +4,9 @@ import { usePathname, useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../../../components/ui/IconButton";
-import { CopilotStep, walkthroughable } from "react-native-copilot";
 
 export default function TopBar({ backgroundColor = Colors.light.background }) {
   const pathname = usePathname();
-
-
-  const CopilotText = walkthroughable(Text);
-  const CopilotView = walkthroughable(View);
-  const CopilotTouchableOpacity = walkthroughable(TouchableOpacity);  
 
   let isItems = false;
   const isOutfits = pathname.includes("outfits");
@@ -79,12 +73,7 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
           backgroundColor: Colors.light.background,
         }}
       >
-        <CopilotStep
-          text="Tap here to add items or create outfits"
-          order={1}
-          name="items"
-        >
-        <CopilotTouchableOpacity
+        <TouchableOpacity
           onPress={() => {
             router.navigate("/pages");
             // router.replace("../items");
@@ -109,14 +98,9 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
           >
             Items
           </Text>
-        </CopilotTouchableOpacity>
-        </CopilotStep>
-        <CopilotStep
-          text="This is the outfits tab. Press it to see all the outfits you made."
-          order={2}
-          name="outfits"
-        >
-        <CopilotTouchableOpacity
+        </TouchableOpacity>
+
+        <TouchableOpacity
           onPress={() => {
             router.navigate("/pages/outfits");
             // router.replace("../outfits");
@@ -141,8 +125,7 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
           >
             Outfits
           </Text>
-        </CopilotTouchableOpacity>
-        </CopilotStep>
+        </TouchableOpacity>
       </View>
     </>
   );
