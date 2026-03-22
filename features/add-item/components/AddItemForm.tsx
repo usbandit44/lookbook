@@ -3,11 +3,12 @@ import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
 import FormElement from "@/components/ui/FormElement";
 import Input from "@/components/ui/Input";
-import Snackbar from "@/components/ui/Snackbar";
-import { Colors, itemTypes } from "@/constants/constants";
+import { Colors, itemColors, itemTypes } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useBackgroundRemoval } from "@/hooks/useBackgroundRemoval";
+import { useSnackbar } from "@/hooks/useSnackBar";
+import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
@@ -19,6 +20,7 @@ import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -34,6 +36,12 @@ type FormValues = {
 };
 
 const AddItemForm = () => {
+  const snackbarSettingsContext = useSnackbar();
+  if (!snackbarSettingsContext) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+
+  const { setSettings, showSnackbar, hideSnackbar } = snackbarSettingsContext;
   const { mutate, isPending, isError, error, isSuccess } =
     useBackgroundRemoval();
 
@@ -45,6 +53,16 @@ const AddItemForm = () => {
 
   const currentItemId = useAppSelector(selectCurrentItem);
 
+  const { pickImage } = useWardrobeImagePicker();
+
+  const handlePickImage = async () => {
+    const uri = await pickImage();
+    if (uri) {
+      dispatch(updateNewItemImg(uri)); // ← this was missing
+      setBackgroudRemoved(false);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       return () => {
@@ -55,9 +73,8 @@ const AddItemForm = () => {
       };
     }, []),
   );
-  const [visablity, setVisablity] = useState(false);
+
   const [deleteModal, setDeleteModal] = useState(false);
-  const [updateVisablity, setUpdateVisablity] = useState(false);
   let imgUri = useAppSelector(selectNewItemImg);
   const [currentItem, setCurrentItem] = useState<ItemsType | null>(null);
   let gap = { gap: 180 };
@@ -81,7 +98,7 @@ const AddItemForm = () => {
           dispatch(updateNewItemImg(item.imgUrl));
           setBackgroudRemoved(true);
         }
-        setSize(item.size ?? "");
+        setColor(item.color ?? "");
         setType(item.type);
 
         console.log(backgroundRemoved);
@@ -90,25 +107,32 @@ const AddItemForm = () => {
     } else {
       async function getItemCount() {
         const count = await itemRepo.countNumberOfItem();
-        setName("Item #" + (Number(count) + 1));
+        setDefaultName("Item #" + (Number(count) + 1));
       }
       getItemCount();
     }
-  }, [visablity]);
+  }, [currentItemId]);
 
   const [selectedItem, setSelectedItem] = React.useState("");
   const dispatch = useAppDispatch();
 
   const router = useRouter();
 
-  const itemsArray = Object.entries(itemTypes).map(([key, label]) => ({
-    label: String(label),
-    value: String(key), // unique internal value (enum key)
-  }));
-
   const [open, setOpen] = useState(false);
+  const [openColorDropdown, setOpenColorDropdown] = useState(false);
   const [type, setType] = useState<string | null>(null);
-  const [items, setItems] = useState(itemsArray);
+  const [items, setItems] = useState(
+    Object.entries(itemTypes).map(([key, label]) => ({
+      label: String(label),
+      value: String(key), // unique internal value (enum key)
+    })),
+  );
+  const [colorValues, setColorValues] = useState(
+    itemColors.map((color) => ({
+      label: color,
+      value: color,
+    })),
+  );
   const [backgroundRemoved, setBackgroudRemoved] = useState(false);
 
   const [showImgError, setShowImgError] = useState(false);
@@ -117,13 +141,15 @@ const AddItemForm = () => {
   // const [showSizeError, setshowSizeError] = useState(false);
 
   const [name, setName] = useState("");
-  const [size, setSize] = useState("");
+  const [defaultName, setDefaultName] = useState("");
+  const [color, setColor] = useState("");
 
   const insertItem = async (item: {
     name: string;
     type: string;
-    size: string;
+    color: string;
     imgUrl: string;
+    backgroundRemoved: boolean;
   }) => {
     try {
       await itemRepo.addItem(item);
@@ -136,26 +162,31 @@ const AddItemForm = () => {
     const fileName = `photo_${Date.now()}.jpg`; // Unique filename
     const dest = (FileSystem.documentDirectory ?? "") + fileName;
     let quit = false;
-    if (imgUri === "" || type == null || name == "") {
+    if (imgUri === "" || type == null) {
       if (imgUri === "") setShowImgError(true);
       if (type == null) setShowTypeError(true);
-      if (name == "") setshowNameError(true);
+
       // if (size == "") setshowSizeError(true);
       return;
     }
     try {
       await FileSystem.copyAsync({ from: imgUri, to: dest });
+      const finalName = name === "" ? defaultName : name;
+      console.log(name);
       const newItem = {
-        name: name,
+        name: finalName,
         type: type,
-        size: size.charAt(0).toUpperCase() + size.slice(1),
+        color: color,
         imgUrl: dest,
+        backgroundRemoved: backgroundRemoved,
       };
       insertItem(newItem);
       setType(null);
-      dispatch(updateNewItemImg(""));
-      setVisablity(!visablity);
-      setTimeout(() => setVisablity(false), 3000);
+      // dispatch(updateNewItemImg(""));
+      //setVisablity(!visablity);
+      showSnackbar("Item successfully added", "success");
+
+      setTimeout(() => hideSnackbar(), 3000);
     } catch (error) {
       console.log(imgUri);
       console.error("Failed to copy photo:", error);
@@ -168,25 +199,31 @@ const AddItemForm = () => {
       if (type == null) setShowTypeError(true);
       if (name == "") setshowNameError(true);
       // if (size == "") setshowSizeError(true);
-      return;
+      return false;
     }
     if (
       currentItem?.imgUrl != imgUri ||
       currentItem?.name != name ||
-      currentItem?.size != size ||
+      currentItem?.color != color ||
       currentItem.type != type
     ) {
       const newItem: ItemsType = {
         id: currentItemId,
         name: name,
         type: type,
-        size: size.charAt(0).toUpperCase() + size.slice(1),
+        color: color,
         imgUrl: imgUri,
         backgroundRemoved: backgroundRemoved,
       };
       itemRepo.updateItem(newItem);
-      setUpdateVisablity(!updateVisablity);
-      setTimeout(() => setVisablity(false), 3000);
+      //setUpdateVisablity(!updateVisablity);
+
+      showSnackbar("Item successfully updated", "success");
+      setTimeout(() => router.navigate("/pages"), 300);
+      dispatch(updateNewItemImg(""));
+      //router.navigate("/pages");
+      setTimeout(() => hideSnackbar(), 3000);
+      //setTimeout(() => setVisablity(false), 3000);
     }
   };
 
@@ -253,7 +290,24 @@ const AddItemForm = () => {
               )
             ) : (
               <Pressable
-                onPress={() => router.navigate("/camera-screen")}
+                onPress={() => {
+                  //router.navigate("/camera-screen");
+                  Alert.alert(
+                    "Add Photo",
+                    "Choose how you'd like to add your item",
+                    [
+                      {
+                        text: "Library",
+                        onPress: () => handlePickImage(),
+                        style: "cancel",
+                      },
+                      {
+                        text: "Camera",
+                        onPress: () => router.navigate("/camera-screen"),
+                      },
+                    ],
+                  );
+                }}
                 style={styles.cameraButton}
               >
                 <Icon
@@ -266,10 +320,26 @@ const AddItemForm = () => {
             )}
           </FormElement>
           <FormElement showError={showNameError} errorMsg="Enter a name">
-            <Input onChangeText={setName} value={name} />
+            <Input
+              onChangeText={setName}
+              value={name}
+              placeholder={defaultName}
+            />
           </FormElement>
 
-          <Input onChangeText={setSize} value={size} placeholder="Size" />
+          <DropDownPicker
+            open={openColorDropdown}
+            value={color}
+            items={colorValues}
+            setOpen={setOpenColorDropdown}
+            setValue={setColor}
+            setItems={setColorValues}
+            style={{
+              backgroundColor: "transparent",
+            }}
+            textStyle={{ fontFamily: "Lora-Regular" }}
+            placeholder="Select Color"
+          />
 
           <FormElement showError={showTypeError} errorMsg="Select a type">
             <DropDownPicker
@@ -293,7 +363,7 @@ const AddItemForm = () => {
           <AppButton
             onPress={() => {
               createItem();
-              setSize("");
+              setColor("");
               // setVisablity(true);
             }}
           >
@@ -302,7 +372,9 @@ const AddItemForm = () => {
         ) : (
           <AppButton
             onPress={() => {
-              updateItem();
+              if (updateItem()) {
+                router.navigate("/pages");
+              }
             }}
           >
             <AppText style={{ color: "white" }}>Update Item</AppText>
@@ -333,20 +405,6 @@ const AddItemForm = () => {
         ) : null}
       </View>
 
-      <Snackbar
-        visibility={visablity}
-        setVisibility={setVisablity}
-        type="success"
-      >
-        Item successfully added
-      </Snackbar>
-      <Snackbar
-        visibility={updateVisablity}
-        setVisibility={setUpdateVisablity}
-        type="success"
-      >
-        Item successfully updated
-      </Snackbar>
       <AppModal modalVisible={deleteModal} setModalVisible={setDeleteModal}>
         <AppText>Do you delete this item</AppText>
         <AppButton

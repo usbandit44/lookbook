@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "lookbook",
+    "name": "Lookbook",
     "slug": "lookbook",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icons/logo.png",
     "scheme": "lookbook",
@@ -33,7 +33,15 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+          "cameraPermission": "Allow $(PRODUCT_NAME) to take photos of your items for your wardrobe"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos so you can add images of you wardrobe.",
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": ["photo"]
         }
       ],
       "expo-router",
@@ -44,6 +52,12 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#fafafa"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos so you can add images of your wardrobe."
         }
       ],
       [

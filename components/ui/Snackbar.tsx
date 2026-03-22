@@ -15,7 +15,8 @@ const Snackbar: React.FC<{
   action?: SnackbarAction;
   type: "default" | "success" | "error";
   visibility: boolean;
-  setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  //setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   onClear?: () => void;
 }> = (props) => {
   let icon;
@@ -85,7 +86,8 @@ const Snackbar: React.FC<{
           ) : null}
           <Pressable
             onPress={() => {
-              props.setVisibility(false);
+              props.onClose();
+              console.log("ok");
               if (props.onClear) props.onClear();
             }}
             hitSlop={10}

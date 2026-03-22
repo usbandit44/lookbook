@@ -7,57 +7,57 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0963CFCCD6EED71528CCDB1A /* libPods-lookbook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D315BE06288C5EB590EF2A /* libPods-lookbook.a */; };
+		049F3A68AC644F5FA7290196 /* Lora-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DB4A02A8E1A041C7B77EC76B /* Lora-Regular.ttf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		298C3D17658248B99A98D394 /* InriaSerif-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 554803F83C68418F976FB329 /* InriaSerif-Bold.ttf */; };
-		34BDBAF000E846A6B37BE41B /* Lora-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6B8307D3DE3F48B49E4A54F3 /* Lora-SemiBoldItalic.ttf */; };
+		1907E6832C01412EA4513BD5 /* Lora-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 83B8582FA01E483E9879FF7D /* Lora-Bold.ttf */; };
+		1A57F0E92F99497990835335 /* Lora-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B100237FD9B3431F88FD4037 /* Lora-Medium.ttf */; };
+		1B8B43C40B1047ECB060AA8B /* Lora-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBE32757A6429AA817ABFD /* Lora-Italic.ttf */; };
+		353401BBE2984E5EACD8A2BF /* InriaSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BDD9FF1A1D5F43C490DF2544 /* InriaSerif-Italic.ttf */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		40DD19A9D1034C3FB8A48C4D /* Lora-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 97BF6F8A9D3C4344B59C22BC /* Lora-Italic.ttf */; };
-		41D9152D6BA443C48391937F /* Lora-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 08DB26794DD543DEA6D4F08C /* Lora-Regular.ttf */; };
-		4315E2D8F3E444CC97FD10F4 /* InriaSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 36776DECBC7C4B60818C8367 /* InriaSerif-Regular.ttf */; };
-		6D17BE8E8D2F4B10827485F5 /* Lora-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 25F43FEF804745AEA2BD23F4 /* Lora-SemiBold.ttf */; };
-		7444FDCE33784C1B85CF21E0 /* Lora-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DB0BE52C5D204A01A8F213AC /* Lora-BoldItalic.ttf */; };
-		8B58A2A052854342AAE149A7 /* Lora-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 66F6785C86C44C02862A848A /* Lora-Medium.ttf */; };
-		8DFFBC7D2C514940A2E2A963 /* Lora-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4C2DA949EDBC42A8B65DE61D /* Lora-Bold.ttf */; };
-		AED3998F44B55AD1139430DD /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C16C3958A4113792DFF378 /* ExpoModulesProvider.swift */; };
-		B788934D192E45F79D0976AF /* Lora-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7D8B201706094F4E92C31AF1 /* Lora-MediumItalic.ttf */; };
+		49CF0E3E15174964A49D2638 /* Lora-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6CC0116A8DDB429E81FF64B7 /* Lora-SemiBold.ttf */; };
+		49F16446E328CF9F54036ED6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5C9772F103F575A169827A00 /* PrivacyInfo.xcprivacy */; };
+		5930E0EBA4FB4BC4855BFF20 /* Lora-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8E8E8B064C242C1AED8ED28 /* Lora-SemiBoldItalic.ttf */; };
+		72536A238BB54A308D96EBB0 /* Lora-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E4604A352DCD41539BD32FBE /* Lora-MediumItalic.ttf */; };
+		8BE7D9BEC566412B8E16C4D4 /* InriaSerif-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 57B0CC80B7E542ACBD691FBB /* InriaSerif-LightItalic.ttf */; };
+		8CA70BCBE5E34B33BD3AEDEF /* InriaSerif-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 81EE229CB91D4C0CB0DC6805 /* InriaSerif-Light.ttf */; };
+		972AE7A3AD624A02B0B4195B /* InriaSerif-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 434AAFE041D64752AF4455BE /* InriaSerif-Bold.ttf */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		C9C242237A1AB95F6B4BC016 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 066E39EE8014F078CC87E4F0 /* PrivacyInfo.xcprivacy */; };
-		CE11B037E3934CE391910E53 /* InriaSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F67638873C39414391840282 /* InriaSerif-Italic.ttf */; };
-		D1C3273BA1D641FAB5A4B5CD /* InriaSerif-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1D343BC730F4493EBF060466 /* InriaSerif-LightItalic.ttf */; };
-		D2330B229E5C48948D5835F5 /* InriaSerif-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7D4ABF20688C4A44ABCB0DFB /* InriaSerif-Light.ttf */; };
-		EC5AEBE949F24585ADB2424D /* InriaSerif-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 219554DA3BE74E51A055D1A6 /* InriaSerif-BoldItalic.ttf */; };
+		C57B8329CD9B44BEA37FF25E /* Lora-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FC996D519B5D4DCCBAFCA34B /* Lora-BoldItalic.ttf */; };
+		C5A4244CC2A44DB58ADE7AED /* InriaSerif-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 83BADA7A35934BE0BFF4927F /* InriaSerif-BoldItalic.ttf */; };
+		D1B654273570F6BF79903341 /* libPods-Lookbook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB4224DDC468D2B03D117981 /* libPods-Lookbook.a */; };
+		D9DE3B3AC0AD4F5FBEA053DD /* InriaSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9490F1B7BE5548D8B027A7E8 /* InriaSerif-Regular.ttf */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
+		F58A9EC5935FC90E0D209314 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055F622CEEC06B0E707DFFCD /* ExpoModulesProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		066E39EE8014F078CC87E4F0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = lookbook/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		08DB26794DD543DEA6D4F08C /* Lora-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Regular.ttf"; path = "../assets/fonts/Lora-Regular.ttf"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* lookbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lookbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = lookbook/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = lookbook/Info.plist; sourceTree = "<group>"; };
-		1D343BC730F4493EBF060466 /* InriaSerif-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-LightItalic.ttf"; path = "../assets/fonts/InriaSerif-LightItalic.ttf"; sourceTree = "<group>"; };
-		219554DA3BE74E51A055D1A6 /* InriaSerif-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-BoldItalic.ttf"; path = "../assets/fonts/InriaSerif-BoldItalic.ttf"; sourceTree = "<group>"; };
-		25F43FEF804745AEA2BD23F4 /* Lora-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-SemiBold.ttf"; path = "../assets/fonts/Lora-SemiBold.ttf"; sourceTree = "<group>"; };
-		36776DECBC7C4B60818C8367 /* InriaSerif-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Regular.ttf"; path = "../assets/fonts/InriaSerif-Regular.ttf"; sourceTree = "<group>"; };
-		4C2DA949EDBC42A8B65DE61D /* Lora-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Bold.ttf"; path = "../assets/fonts/Lora-Bold.ttf"; sourceTree = "<group>"; };
-		554803F83C68418F976FB329 /* InriaSerif-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Bold.ttf"; path = "../assets/fonts/InriaSerif-Bold.ttf"; sourceTree = "<group>"; };
-		66F6785C86C44C02862A848A /* Lora-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Medium.ttf"; path = "../assets/fonts/Lora-Medium.ttf"; sourceTree = "<group>"; };
-		6B8307D3DE3F48B49E4A54F3 /* Lora-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-SemiBoldItalic.ttf"; path = "../assets/fonts/Lora-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
-		71CF17FAD68FB542418CB399 /* Pods-lookbook.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lookbook.debug.xcconfig"; path = "Target Support Files/Pods-lookbook/Pods-lookbook.debug.xcconfig"; sourceTree = "<group>"; };
-		7D4ABF20688C4A44ABCB0DFB /* InriaSerif-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Light.ttf"; path = "../assets/fonts/InriaSerif-Light.ttf"; sourceTree = "<group>"; };
-		7D8B201706094F4E92C31AF1 /* Lora-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-MediumItalic.ttf"; path = "../assets/fonts/Lora-MediumItalic.ttf"; sourceTree = "<group>"; };
-		97BF6F8A9D3C4344B59C22BC /* Lora-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Italic.ttf"; path = "../assets/fonts/Lora-Italic.ttf"; sourceTree = "<group>"; };
-		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = lookbook/SplashScreen.storyboard; sourceTree = "<group>"; };
+		055F622CEEC06B0E707DFFCD /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Lookbook/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* Lookbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lookbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Lookbook/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Lookbook/Info.plist; sourceTree = "<group>"; };
+		434AAFE041D64752AF4455BE /* InriaSerif-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Bold.ttf"; path = "../assets/fonts/InriaSerif-Bold.ttf"; sourceTree = "<group>"; };
+		4577FAAA2D25FA4DF1471E7A /* Pods-Lookbook.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lookbook.debug.xcconfig"; path = "Target Support Files/Pods-Lookbook/Pods-Lookbook.debug.xcconfig"; sourceTree = "<group>"; };
+		57B0CC80B7E542ACBD691FBB /* InriaSerif-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-LightItalic.ttf"; path = "../assets/fonts/InriaSerif-LightItalic.ttf"; sourceTree = "<group>"; };
+		5C9772F103F575A169827A00 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Lookbook/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6CC0116A8DDB429E81FF64B7 /* Lora-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-SemiBold.ttf"; path = "../assets/fonts/Lora-SemiBold.ttf"; sourceTree = "<group>"; };
+		6EFBE32757A6429AA817ABFD /* Lora-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Italic.ttf"; path = "../assets/fonts/Lora-Italic.ttf"; sourceTree = "<group>"; };
+		81EE229CB91D4C0CB0DC6805 /* InriaSerif-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Light.ttf"; path = "../assets/fonts/InriaSerif-Light.ttf"; sourceTree = "<group>"; };
+		83B8582FA01E483E9879FF7D /* Lora-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Bold.ttf"; path = "../assets/fonts/Lora-Bold.ttf"; sourceTree = "<group>"; };
+		83BADA7A35934BE0BFF4927F /* InriaSerif-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-BoldItalic.ttf"; path = "../assets/fonts/InriaSerif-BoldItalic.ttf"; sourceTree = "<group>"; };
+		855B7DC3936461365699EBA9 /* Pods-Lookbook.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lookbook.release.xcconfig"; path = "Target Support Files/Pods-Lookbook/Pods-Lookbook.release.xcconfig"; sourceTree = "<group>"; };
+		9490F1B7BE5548D8B027A7E8 /* InriaSerif-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Regular.ttf"; path = "../assets/fonts/InriaSerif-Regular.ttf"; sourceTree = "<group>"; };
+		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Lookbook/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B100237FD9B3431F88FD4037 /* Lora-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Medium.ttf"; path = "../assets/fonts/Lora-Medium.ttf"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C1C16C3958A4113792DFF378 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-lookbook/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		D0D315BE06288C5EB590EF2A /* libPods-lookbook.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-lookbook.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D84FA2F8D17FDCBB35472E1B /* Pods-lookbook.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lookbook.release.xcconfig"; path = "Target Support Files/Pods-lookbook/Pods-lookbook.release.xcconfig"; sourceTree = "<group>"; };
-		DB0BE52C5D204A01A8F213AC /* Lora-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-BoldItalic.ttf"; path = "../assets/fonts/Lora-BoldItalic.ttf"; sourceTree = "<group>"; };
+		BDD9FF1A1D5F43C490DF2544 /* InriaSerif-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Italic.ttf"; path = "../assets/fonts/InriaSerif-Italic.ttf"; sourceTree = "<group>"; };
+		DB4A02A8E1A041C7B77EC76B /* Lora-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Regular.ttf"; path = "../assets/fonts/Lora-Regular.ttf"; sourceTree = "<group>"; };
+		E4604A352DCD41539BD32FBE /* Lora-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-MediumItalic.ttf"; path = "../assets/fonts/Lora-MediumItalic.ttf"; sourceTree = "<group>"; };
+		E8E8E8B064C242C1AED8ED28 /* Lora-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-SemiBoldItalic.ttf"; path = "../assets/fonts/Lora-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = lookbook/AppDelegate.swift; sourceTree = "<group>"; };
-		F11748442D0722820044C1D9 /* lookbook-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "lookbook-Bridging-Header.h"; path = "lookbook/lookbook-Bridging-Header.h"; sourceTree = "<group>"; };
-		F67638873C39414391840282 /* InriaSerif-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Italic.ttf"; path = "../assets/fonts/InriaSerif-Italic.ttf"; sourceTree = "<group>"; };
+		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Lookbook/AppDelegate.swift; sourceTree = "<group>"; };
+		F11748442D0722820044C1D9 /* Lookbook-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Lookbook-Bridging-Header.h"; path = "Lookbook/Lookbook-Bridging-Header.h"; sourceTree = "<group>"; };
+		FB4224DDC468D2B03D117981 /* libPods-Lookbook.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Lookbook.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC996D519B5D4DCCBAFCA34B /* Lora-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-BoldItalic.ttf"; path = "../assets/fonts/Lora-BoldItalic.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,34 +65,63 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0963CFCCD6EED71528CCDB1A /* libPods-lookbook.a in Frameworks */,
+				D1B654273570F6BF79903341 /* libPods-Lookbook.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* lookbook */ = {
+		13B07FAE1A68108700A75B9A /* Lookbook */ = {
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
-				F11748442D0722820044C1D9 /* lookbook-Bridging-Header.h */,
+				F11748442D0722820044C1D9 /* Lookbook-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				066E39EE8014F078CC87E4F0 /* PrivacyInfo.xcprivacy */,
+				5C9772F103F575A169827A00 /* PrivacyInfo.xcprivacy */,
 			);
-			name = lookbook;
+			name = Lookbook;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				D0D315BE06288C5EB590EF2A /* libPods-lookbook.a */,
+				FB4224DDC468D2B03D117981 /* libPods-Lookbook.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3ACCFC62EAA94D6280B7C06A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				434AAFE041D64752AF4455BE /* InriaSerif-Bold.ttf */,
+				83BADA7A35934BE0BFF4927F /* InriaSerif-BoldItalic.ttf */,
+				BDD9FF1A1D5F43C490DF2544 /* InriaSerif-Italic.ttf */,
+				81EE229CB91D4C0CB0DC6805 /* InriaSerif-Light.ttf */,
+				57B0CC80B7E542ACBD691FBB /* InriaSerif-LightItalic.ttf */,
+				9490F1B7BE5548D8B027A7E8 /* InriaSerif-Regular.ttf */,
+				83B8582FA01E483E9879FF7D /* Lora-Bold.ttf */,
+				FC996D519B5D4DCCBAFCA34B /* Lora-BoldItalic.ttf */,
+				6EFBE32757A6429AA817ABFD /* Lora-Italic.ttf */,
+				B100237FD9B3431F88FD4037 /* Lora-Medium.ttf */,
+				E4604A352DCD41539BD32FBE /* Lora-MediumItalic.ttf */,
+				DB4A02A8E1A041C7B77EC76B /* Lora-Regular.ttf */,
+				6CC0116A8DDB429E81FF64B7 /* Lora-SemiBold.ttf */,
+				E8E8E8B064C242C1AED8ED28 /* Lora-SemiBoldItalic.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		4DEF7BDF5C4E0004AA81912C /* Lookbook */ = {
+			isa = PBXGroup;
+			children = (
+				055F622CEEC06B0E707DFFCD /* ExpoModulesProvider.swift */,
+			);
+			name = Lookbook;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -105,13 +134,13 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* lookbook */,
+				13B07FAE1A68108700A75B9A /* Lookbook */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				F60FF0E8EF2A4DB49EED1C3D /* Resources */,
-				8C5BFDCD9126E896151C1671 /* Pods */,
-				FAA5919FED1DC79FC7248D74 /* ExpoModulesProviders */,
+				3ACCFC62EAA94D6280B7C06A /* Resources */,
+				E1C8CE6DFD8B59F2969AD021 /* Pods */,
+				8C23808F5C9B1B8D8C4A3ACB /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -121,26 +150,17 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* lookbook.app */,
+				13B07F961A680F5B00A75B9A /* Lookbook.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8C5BFDCD9126E896151C1671 /* Pods */ = {
+		8C23808F5C9B1B8D8C4A3ACB /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				71CF17FAD68FB542418CB399 /* Pods-lookbook.debug.xcconfig */,
-				D84FA2F8D17FDCBB35472E1B /* Pods-lookbook.release.xcconfig */,
+				4DEF7BDF5C4E0004AA81912C /* Lookbook */,
 			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		B30B4419DF52B7A98D00FE99 /* lookbook */ = {
-			isa = PBXGroup;
-			children = (
-				C1C16C3958A4113792DFF378 /* ExpoModulesProvider.swift */,
-			);
-			name = lookbook;
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -149,61 +169,41 @@
 				BB2F792C24A3F905000567C9 /* Expo.plist */,
 			);
 			name = Supporting;
-			path = lookbook/Supporting;
+			path = Lookbook/Supporting;
 			sourceTree = "<group>";
 		};
-		F60FF0E8EF2A4DB49EED1C3D /* Resources */ = {
+		E1C8CE6DFD8B59F2969AD021 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				554803F83C68418F976FB329 /* InriaSerif-Bold.ttf */,
-				219554DA3BE74E51A055D1A6 /* InriaSerif-BoldItalic.ttf */,
-				F67638873C39414391840282 /* InriaSerif-Italic.ttf */,
-				7D4ABF20688C4A44ABCB0DFB /* InriaSerif-Light.ttf */,
-				1D343BC730F4493EBF060466 /* InriaSerif-LightItalic.ttf */,
-				36776DECBC7C4B60818C8367 /* InriaSerif-Regular.ttf */,
-				4C2DA949EDBC42A8B65DE61D /* Lora-Bold.ttf */,
-				DB0BE52C5D204A01A8F213AC /* Lora-BoldItalic.ttf */,
-				97BF6F8A9D3C4344B59C22BC /* Lora-Italic.ttf */,
-				66F6785C86C44C02862A848A /* Lora-Medium.ttf */,
-				7D8B201706094F4E92C31AF1 /* Lora-MediumItalic.ttf */,
-				08DB26794DD543DEA6D4F08C /* Lora-Regular.ttf */,
-				25F43FEF804745AEA2BD23F4 /* Lora-SemiBold.ttf */,
-				6B8307D3DE3F48B49E4A54F3 /* Lora-SemiBoldItalic.ttf */,
+				4577FAAA2D25FA4DF1471E7A /* Pods-Lookbook.debug.xcconfig */,
+				855B7DC3936461365699EBA9 /* Pods-Lookbook.release.xcconfig */,
 			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
-		FAA5919FED1DC79FC7248D74 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				B30B4419DF52B7A98D00FE99 /* lookbook */,
-			);
-			name = ExpoModulesProviders;
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* lookbook */ = {
+		13B07F861A680F5B00A75B9A /* Lookbook */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "lookbook" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Lookbook" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				AEA8E04A8A1F19A2EE2A7BB3 /* [Expo] Configure project */,
+				D6FDA41EE8EA02B8AC979A9F /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				62F8B1ACA188E0894F8E7AB9 /* [CP] Embed Pods Frameworks */,
+				C986584852CE70DAB3E4D0FB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = lookbook;
-			productName = lookbook;
-			productReference = 13B07F961A680F5B00A75B9A /* lookbook.app */;
+			name = Lookbook;
+			productName = Lookbook;
+			productReference = 13B07F961A680F5B00A75B9A /* Lookbook.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -216,11 +216,10 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
-						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "lookbook" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Lookbook" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -233,7 +232,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* lookbook */,
+				13B07F861A680F5B00A75B9A /* Lookbook */,
 			);
 		};
 /* End PBXProject section */
@@ -246,21 +245,21 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				298C3D17658248B99A98D394 /* InriaSerif-Bold.ttf in Resources */,
-				EC5AEBE949F24585ADB2424D /* InriaSerif-BoldItalic.ttf in Resources */,
-				CE11B037E3934CE391910E53 /* InriaSerif-Italic.ttf in Resources */,
-				D2330B229E5C48948D5835F5 /* InriaSerif-Light.ttf in Resources */,
-				D1C3273BA1D641FAB5A4B5CD /* InriaSerif-LightItalic.ttf in Resources */,
-				4315E2D8F3E444CC97FD10F4 /* InriaSerif-Regular.ttf in Resources */,
-				8DFFBC7D2C514940A2E2A963 /* Lora-Bold.ttf in Resources */,
-				7444FDCE33784C1B85CF21E0 /* Lora-BoldItalic.ttf in Resources */,
-				40DD19A9D1034C3FB8A48C4D /* Lora-Italic.ttf in Resources */,
-				8B58A2A052854342AAE149A7 /* Lora-Medium.ttf in Resources */,
-				B788934D192E45F79D0976AF /* Lora-MediumItalic.ttf in Resources */,
-				41D9152D6BA443C48391937F /* Lora-Regular.ttf in Resources */,
-				6D17BE8E8D2F4B10827485F5 /* Lora-SemiBold.ttf in Resources */,
-				34BDBAF000E846A6B37BE41B /* Lora-SemiBoldItalic.ttf in Resources */,
-				C9C242237A1AB95F6B4BC016 /* PrivacyInfo.xcprivacy in Resources */,
+				972AE7A3AD624A02B0B4195B /* InriaSerif-Bold.ttf in Resources */,
+				C5A4244CC2A44DB58ADE7AED /* InriaSerif-BoldItalic.ttf in Resources */,
+				353401BBE2984E5EACD8A2BF /* InriaSerif-Italic.ttf in Resources */,
+				8CA70BCBE5E34B33BD3AEDEF /* InriaSerif-Light.ttf in Resources */,
+				8BE7D9BEC566412B8E16C4D4 /* InriaSerif-LightItalic.ttf in Resources */,
+				D9DE3B3AC0AD4F5FBEA053DD /* InriaSerif-Regular.ttf in Resources */,
+				1907E6832C01412EA4513BD5 /* Lora-Bold.ttf in Resources */,
+				C57B8329CD9B44BEA37FF25E /* Lora-BoldItalic.ttf in Resources */,
+				1B8B43C40B1047ECB060AA8B /* Lora-Italic.ttf in Resources */,
+				1A57F0E92F99497990835335 /* Lora-Medium.ttf in Resources */,
+				72536A238BB54A308D96EBB0 /* Lora-MediumItalic.ttf in Resources */,
+				049F3A68AC644F5FA7290196 /* Lora-Regular.ttf in Resources */,
+				49CF0E3E15174964A49D2638 /* Lora-SemiBold.ttf in Resources */,
+				5930E0EBA4FB4BC4855BFF20 /* Lora-SemiBoldItalic.ttf in Resources */,
+				49F16446E328CF9F54036ED6 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,29 +296,11 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-lookbook-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-Lookbook-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		62F8B1ACA188E0894F8E7AB9 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-lookbook/Pods-lookbook-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-lookbook/Pods-lookbook-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
@@ -328,12 +309,14 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-lookbook/Pods-lookbook-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Lookbook/Pods-Lookbook-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoMediaLibrary/ExpoMediaLibrary_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoSystemUI/ExpoSystemUI_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNCAsyncStorage/RNCAsyncStorage_resources.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
@@ -367,8 +350,10 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoMediaLibrary_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoSystemUI_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNCAsyncStorage_resources.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AntDesign.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Entypo.ttf",
@@ -399,10 +384,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-lookbook/Pods-lookbook-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Lookbook/Pods-Lookbook-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AEA8E04A8A1F19A2EE2A7BB3 /* [Expo] Configure project */ = {
+		C986584852CE70DAB3E4D0FB /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Lookbook/Pods-Lookbook-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Lookbook/Pods-Lookbook-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D6FDA41EE8EA02B8AC979A9F /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -419,7 +422,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-lookbook/expo-configure-project.sh\"\n";
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Lookbook/expo-configure-project.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -429,7 +432,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				AED3998F44B55AD1139430DD /* ExpoModulesProvider.swift in Sources */,
+				F58A9EC5935FC90E0D209314 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,13 +441,11 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 71CF17FAD68FB542418CB399 /* Pods-lookbook.debug.xcconfig */;
+			baseConfigurationReference = 4577FAAA2D25FA4DF1471E7A /* Pods-Lookbook.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = lookbook/lookbook.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Lookbook/Lookbook.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7BSH728GDJ;
 				ENABLE_BITCODE = NO;
@@ -452,7 +453,7 @@
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
-				INFOPLIST_FILE = lookbook/Info.plist;
+				INFOPLIST_FILE = Lookbook/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -465,9 +466,9 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.arvinedouard.lookbook;
-				PRODUCT_NAME = lookbook;
-				SWIFT_OBJC_BRIDGING_HEADER = "lookbook/lookbook-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ae.lookbook;
+				PRODUCT_NAME = "Lookbook";
+				SWIFT_OBJC_BRIDGING_HEADER = "Lookbook/Lookbook-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -477,16 +478,14 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D84FA2F8D17FDCBB35472E1B /* Pods-lookbook.release.xcconfig */;
+			baseConfigurationReference = 855B7DC3936461365699EBA9 /* Pods-Lookbook.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = lookbook/lookbook.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Lookbook/Lookbook.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7BSH728GDJ;
-				INFOPLIST_FILE = lookbook/Info.plist;
+				INFOPLIST_FILE = Lookbook/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -499,9 +498,9 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.arvinedouard.lookbook;
-				PRODUCT_NAME = lookbook;
-				SWIFT_OBJC_BRIDGING_HEADER = "lookbook/lookbook-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ae.lookbook;
+				PRODUCT_NAME = "Lookbook";
+				SWIFT_OBJC_BRIDGING_HEADER = "Lookbook/Lookbook-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -563,10 +562,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -621,10 +617,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -635,7 +628,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "lookbook" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Lookbook" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -644,7 +637,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "lookbook" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Lookbook" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

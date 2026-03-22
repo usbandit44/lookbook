@@ -14,16 +14,14 @@ import { ScrollView } from "react-native-gesture-handler";
 const Home = () => {
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
-  //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
 
-  //const { data: itemsData } = useLiveQuery(drizzleDb.select().from(items));
   const { data: liveItems } = useLiveQuery(drizzleDb.select().from(items));
   const [itemsData, setItemsData] = useState<
     {
       id: number;
       name: string;
       type: string;
-      size: string | null;
+      color: string | null;
       imgUrl: string;
     }[]
   >([]);
@@ -40,7 +38,7 @@ const Home = () => {
         id: number;
         name: string;
         type: string;
-        size: string | null;
+        color: string | null;
         imgUrl: string;
       }[]
     | null
@@ -63,9 +61,8 @@ const Home = () => {
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: any[] }) => {
       const topRowsVisible = viewableItems.some(
-        (vi) => vi.index !== null && vi.index < 4, // 2 rows × 2 columns
+        (vi) => vi.index !== null && vi.index < 4,
       );
-
       setShowScrollButton(!topRowsVisible);
     },
   ).current;
@@ -88,27 +85,26 @@ const Home = () => {
     }
   };
 
-  // setItemsData(data);
-  useEffect(() => {
-    // const fetchItems = async () => {
-    //   await drizzleDb.delete(items);
-    // };
-    // fetchItems();
-  }, []);
-
   useEffect(() => {
     if (filter.length == 0) {
       setFilteredData(itemsData);
     } else {
-      setFilteredData(itemsData.filter((item) => filter.includes(item.type)));
+      setFilteredData(
+        itemsData.filter(
+          (item) =>
+            filter.includes(item.type) || filter.includes(item.color ?? ""),
+        ),
+      );
     }
   }, [applyFilter, itemsData]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <FlatList
-        initialNumToRender={6} // render first 3 rows only
-        maxToRenderPerBatch={6} // render 3 more rows per batch
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
         windowSize={5}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
@@ -116,11 +112,9 @@ const Home = () => {
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        columnWrapperStyle={styles.itemsGrid}
+        columnWrapperStyle={styles.row}
         ListHeaderComponent={
-          <View
-            style={{ paddingTop: 15, paddingLeft: 15, alignSelf: "flex-start" }}
-          >
+          <View style={styles.header}>
             <AppButton onPress={() => setModalVisible(true)}>
               <Icon
                 name="filter-menu-outline"
@@ -135,30 +129,18 @@ const Home = () => {
           </View>
         }
         renderItem={({ item }) => (
-          // <View>
-          //   <Image
-          //     source={{ uri: item.imgUrl ?? undefined }}
-          //     contentFit="contain"
-          //     style={{ width: 500, aspectRatio: 1 }}
-          //   />
-          // </View>
           <ItemPreview
             imgUri={item.imgUrl ?? ""}
             name={item.name ?? ""}
-            size={item.size ?? ""}
+            color={item.color ?? ""}
             type="item"
             id={item.id}
           />
         )}
       />
+
       <Animated.View
-        style={{
-          opacity: scrollButtonOpacity,
-          position: "absolute",
-          bottom: 20,
-          alignSelf: "flex-end",
-          paddingRight: 15,
-        }}
+        style={[styles.scrollTopBtn, { opacity: scrollButtonOpacity }]}
         pointerEvents={showScroolButton ? "auto" : "none"}
       >
         <AppButton
@@ -186,7 +168,7 @@ const Home = () => {
         style={{ height: 500 }}
       >
         <AppText>Filter</AppText>
-        <ScrollView>
+        <ScrollView style={{ flex: 1 }}>
           <Pressable
             style={styles.option}
             onPress={() => {
@@ -402,47 +384,36 @@ const Home = () => {
 export default Home;
 
 const styles = StyleSheet.create({
-  itemsGrid: {
-    justifyContent: "space-between",
+  container: {
+    flex: 1,
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: 10,
+  },
+  header: {
+    paddingTop: 15,
     paddingLeft: 15,
-    paddingRight: 15,
+    alignSelf: "flex-start",
+  },
+  row: {
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
     paddingTop: 15,
   },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  scrollTopBtn: {
+    position: "absolute",
+    bottom: 20,
+    alignSelf: "flex-end",
+    paddingRight: 15,
   },
-  modalView: {
-    margin: 50,
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 35,
-    alignItems: "center",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    height: 500,
-    gap: 15,
-  },
-  filterButton: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-
   option: {
     width: "100%",
     justifyContent: "space-between",
     alignItems: "center",
     flexDirection: "row",
-
     borderTopWidth: 0.5,
     borderColor: "#979C9E",
   },

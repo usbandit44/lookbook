@@ -35,3 +35,19 @@ export enum itemTypes {
   Headwear = "Headwear",
   Accessories = "Accessories",
 }
+
+export const itemColors = [
+  "White",
+  "Black",
+  "Grey",
+  "Khaki",
+  "Brown",
+  "Blue",
+  "Green",
+  "Red",
+  "Pink",
+  "Yellow",
+  "Orange",
+  "Purple",
+  "Multicolor",
+];

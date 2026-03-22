@@ -11,7 +11,7 @@ class SqliteItemRepo extends ItemRepo {
   async addItem(item: {
     name: string;
     type: string;
-    size: string;
+    color: string;
     imgUrl: string;
     backgroundRemoved: boolean;
   }): Promise<number> {
@@ -182,7 +182,7 @@ class SqliteItemRepo extends ItemRepo {
         .set({
           imgUrl: item.imgUrl,
           name: item.name,
-          size: item.size,
+          color: item.color,
           type: item.type,
         })
         .where(eq(items.id, item.id))

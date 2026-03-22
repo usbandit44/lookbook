@@ -30,7 +30,7 @@ const AddItem = () => {
         id: number;
         name: string;
         type: string;
-        size: string | null;
+        color: string | null;
         imgUrl: string;
       }[]
     | null

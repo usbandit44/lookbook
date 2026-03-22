@@ -6,7 +6,7 @@ abstract class ItemRepo {
   abstract addItem(item: {
     name: string;
     type: string;
-    size: string;
+    color: string;
     imgUrl: string;
     backgroundRemoved: boolean;
   }): Promise<number>;

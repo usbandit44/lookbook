@@ -1,5 +1,7 @@
+import Snackbar from "@/components/ui/Snackbar";
 import { Colors } from "@/constants/constants";
 import migrations from "@/drizzle/migrations";
+import SnackbarProvider, { useSnackbar } from "@/hooks/useSnackBar";
 import { store } from "@/redux/store";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,20 +28,18 @@ export const DATABASE_NAME = "lookbook";
 function AppShell() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const snackbarSettingsContext = useSnackbar();
 
   const isCamera = pathname.includes("/camera-screen");
-
   const backgroundColor = isCamera ? "black" : Colors.light.background;
-
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
 
   const expoDb = openDatabaseSync(DATABASE_NAME);
   const db = drizzle(expoDb);
   useMigrations(db, migrations);
 
+  // ← merge both useFonts into one call
   const [fontsLoaded] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     "InriaSerif-Bold": require("@/assets/fonts/InriaSerif-Bold.ttf"),
     "InriaSerif-BoldItalic": require("@/assets/fonts/InriaSerif-BoldItalic.ttf"),
     "InriaSerif-Italic": require("@/assets/fonts/InriaSerif-Italic.ttf"),
@@ -60,9 +60,14 @@ function AppShell() {
     "Nunito-VariableFont_wght": require("@/assets/fonts/Nunito-VariableFont_wght.ttf"),
   });
 
+  // ← early returns AFTER all hooks
   if (!fontsLoaded) return null;
 
-  if (!loaded) return null;
+  if (!snackbarSettingsContext) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+
+  const { settings, hideSnackbar } = snackbarSettingsContext;
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
@@ -75,8 +80,16 @@ function AppShell() {
       />
 
       {/* 🔹 App content */}
+
       <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
         <Slot />
+        <Snackbar
+          visibility={settings.visibility}
+          onClose={hideSnackbar}
+          type={settings.type}
+        >
+          {settings.children}
+        </Snackbar>
       </GestureHandlerRootView>
 
       {/* 🔹 Status bar text */}
@@ -99,9 +112,11 @@ export default function RootLayout() {
         >
           <QueryClientProvider client={queryClient}>
             <ThemeProvider value={DefaultTheme}>
-              <Provider store={store}>
-                <AppShell />
-              </Provider>
+              <SnackbarProvider>
+                <Provider store={store}>
+                  <AppShell />
+                </Provider>
+              </SnackbarProvider>
             </ThemeProvider>
           </QueryClientProvider>
         </SQLiteProvider>

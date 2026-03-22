@@ -8,8 +8,9 @@ class AppItemRepo extends ItemRepo {
   async addItem(item: {
     name: string;
     type: string;
-    size: string;
+    color: string;
     imgUrl: string;
+    backgroundRemoved: boolean;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.addItem(item);

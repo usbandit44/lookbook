@@ -43,6 +43,34 @@
       "when": 1770258178035,
       "tag": "0005_lying_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1773341677973,
+      "tag": "0006_material_corsair",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1774063719684,
+      "tag": "0007_third_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1774063787991,
+      "tag": "0008_bright_ricochet",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1774063987680,
+      "tag": "0009_rainy_ogun",
+      "breakpoints": true
     }
   ]
 }

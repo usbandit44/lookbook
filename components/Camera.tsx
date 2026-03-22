@@ -12,12 +12,6 @@ import AppButton from "./ui/AppButton";
 
 export function Camera() {
   //const apiHandler = new ApiHandler();
-  const [isRemoveBackgroundEnabled, setIsRemoveBackgroundEnabled] =
-    useState(false);
-  const toggleSwitch = () => {
-    setIsRemoveBackgroundEnabled((previousState) => !previousState);
-    console.log(isRemoveBackgroundEnabled);
-  };
 
   const [openToolTip, setOpenToolTip] = useState(false);
 
@@ -46,16 +40,7 @@ export function Camera() {
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
-      if (isRemoveBackgroundEnabled) {
-        // const backgroundRemovedImageURI = await removeBackground(photo.uri);
-        // dispatch(updateNewItemImg(backgroundRemovedImageURI));
-
-        // await apiHandler.backgroundRemoval(photo.uri);
-        dispatch(updateNewItemImg(photo.uri));
-        console.log("here");
-      } else {
-        dispatch(updateNewItemImg(photo.uri));
-      }
+      dispatch(updateNewItemImg(photo.uri));
     }
   };
 
@@ -69,7 +54,7 @@ export function Camera() {
         <Image
           source={{ uri: imgUri }}
           contentFit="contain"
-          style={{ width: 500, aspectRatio: 1 }}
+          style={{ width: "100%", aspectRatio: 1 }}
         />
         <View style={{ height: 50 }}></View>
       </View>
@@ -96,25 +81,7 @@ export function Camera() {
               width: 32,
               gap: 5,
             }}
-          >
-            {/* <Popover
-              from={
-                <TouchableOpacity>
-                  <Icon name="info" type="material" color="white" size={24} />
-                </TouchableOpacity>
-              }
-            >
-              <Text style={{ padding: 20 }}>
-                Turn on to enbale background removale
-              </Text>
-            </Popover>
-            <Switch
-              trackColor={{ false: "#767577", true: "#0f8702ff" }}
-              thumbColor={"#f4f3f4"}
-              onValueChange={toggleSwitch}
-              value={isRemoveBackgroundEnabled}
-            /> */}
-          </View>
+          ></View>
 
           <Pressable onPress={takePicture}>
             {({ pressed }) => (
@@ -152,7 +119,13 @@ export function Camera() {
           onPress={() => {
             router.back();
           }}
-          style={{ padding: 15, position: "absolute", top: 0, left: 0 }}
+          style={{
+            padding: 15,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            backgroundColor: "transparent",
+          }}
         >
           <Icon
             name="arrow-back-ios-new"
@@ -173,10 +146,16 @@ export function Camera() {
             width: "100%",
           }}
         >
-          <AppButton onPress={() => dispatch(updateNewItemImg(""))}>
+          <AppButton
+            style={{ backgroundColor: "transparent" }}
+            onPress={() => dispatch(updateNewItemImg(""))}
+          >
             <Icon name="close" type="material" color="white" size={30} />
           </AppButton>
-          <AppButton onPress={() => router.navigate("/add-item")}>
+          <AppButton
+            style={{ backgroundColor: "transparent" }}
+            onPress={() => router.navigate("/add-item")}
+          >
             <Icon name="check" type="material" color="white" size={30} />
           </AppButton>
         </View>

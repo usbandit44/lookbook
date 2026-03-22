@@ -7,11 +7,14 @@ export const items = sqliteTable("items", {
   type: text("type", {
     enum: Object.values(itemTypes) as [string, ...string[]],
   }).notNull(),
-  size: text(),
+  color: text(),
+  size: text().$default(() => ""),
   imgUrl: text().notNull(),
   backgroundRemoved: integer("updateImgUrl", { mode: "boolean" })
     .notNull()
     .default(false),
 });
 
-export type ItemsType = typeof items.$inferSelect;
+export type ItemsType = Omit<typeof items.$inferSelect, "size"> & {
+  size?: string | null;
+};

@@ -61,6 +61,9 @@ const OutfitsPage = () => {
         initialNumToRender={6} // render first 3 rows only
         maxToRenderPerBatch={6} // render 3 more rows per batch
         windowSize={5}
+        onViewableItemsChanged={onViewableItemsChanged} // ← missing
+        viewabilityConfig={viewabilityConfig} // ← missing
+        ref={flatListRef}
         data={itemsData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
@@ -77,7 +80,7 @@ const OutfitsPage = () => {
             id={item.id}
             imgUri={item.imgUrl ?? ""}
             name={item.name ?? ""}
-            size={""}
+            color={""}
             type={"outfit"}
           />
         )}
