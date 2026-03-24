@@ -1,8 +1,6 @@
 import { Colors } from "@/constants/constants";
-import { auth } from "@/firebase/firebase";
 import AppUserRepo from "@/repo/user_repo/AppUserRepo";
 import { useRouter } from "expo-router";
-import { signInAnonymously } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
@@ -13,34 +11,19 @@ export function LoginPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        // Create anonymous user
-        try {
-          await signInAnonymously(auth);
-        } catch (error) {
-          console.error("Anonymous sign-in failed:", error);
-        }
-      } else {
-        // User exists, route to /pages
-        if (await userRepo.checkUserExist()) {
-          console.log(await userRepo.checkUserExist());
-          if (await userRepo.checkTutorialStatus()) {
-            router.navigate("/pages");
-          } else {
-            router.navigate("/tutorial");
-          }
+    async function checkUser() {
+      if (await userRepo.checkUserExist()) {
+        if (await userRepo.checkTutorialStatus()) {
+          router.navigate("/pages");
         } else {
-          await userRepo.createUser();
           router.navigate("/tutorial");
         }
+      } else {
+        await userRepo.createUser();
+        router.navigate("/tutorial");
       }
-
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    }
+    checkUser();
   }, []);
 
   // Optional loading indicator

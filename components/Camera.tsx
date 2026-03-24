@@ -1,17 +1,27 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
+import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "react-native-elements";
 import AppButton from "./ui/AppButton";
 
 export function Camera() {
   //const apiHandler = new ApiHandler();
+
+  const { state, process } = useBackgroundRemover();
+
+  useEffect(() => {
+    if (state.status === "done") {
+      dispatch(updateNewItemImg(state.resultUri));
+      router.navigate("/add-item");
+    }
+  }, [state]);
 
   const [openToolTip, setOpenToolTip] = useState(false);
 
@@ -154,7 +164,7 @@ export function Camera() {
           </AppButton>
           <AppButton
             style={{ backgroundColor: "transparent" }}
-            onPress={() => router.navigate("/add-item")}
+            onPress={() => process(imgUri)} // ← process instead of navigate
           >
             <Icon name="check" type="material" color="white" size={30} />
           </AppButton>

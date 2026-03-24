@@ -1,0 +1,9 @@
+{
+  "name": "background-remover",
+  "version": "1.0.0",
+  "description": "iOS background removal using VNGenerateForegroundInstanceMaskRequest",
+  "main": "index.ts",
+  "author": "",
+  "license": "MIT",
+  "homepage": ""
+}

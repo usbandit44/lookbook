@@ -6,7 +6,7 @@ import Input from "@/components/ui/Input";
 import { Colors, itemColors, itemTypes } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import { useBackgroundRemoval } from "@/hooks/useBackgroundRemoval";
+import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
@@ -19,7 +19,6 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -42,12 +41,8 @@ const AddItemForm = () => {
   }
 
   const { setSettings, showSnackbar, hideSnackbar } = snackbarSettingsContext;
-  const { mutate, isPending, isError, error, isSuccess } =
-    useBackgroundRemoval();
+  const { state, process } = useBackgroundRemover();
 
-  const onRemoveBg = (imageUri: string) => {
-    mutate(imageUri);
-  };
   const itemRepo = new AppItemRepo();
   const outfitRepo = new AppOutfitRepo();
 
@@ -58,8 +53,9 @@ const AddItemForm = () => {
   const handlePickImage = async () => {
     const uri = await pickImage();
     if (uri) {
-      dispatch(updateNewItemImg(uri)); // ← this was missing
+      dispatch(updateNewItemImg(uri));
       setBackgroudRemoved(false);
+      await process(uri); // auto remove background
     }
   };
 
@@ -75,17 +71,20 @@ const AddItemForm = () => {
   );
 
   const [deleteModal, setDeleteModal] = useState(false);
+
   let imgUri = useAppSelector(selectNewItemImg);
   const [currentItem, setCurrentItem] = useState<ItemsType | null>(null);
   let gap = { gap: 180 };
   if (currentItemId != -1) {
     gap = { gap: 150 };
   }
+
   useEffect(() => {
-    if (isSuccess) {
+    if (state.status === "done") {
+      dispatch(updateNewItemImg(state.resultUri));
       setBackgroudRemoved(true);
     }
-  }, [isSuccess]);
+  }, [state]);
 
   useEffect(() => {
     if (currentItemId != -1) {
@@ -93,15 +92,12 @@ const AddItemForm = () => {
         const item = await itemRepo.getItem(currentItemId);
         setCurrentItem(item);
         setName(item.name);
-        if (!imgUri) {
-          // <-- only overwrite if no image is selected yet
-          dispatch(updateNewItemImg(item.imgUrl));
-          setBackgroudRemoved(true);
-        }
+
+        dispatch(updateNewItemImg(item.imgUrl));
+        setBackgroudRemoved(item.backgroundRemoved);
+
         setColor(item.color ?? "");
         setType(item.type);
-
-        console.log(backgroundRemoved);
       }
       getCurrentItem();
     } else {
@@ -182,7 +178,7 @@ const AddItemForm = () => {
       };
       insertItem(newItem);
       setType(null);
-      // dispatch(updateNewItemImg(""));
+      dispatch(updateNewItemImg(""));
       //setVisablity(!visablity);
       showSnackbar("Item successfully added", "success");
 
@@ -220,7 +216,6 @@ const AddItemForm = () => {
 
       showSnackbar("Item successfully updated", "success");
       setTimeout(() => router.navigate("/pages"), 300);
-      dispatch(updateNewItemImg(""));
       //router.navigate("/pages");
       setTimeout(() => hideSnackbar(), 3000);
       //setTimeout(() => setVisablity(false), 3000);
@@ -254,40 +249,29 @@ const AddItemForm = () => {
         <View style={styles.form}>
           <FormElement showError={showImgError} errorMsg="Add a Image">
             {imgUri ? (
-              isPending ? (
-                <View style={styles.imageWrapper}>
-                  <ActivityIndicator size="large" color="black" />
-                </View>
-              ) : (
-                <View style={styles.imageWrapper}>
-                  <Image
-                    source={{ uri: imgUri }}
-                    contentFit="cover"
-                    style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
+              <View style={styles.imageWrapper}>
+                <Image
+                  source={{ uri: imgUri }}
+                  contentFit="cover"
+                  style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
+                />
+                <Pressable
+                  onPress={() => {
+                    dispatch(updateNewItemImg(""));
+                    setBackgroudRemoved(false);
+                  }}
+                  style={styles.clearIcon}
+                  hitSlop={10}
+                >
+                  <Icon
+                    reverse
+                    name="close"
+                    type="material"
+                    color="black"
+                    size={15}
                   />
-                  <Pressable
-                    onPress={() => {
-                      dispatch(updateNewItemImg(""));
-                      setBackgroudRemoved(false);
-                    }}
-                    style={styles.clearIcon}
-                    hitSlop={10}
-                  >
-                    <Icon
-                      reverse
-                      name="close"
-                      type="material"
-                      color="black"
-                      size={15}
-                    />
-                  </Pressable>
-                  {backgroundRemoved ? null : (
-                    <AppButton type="text" onPress={() => onRemoveBg(imgUri)}>
-                      <AppText>Remove Background</AppText>
-                    </AppButton>
-                  )}
-                </View>
-              )
+                </Pressable>
+              </View>
             ) : (
               <Pressable
                 onPress={() => {
