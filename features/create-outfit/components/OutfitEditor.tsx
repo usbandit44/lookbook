@@ -476,17 +476,41 @@ const OutfitEditor: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   // ── Screenshot helper — hides UI, captures, restores ─────────────────────
+  // const captureOutfit = async (): Promise<string> => {
+  //   setIsCapturing(true);
+
+  //   // Wait for React to fully flush the render before capturing
+  //   await new Promise<void>((resolve) => {
+  //     InteractionManager.runAfterInteractions(() => {
+  //       setTimeout(resolve, 100);
+  //     });
+  //   });
+
+  //   const imgUri = await captureRef(viewRef, {
+  //     format: "jpg",
+  //     quality: 0.9,
+  //   });
+
+  //   setIsCapturing(false);
+  //   return imgUri;
+  // };
   const captureOutfit = async (): Promise<string> => {
+    const view = viewRef.current; // 👈 store it FIRST
+
+    if (!view) {
+      throw new Error("viewRef is null");
+    }
+
     setIsCapturing(true);
 
-    // Wait for React to fully flush the render before capturing
     await new Promise<void>((resolve) => {
       InteractionManager.runAfterInteractions(() => {
         setTimeout(resolve, 100);
       });
     });
 
-    const imgUri = await captureRef(viewRef, {
+    const imgUri = await captureRef(view, {
+      // 👈 use stored view
       format: "jpg",
       quality: 0.9,
     });
@@ -496,18 +520,46 @@ const OutfitEditor: React.FC = () => {
   };
   // ─────────────────────────────────────────────────────────────────────────
 
-  const saveOutfit = async () => {
-    const imgUri = await captureOutfit();
-    const fileName = `screenshot_${Date.now()}.jpg`;
-    const dest = (FileSystem.documentDirectory ?? "") + fileName;
-    await FileSystem.copyAsync({ from: imgUri, to: dest });
+  // const saveOutfit = async () => {
+  //   const imgUri = await captureOutfit();
+  //   const fileName = `screenshot_${Date.now()}.jpg`;
+  //   const dest = (FileSystem.documentDirectory ?? "") + fileName;
+  //   await FileSystem.copyAsync({ from: imgUri, to: dest });
 
-    const createdOutfitId = await outfitRepo.addOutfit({
-      items: items,
-      name: outfitName,
-      imgUrl: dest,
-    });
-    setSavedOutfitId(createdOutfitId);
+  //   const createdOutfitId = await outfitRepo.addOutfit({
+  //     items: items,
+  //     name: outfitName,
+  //     imgUrl: dest,
+  //   });
+  //   console.log(createdOutfitId);
+  //   setSavedOutfitId(createdOutfitId);
+  // };
+
+  const saveOutfit = async () => {
+    try {
+      console.log("1 - starting save");
+
+      const imgUri = await captureOutfit();
+      console.log("2 - captured image:", imgUri);
+
+      const fileName = `screenshot_${Date.now()}.jpg`;
+      const dest = (FileSystem.documentDirectory ?? "") + fileName;
+
+      await FileSystem.copyAsync({ from: imgUri, to: dest });
+      console.log("3 - copied file");
+
+      const createdOutfitId = await outfitRepo.addOutfit({
+        items: items,
+        name: outfitName,
+        imgUrl: dest,
+      });
+
+      console.log("4 - created outfit:", createdOutfitId);
+
+      setSavedOutfitId(createdOutfitId);
+    } catch (err) {
+      console.error("❌ SAVE FAILED:", err);
+    }
   };
 
   const updateOutfit = async () => {
@@ -607,7 +659,8 @@ const OutfitEditor: React.FC = () => {
               }
             } else {
               if (saved) {
-                saveOutfit();
+                console.log(saved);
+                await saveOutfit();
               }
               dispatch(clearAllItems());
               dispatch(clearCurrentOutfit());

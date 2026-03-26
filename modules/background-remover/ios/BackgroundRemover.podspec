@@ -7,10 +7,10 @@ Pod::Spec.new do |s|
   s.version        = package['version']
   s.summary        = package['description']
   s.author         = package['author']
-  s.homepage       = package['homepage']
+  s.homepage       = 'https://github.com'
   s.license        = package['license']
   s.platform       = :ios, '17.0'
-  s.source         = { git: '' }
+  s.source         = { :git => '' }
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'

@@ -40,7 +40,8 @@ const AddItemForm = () => {
     throw new Error("useSnackbar must be used within a SnackbarProvider");
   }
 
-  const { setSettings, showSnackbar, hideSnackbar } = snackbarSettingsContext;
+  const { setSettings, showSnackbar, hideSnackbar, settings } =
+    snackbarSettingsContext;
   const { state, process } = useBackgroundRemover();
 
   const itemRepo = new AppItemRepo();
@@ -107,7 +108,7 @@ const AddItemForm = () => {
       }
       getItemCount();
     }
-  }, [currentItemId]);
+  }, [currentItemId, settings]);
 
   const [selectedItem, setSelectedItem] = React.useState("");
   const dispatch = useAppDispatch();
@@ -178,6 +179,8 @@ const AddItemForm = () => {
       };
       insertItem(newItem);
       setType(null);
+      setColor("");
+      setName("");
       dispatch(updateNewItemImg(""));
       //setVisablity(!visablity);
       showSnackbar("Item successfully added", "success");
@@ -347,8 +350,6 @@ const AddItemForm = () => {
           <AppButton
             onPress={() => {
               createItem();
-              setColor("");
-              // setVisablity(true);
             }}
           >
             <AppText style={{ color: "white" }}>Create Item</AppText>
