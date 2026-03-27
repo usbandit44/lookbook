@@ -463,6 +463,7 @@ const OutfitEditor: React.FC = () => {
   const outfitRepo = new AppOutfitRepo();
   const [saved, setSaved] = useState(false);
   const [outfitName, setOutfitName] = useState("");
+  const [defaultName, setDefaultName] = useState("");
   const [isCapturing, setIsCapturing] = useState(false);
 
   const repo = new AppItemRepo();
@@ -548,9 +549,11 @@ const OutfitEditor: React.FC = () => {
       await FileSystem.copyAsync({ from: imgUri, to: dest });
       console.log("3 - copied file");
 
+      const finalName = outfitName === "" ? defaultName : outfitName;
+
       const createdOutfitId = await outfitRepo.addOutfit({
         items: items,
-        name: outfitName,
+        name: finalName,
         imgUrl: dest,
       });
 
@@ -600,12 +603,27 @@ const OutfitEditor: React.FC = () => {
       );
     } else {
       return (
-        <AppButton onPress={() => setSaved(!saved)} type="icon">
-          {saved ? (
-            <Icon name="bookmark" type="material" size={30} />
-          ) : (
-            <Icon name="bookmark-border" type="material" size={30} />
-          )}
+        // <AppButton onPress={() => setSaved(!saved)} type="icon">
+        //   {saved ? (
+        //     <Icon name="bookmark" type="material" size={30} />
+        //   ) : (
+        //     <Icon name="bookmark-border" type="material" size={30} />
+        //   )}
+        // </AppButton>
+        <AppButton
+          type="text"
+          onPress={async () => {
+            await saveOutfit();
+            dispatch(clearAllItems());
+            dispatch(clearCurrentOutfit());
+
+            showSnackbar("Outfit added!", "success");
+
+            setTimeout(() => router.navigate("/pages/outfits"), 300);
+            setTimeout(() => hideSnackbar(), 3000);
+          }}
+        >
+          <AppText>Save</AppText>
         </AppButton>
       );
     }
@@ -617,7 +635,7 @@ const OutfitEditor: React.FC = () => {
     } else {
       async function getItemCount() {
         const count = await outfitRepo.countNumberOfOutfit();
-        setOutfitName("Outfit #" + (Number(count) + 1));
+        setDefaultName("Outfit #" + (Number(count) + 1));
       }
       getItemCount();
     }
@@ -658,10 +676,10 @@ const OutfitEditor: React.FC = () => {
                 router.navigate("/pages/outfits");
               }
             } else {
-              if (saved) {
-                console.log(saved);
-                await saveOutfit();
-              }
+              // if (saved) {
+              //   console.log(saved);
+              //   await saveOutfit();
+              // }
               dispatch(clearAllItems());
               dispatch(clearCurrentOutfit());
               router.navigate("/pages/outfits");
@@ -675,6 +693,7 @@ const OutfitEditor: React.FC = () => {
           onChangeText={setOutfitName}
           value={outfitName}
           placeholderTextColor="black"
+          placeholder={defaultName}
           style={styles.name}
         />
 

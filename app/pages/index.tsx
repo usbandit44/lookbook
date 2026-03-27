@@ -2,16 +2,83 @@ import ItemPreview from "@/components/ItemPreview";
 import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
-import { Colors } from "@/constants/constants";
+import { Colors, itemColors } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
+import { scheduleNotification } from "@/functions/notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import * as Notifications from "expo-notifications";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, FlatList, Pressable, StyleSheet, View } from "react-native";
+import {
+  Animated,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
-import { ScrollView } from "react-native-gesture-handler";
+
+const FILTER_OPTIONS = [
+  "Tops",
+  "Bottoms",
+  "Outerwear",
+  "Shoes",
+  "Belt",
+  "Headwear",
+  "Accessories",
+];
 
 const Home = () => {
+  const notifications = [
+    {
+      weekday: 2,
+      hour: 8,
+      minute: 0,
+      title: "Start Your Week Right!",
+      body: "Kick off your week strong! Open the app to plan your outfit.",
+    },
+    {
+      weekday: 6,
+      hour: 20,
+      minute: 0,
+      title: "Friday Night! 🎉",
+      body: "Friday night’s here! Make sure you outfit is as good as your plans.",
+    },
+    {
+      weekday: 7,
+      hour: 9,
+      minute: 0,
+      title: "Weekend Vibes 🌴",
+      body: "Your weekend starts now! Check Lookbook for outfit ideas.",
+    },
+  ];
+
+  useEffect(() => {
+    async function initNotifications() {
+      const alreadyScheduled = await AsyncStorage.getItem(
+        "notifications_scheduled",
+      );
+      if (alreadyScheduled) return;
+
+      notifications.forEach((n) => {
+        scheduleNotification(n.title, n.body, {
+          type: "weekly",
+          weekday: n.weekday,
+          hour: n.hour,
+          minute: n.minute,
+          repeats: true,
+        } as Notifications.WeeklyTriggerInput);
+      });
+
+      await AsyncStorage.setItem("notifications_scheduled", "true");
+    }
+
+    initNotifications();
+  }, []);
+
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
 
@@ -32,6 +99,7 @@ const Home = () => {
     }
   }, [liveItems]);
 
+  const [filterColor, setFilterColor] = useState(false);
   const [filter, setFilter] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<
     | {
@@ -46,14 +114,10 @@ const Home = () => {
   const [applyFilter, setApplyFilter] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [topSelected, setTopSelected] = useState(false);
-  const [bottomSelected, setBottomSelected] = useState(false);
-  const [outerwearSelected, setOuterwearSelected] = useState(false);
-  const [shoesSelected, setShoesSelected] = useState(false);
-  const [headwearSelected, setHeadwearSelected] = useState(false);
-  const [beltSelected, setBeltSelected] = useState(false);
-  const [accessoriesSelected, setAccessoriesSelected] = useState(false);
   const [showScroolButton, setShowScrollButton] = useState(false);
+
+  // page toggle
+  const [showColorPage, setShowColorPage] = useState(false);
   const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
 
   const flatListRef = useRef<FlatList<any>>(null);
@@ -85,16 +149,37 @@ const Home = () => {
     }
   };
 
+  const toggleFilter = (type: string) => {
+    setFilter((prev) =>
+      prev.includes(type)
+        ? prev.filter((item) => item !== type)
+        : [...prev, type],
+    );
+  };
+
   useEffect(() => {
     if (filter.length == 0) {
-      setFilteredData(itemsData);
+      const formattedData =
+        itemsData.length % 2 === 1
+          ? [
+              ...itemsData,
+              { id: -1, name: "", type: "", color: null, imgUrl: "" },
+            ]
+          : itemsData;
+      setFilteredData(formattedData);
     } else {
-      setFilteredData(
-        itemsData.filter(
-          (item) =>
-            filter.includes(item.type) || filter.includes(item.color ?? ""),
-        ),
+      const filtered = itemsData.filter(
+        (item) =>
+          filter.includes(item.type) && filter.includes(item.color ?? ""),
       );
+      const formattedData =
+        filtered.length % 2 === 1
+          ? [
+              ...filtered,
+              { id: -1, name: "", type: "", color: null, imgUrl: "" },
+            ]
+          : filtered;
+      setFilteredData(formattedData);
     }
   }, [applyFilter, itemsData]);
 
@@ -167,215 +252,134 @@ const Home = () => {
         setModalVisible={setModalVisible}
         style={{ height: 500 }}
       >
-        <AppText>Filter</AppText>
-        <ScrollView style={{ flex: 1 }}>
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (topSelected) {
-                setFilter(filter.filter((type) => type !== "Tops"));
-              } else {
-                setFilter([...filter, "Tops"]);
-              }
-              setTopSelected(!topSelected);
-            }}
-          >
-            <AppText>Tops</AppText>
-            <CheckBox
-              checked={topSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => {
-                if (topSelected) {
-                  setFilter(filter.filter((type) => type !== "Tops"));
-                } else {
-                  setFilter([...filter, "Tops"]);
-                }
-                setTopSelected(!topSelected);
-              }}
-            />
-          </Pressable>
+        {!showColorPage ? (
+          <>
+            <AppText>Filter</AppText>
 
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (bottomSelected) {
-                setFilter(filter.filter((type) => type !== "Bottoms"));
-              } else {
-                setFilter([...filter, "Bottoms"]);
-              }
-              setBottomSelected(!bottomSelected);
-            }}
-          >
-            <AppText>Bottoms</AppText>
-            <CheckBox
-              checked={bottomSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => {
-                if (bottomSelected) {
-                  setFilter(filter.filter((type) => type !== "Bottoms"));
-                } else {
-                  setFilter([...filter, "Bottoms"]);
-                }
-                setBottomSelected(!bottomSelected);
-              }}
-            />
-          </Pressable>
+            <ScrollView style={{ flex: 1 }}>
+              {FILTER_OPTIONS.map((type) => {
+                const selected = filter.includes(type);
 
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (outerwearSelected) {
-                setFilter(filter.filter((type) => type !== "Outerwear"));
-              } else {
-                setFilter([...filter, "Outerwear"]);
-              }
-              setOuterwearSelected(!outerwearSelected);
-            }}
-          >
-            <AppText>Outerwear</AppText>
-            <CheckBox
-              checked={outerwearSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => {
-                if (outerwearSelected) {
-                  setFilter(filter.filter((type) => type !== "Outerwear"));
-                } else {
-                  setFilter([...filter, "Outerwear"]);
-                }
-                setOuterwearSelected(!outerwearSelected);
-              }}
-            />
-          </Pressable>
+                return (
+                  <Pressable
+                    key={type}
+                    style={[styles.option, selected && styles.optionSelected]}
+                    onPress={() => toggleFilter(type)}
+                  >
+                    <AppText>{type}</AppText>
 
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (shoesSelected) {
-                setFilter(filter.filter((type) => type !== "Shoes"));
-              } else {
-                setFilter([...filter, "Shoes"]);
-              }
-              setShoesSelected(!shoesSelected);
-            }}
-          >
-            <AppText>Shoes</AppText>
-            <CheckBox
-              checked={shoesSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => {
-                if (shoesSelected) {
-                  setFilter(filter.filter((type) => type !== "Shoes"));
-                } else {
-                  setFilter([...filter, "Shoes"]);
-                }
-                setShoesSelected(!shoesSelected);
-              }}
-            />
-          </Pressable>
+                    <CheckBox
+                      checked={selected}
+                      onPress={() => toggleFilter(type)}
+                      checkedIcon={
+                        <Icon name="check-box" type="material" size={24} />
+                      }
+                      uncheckedIcon={
+                        <Icon
+                          name="check-box-outline-blank"
+                          type="material"
+                          size={24}
+                        />
+                      }
+                      containerStyle={styles.checkboxContainer}
+                    />
+                  </Pressable>
+                );
+              })}
 
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (beltSelected) {
-                setFilter(filter.filter((type) => type !== "Belt"));
-              } else {
-                setFilter([...filter, "Belt"]);
-              }
-              setBeltSelected(!beltSelected);
-            }}
-          >
-            <AppText>Belt</AppText>
-            <CheckBox
-              checked={beltSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
-              onPress={() => {
-                if (beltSelected) {
-                  setFilter(filter.filter((type) => type !== "Belt"));
-                } else {
-                  setFilter([...filter, "Belt"]);
-                }
-                setBeltSelected(!beltSelected);
-              }}
-            />
-          </Pressable>
+              {/* 👉 Navigate to Color Page */}
+              <Pressable
+                style={[
+                  styles.option,
+                  { paddingVertical: 12, paddingRight: 20 },
+                ]}
+                onPress={() => setShowColorPage(true)}
+              >
+                <AppText>Colors</AppText>
+                <Icon name="arrow-forward-ios" type="material" size={20} />
+              </Pressable>
+            </ScrollView>
 
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (headwearSelected) {
-                setFilter(filter.filter((type) => type !== "Headwear"));
-              } else {
-                setFilter([...filter, "Headwear"]);
-              }
-              setHeadwearSelected(!headwearSelected);
-            }}
-          >
-            <AppText>Headwear</AppText>
-            <CheckBox
-              checked={headwearSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+            {/* Apply */}
+            <AppButton
               onPress={() => {
-                if (headwearSelected) {
-                  setFilter(filter.filter((type) => type !== "Headwear"));
-                } else {
-                  setFilter([...filter, "Headwear"]);
-                }
-                setHeadwearSelected(!headwearSelected);
+                setApplyFilter((prev) => prev + 1);
+                setModalVisible(false);
               }}
-            />
-          </Pressable>
+            >
+              <AppText style={{ color: "white" }}>Apply</AppText>
+            </AppButton>
 
-          <Pressable
-            style={styles.option}
-            onPress={() => {
-              if (accessoriesSelected) {
-                setFilter(filter.filter((type) => type !== "Accessories"));
-              } else {
-                setFilter([...filter, "Accessories"]);
-              }
-              setAccessoriesSelected(!accessoriesSelected);
-            }}
-          >
-            <AppText>Accessories</AppText>
-            <CheckBox
-              checked={accessoriesSelected}
-              checkedIcon={<Icon name="check-box" type="material" size={24} />}
+            {/* Reset */}
+            <AppButton
               onPress={() => {
-                if (accessoriesSelected) {
-                  setFilter(filter.filter((type) => type !== "Accessories"));
-                } else {
-                  setFilter([...filter, "Accessories"]);
-                }
-                setAccessoriesSelected(!accessoriesSelected);
+                setFilter([]);
+                setApplyFilter((prev) => prev + 1);
               }}
-            />
-          </Pressable>
-        </ScrollView>
+              type="text"
+            >
+              <AppText style={{ color: Colors.light.destructive }}>
+                Reset
+              </AppText>
+            </AppButton>
+          </>
+        ) : (
+          /* ───────── PAGE 2: COLOR FILTER ───────── */
+          <>
+            {/* Header */}
+            <View
+              style={{
+                paddingLeft: 15,
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "row",
+              }}
+            >
+              <Pressable
+                onPress={() => setShowColorPage(false)}
+                hitSlop={10}
+                style={{ position: "absolute", left: 0, top: 0 }}
+              >
+                <Icon name="arrow-back-ios" type="material" size={20} />
+              </Pressable>
+              <AppText>Colors</AppText>
+              <View style={{ width: 20 }} />
+            </View>
 
-        <AppButton
-          onPress={() => {
-            setApplyFilter(applyFilter + 1);
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <AppText style={{ color: "white" }}>Apply</AppText>
-        </AppButton>
-        <AppButton
-          onPress={() => {
-            setTopSelected(false);
-            setBottomSelected(false);
-            setOuterwearSelected(false);
-            setShoesSelected(false);
-            setHeadwearSelected(false);
-            setAccessoriesSelected(false);
-            setBeltSelected(false);
-            setFilter([]);
-            setApplyFilter(applyFilter + 1);
-          }}
-          type="text"
-        >
-          <AppText style={{ color: Colors.light.destructive }}>Reset</AppText>
-        </AppButton>
+            <ScrollView style={{ flex: 1 }}>
+              {itemColors.map((color) => {
+                const selected = filter.includes(color);
+
+                return (
+                  <Pressable
+                    key={color}
+                    style={[styles.option, selected && styles.optionSelected]}
+                    onPress={() => toggleFilter(color)}
+                  >
+                    <AppText>{color}</AppText>
+
+                    <CheckBox
+                      checked={selected}
+                      onPress={() => toggleFilter(color)}
+                      checkedIcon={
+                        <Icon name="check-box" type="material" size={24} />
+                      }
+                      uncheckedIcon={
+                        <Icon
+                          name="check-box-outline-blank"
+                          type="material"
+                          size={24}
+                        />
+                      }
+                      containerStyle={styles.checkboxContainer}
+                    />
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </>
+        )}
       </AppModal>
     </View>
   );
@@ -409,6 +413,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     paddingRight: 15,
   },
+
   option: {
     width: "100%",
     justifyContent: "space-between",
@@ -416,5 +421,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderTopWidth: 0.5,
     borderColor: "#979C9E",
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+  },
+
+  optionSelected: {
+    backgroundColor: "#f2f2f2", // 👈 subtle highlight
+  },
+
+  checkboxContainer: {
+    padding: 0,
+    margin: 0,
   },
 });

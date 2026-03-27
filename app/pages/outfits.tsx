@@ -54,7 +54,10 @@ const OutfitsPage = () => {
     // };
     // fetchItems();
   }, []);
-
+  const formattedData =
+    itemsData.length % 2 === 1
+      ? [...itemsData, { id: "empty", empty: true }]
+      : itemsData;
   return (
     <View style={{ flex: 1 }}>
       <FlatList
@@ -64,7 +67,7 @@ const OutfitsPage = () => {
         onViewableItemsChanged={onViewableItemsChanged} // ← missing
         viewabilityConfig={viewabilityConfig} // ← missing
         ref={flatListRef}
-        data={itemsData}
+        data={formattedData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.itemsGrid}

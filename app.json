@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lookbook",
     "slug": "lookbook",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/icons/logo.png",
     "scheme": "lookbook",
@@ -31,6 +31,16 @@
       "favicon": "./assets/icons/logo.png"
     },
     "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/logo.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
       [
         "expo-camera",
         {

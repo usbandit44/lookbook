@@ -12,7 +12,12 @@ import { Slot, usePathname } from "expo-router";
 import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import { Suspense } from "react";
-import { ActivityIndicator, View } from "react-native";
+import {
+  ActivityIndicator,
+  Keyboard,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import {
@@ -70,31 +75,36 @@ function AppShell() {
   const { settings, hideSnackbar } = snackbarSettingsContext;
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
-      {/* 🔹 Paint status bar background */}
-      <View
-        style={{
-          height: insets.top,
-          backgroundColor,
-        }}
-      />
+    <TouchableWithoutFeedback
+      onPress={() => Keyboard.dismiss()}
+      accessible={false}
+    >
+      <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+        {/* 🔹 Paint status bar background */}
+        <View
+          style={{
+            height: insets.top,
+            backgroundColor,
+          }}
+        />
 
-      {/* 🔹 App content */}
+        {/* 🔹 App content */}
 
-      <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
-        <Slot />
-        <Snackbar
-          visibility={settings.visibility}
-          onClose={hideSnackbar}
-          type={settings.type}
-        >
-          {settings.children}
-        </Snackbar>
-      </GestureHandlerRootView>
+        <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
+          <Slot />
+          <Snackbar
+            visibility={settings.visibility}
+            onClose={hideSnackbar}
+            type={settings.type}
+          >
+            {settings.children}
+          </Snackbar>
+        </GestureHandlerRootView>
 
-      {/* 🔹 Status bar text */}
-      <StatusBar style={isCamera ? "light" : "dark"} />
-    </View>
+        {/* 🔹 Status bar text */}
+        <StatusBar style={isCamera ? "light" : "dark"} />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
