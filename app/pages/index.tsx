@@ -2,7 +2,7 @@ import ItemPreview from "@/components/ItemPreview";
 import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
-import { Colors, itemColors } from "@/constants/constants";
+import { Colors, itemColors, itemTypesArray } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
 import { scheduleNotification } from "@/functions/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,16 +20,6 @@ import {
   View,
 } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
-
-const FILTER_OPTIONS = [
-  "Tops",
-  "Bottoms",
-  "Outerwear",
-  "Shoes",
-  "Belt",
-  "Headwear",
-  "Accessories",
-];
 
 const Home = () => {
   const notifications = [
@@ -100,7 +90,8 @@ const Home = () => {
   }, [liveItems]);
 
   const [filterColor, setFilterColor] = useState(false);
-  const [filter, setFilter] = useState<string[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
+  const [colorFilter, setColorFilter] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<
     | {
         id: number;
@@ -149,38 +140,35 @@ const Home = () => {
     }
   };
 
-  const toggleFilter = (type: string) => {
-    setFilter((prev) =>
-      prev.includes(type)
-        ? prev.filter((item) => item !== type)
-        : [...prev, type],
+  const toggleType = (type: string) => {
+    setTypeFilter((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
+
+  const toggleColor = (color: string) => {
+    setColorFilter((prev) =>
+      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color],
     );
   };
 
   useEffect(() => {
-    if (filter.length == 0) {
-      const formattedData =
-        itemsData.length % 2 === 1
-          ? [
-              ...itemsData,
-              { id: -1, name: "", type: "", color: null, imgUrl: "" },
-            ]
-          : itemsData;
-      setFilteredData(formattedData);
-    } else {
-      const filtered = itemsData.filter(
-        (item) =>
-          filter.includes(item.type) && filter.includes(item.color ?? ""),
-      );
-      const formattedData =
-        filtered.length % 2 === 1
-          ? [
-              ...filtered,
-              { id: -1, name: "", type: "", color: null, imgUrl: "" },
-            ]
-          : filtered;
-      setFilteredData(formattedData);
-    }
+    let filtered = itemsData.filter((item) => {
+      const typeMatch =
+        typeFilter.length === 0 || typeFilter.includes(item.type);
+
+      const colorMatch =
+        colorFilter.length === 0 || colorFilter.includes(item.color ?? "");
+
+      return typeMatch && colorMatch;
+    });
+
+    const formattedData =
+      filtered.length % 2 === 1
+        ? [...filtered, { id: -1, name: "", type: "", color: null, imgUrl: "" }]
+        : filtered;
+
+    setFilteredData(formattedData);
   }, [applyFilter, itemsData]);
 
   return (
@@ -257,20 +245,20 @@ const Home = () => {
             <AppText>Filter</AppText>
 
             <ScrollView style={{ flex: 1 }}>
-              {FILTER_OPTIONS.map((type) => {
-                const selected = filter.includes(type);
+              {itemTypesArray.map((type) => {
+                const selected = typeFilter.includes(type);
 
                 return (
                   <Pressable
                     key={type}
                     style={[styles.option, selected && styles.optionSelected]}
-                    onPress={() => toggleFilter(type)}
+                    onPress={() => toggleType(type)}
                   >
                     <AppText>{type}</AppText>
 
                     <CheckBox
                       checked={selected}
-                      onPress={() => toggleFilter(type)}
+                      onPress={() => toggleType(type)}
                       checkedIcon={
                         <Icon name="check-box" type="material" size={24} />
                       }
@@ -313,7 +301,8 @@ const Home = () => {
             {/* Reset */}
             <AppButton
               onPress={() => {
-                setFilter([]);
+                setTypeFilter([]);
+                setColorFilter([]);
                 setApplyFilter((prev) => prev + 1);
               }}
               type="text"
@@ -349,19 +338,19 @@ const Home = () => {
 
             <ScrollView style={{ flex: 1 }}>
               {itemColors.map((color) => {
-                const selected = filter.includes(color);
+                const selected = colorFilter.includes(color);
 
                 return (
                   <Pressable
                     key={color}
                     style={[styles.option, selected && styles.optionSelected]}
-                    onPress={() => toggleFilter(color)}
+                    onPress={() => toggleColor(color)}
                   >
                     <AppText>{color}</AppText>
 
                     <CheckBox
                       checked={selected}
-                      onPress={() => toggleFilter(color)}
+                      onPress={() => toggleColor(color)}
                       checkedIcon={
                         <Icon name="check-box" type="material" size={24} />
                       }

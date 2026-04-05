@@ -66,6 +66,7 @@
 // });
 
 import AppText from "@/components/ui/AppText";
+import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { setCurrentItem } from "@/redux/slices/itemSlice";
 import { setCurrentOutfit, setItems } from "@/redux/slices/outfitSlice";
@@ -91,11 +92,13 @@ const ItemPreview: React.FC<{
   const dispatch = useAppDispatch();
   const outfitRepo = new AppOutfitRepo();
   const itemRepo = new AppItemRepo();
+  const imageUri = normalizeImageUri(props.imgUri);
 
   return (
     <Pressable
       style={[styles.container, { width: itemWidth }]}
       onPress={async () => {
+        if (props.id == -1) return;
         if (props.type == "outfit") {
           const outfit = await outfitRepo.getOutfit(props.id);
           dispatch(setCurrentOutfit({ id: outfit.id, name: outfit.name }));
@@ -109,7 +112,7 @@ const ItemPreview: React.FC<{
       }}
     >
       <Image
-        source={{ uri: props.imgUri }}
+        source={{ uri: imageUri }}
         contentFit="cover"
         style={[styles.img, { height: itemHeight }]}
       />

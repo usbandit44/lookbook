@@ -488,13 +488,7 @@ const Movable: React.FC<MovableProps> = ({
           style={[styles.closeIconWrapper, isCapturing && { display: "none" }]}
         >
           <Pressable hitSlop={14} onPress={onClear}>
-            <Icon
-              reverse
-              name="close"
-              type="material"
-              color="black"
-              size={14}
-            />
+            <Icon name="close" type="material" color="black" size={14} />
           </Pressable>
         </View>
       </Animated.View>
@@ -515,8 +509,8 @@ const styles = StyleSheet.create({
   },
   closeIconWrapper: {
     position: "absolute",
-    top: -35,
-    right: -28,
+    top: 0,
+    right: 0,
     zIndex: 2,
   },
 });

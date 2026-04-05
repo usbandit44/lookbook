@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text } from "react-native";
 
-type TextType = "p1" | "p2" | "p3 " | "p3Bold" | "p3SemiBold";
+type TextType = "p1" | "p2" | "p3" | "p3Bold" | "p3SemiBold";
 
 const AppText: React.FC<{
   children: string;

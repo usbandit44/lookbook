@@ -4,6 +4,7 @@ import {
   itemInOutfit,
   removeItem,
 } from "@/redux/slices/outfitSlice";
+import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import {
@@ -25,11 +26,15 @@ const SelectableItem: React.FC<{
 
   const included = useAppSelector(itemInOutfit(props.id));
   const [selected, setSelected] = useState(included);
+  const imageUri = normalizeImageUri(props.imgUri);
 
   React.useEffect(() => {
     setSelected(included);
   }, [included]);
   const dispatch = useAppDispatch();
+  if (props.id < 0) {
+    return null;
+  }
   return (
     <Pressable
       onPress={() => {
@@ -46,7 +51,7 @@ const SelectableItem: React.FC<{
       }}
     >
       <Image
-        source={{ uri: props.imgUri }}
+        source={{ uri: imageUri }}
         contentFit="cover"
         style={styles.img}
       />

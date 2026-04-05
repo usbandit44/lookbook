@@ -30,11 +30,23 @@ export enum itemTypes {
   Tops = "Tops",
   Bottoms = "Bottoms",
   Outerwear = "Outerwear",
+  Dresses = "Dresses",
   Shoes = "Shoes",
   Belt = "Belt",
   Headwear = "Headwear",
   Accessories = "Accessories",
 }
+
+export const itemTypesArray = [
+  "Tops",
+  "Bottoms",
+  "Outerwear",
+  "Dresses",
+  "Shoes",
+  "Belt",
+  "Headwear",
+  "Accessories",
+];
 
 export const itemColors = [
   "White",
@@ -49,5 +61,7 @@ export const itemColors = [
   "Yellow",
   "Orange",
   "Purple",
+  "Silver",
+  "Gold",
   "Multicolor",
 ];

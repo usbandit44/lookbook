@@ -1,5 +1,8 @@
 import AppText from "@/components/ui/AppText";
 import icons from "@/constants/icons";
+import { useAppDispatch } from "@/hooks/redux-hooks";
+import { updateNewItemImg } from "@/redux/slices/cameraSlice";
+import { clearCurrentItem } from "@/redux/slices/itemSlice";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -13,6 +16,7 @@ import {
 import { Icon } from "react-native-elements";
 
 const BottomNav = () => {
+  const dispatch = useAppDispatch();
   const { width } = useWindowDimensions();
   const router = useRouter();
   const [active, setActive] = useState(false);
@@ -71,7 +75,9 @@ const BottomNav = () => {
             <Pressable
               onPress={() => {
                 setActive(false);
-                router.navigate("/add-item");
+                dispatch(updateNewItemImg(""));
+                dispatch(clearCurrentItem());
+                router.navigate("/camera-screen");
               }}
               style={styles.navButton}
             >

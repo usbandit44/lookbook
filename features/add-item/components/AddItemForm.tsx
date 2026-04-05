@@ -5,10 +5,10 @@ import FormElement from "@/components/ui/FormElement";
 import Input from "@/components/ui/Input";
 import { Colors, itemColors, itemTypes } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
+import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
 import { useSnackbar } from "@/hooks/useSnackBar";
-import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
@@ -19,7 +19,6 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -33,6 +32,22 @@ type FormValues = {
   img: string;
   type: string;
 };
+
+/** Cache/temp paths (e.g. background-remover output) are deleted by the OS; only documentDirectory is stable. */
+async function ensurePersistedItemImageUri(uri: string): Promise<string> {
+  const doc = FileSystem.documentDirectory;
+  if (!doc) throw new Error("documentDirectory unavailable");
+
+  if (uri.startsWith(doc)) {
+    const info = await FileSystem.getInfoAsync(uri);
+    if (info.exists) return uri;
+  }
+
+  const ext = uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
+  const dest = `${doc}photo_${Date.now()}.${ext}`;
+  await FileSystem.copyAsync({ from: uri, to: dest });
+  return dest;
+}
 
 const AddItemForm = () => {
   const snackbarSettingsContext = useSnackbar();
@@ -48,17 +63,6 @@ const AddItemForm = () => {
   const outfitRepo = new AppOutfitRepo();
 
   const currentItemId = useAppSelector(selectCurrentItem);
-
-  const { pickImage } = useWardrobeImagePicker();
-
-  const handlePickImage = async () => {
-    const uri = await pickImage();
-    if (uri) {
-      dispatch(updateNewItemImg(uri));
-      setBackgroudRemoved(false);
-      await process(uri); // auto remove background
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -81,21 +85,15 @@ const AddItemForm = () => {
   }
 
   useEffect(() => {
-    if (state.status === "done") {
-      dispatch(updateNewItemImg(state.resultUri));
-      setBackgroudRemoved(true);
-    }
-  }, [state]);
-
-  useEffect(() => {
     if (currentItemId != -1) {
       async function getCurrentItem() {
         const item = await itemRepo.getItem(currentItemId);
+        const normalizedImgUrl = normalizeImageUri(item.imgUrl);
         setCurrentItem(item);
         setName(item.name);
-
-        dispatch(updateNewItemImg(item.imgUrl));
-        setBackgroudRemoved(item.backgroundRemoved);
+        if (imgUri == "") {
+          dispatch(updateNewItemImg(normalizedImgUrl));
+        }
 
         setColor(item.color ?? "");
         setType(item.type);
@@ -130,7 +128,7 @@ const AddItemForm = () => {
       value: color,
     })),
   );
-  const [backgroundRemoved, setBackgroudRemoved] = useState(false);
+  //const [backgroundRemoved, setBackgroudRemoved] = useState(false);
 
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
@@ -156,7 +154,10 @@ const AddItemForm = () => {
   };
 
   const createItem = async () => {
-    const fileName = `photo_${Date.now()}.jpg`; // Unique filename
+    // Preserve the actual image type we were given (e.g. background remover outputs PNG).
+    const isPng = (imgUri ?? "").toLowerCase().endsWith(".png");
+    const fileExt = isPng ? "png" : "jpg";
+    const fileName = `photo_${Date.now()}.${fileExt}`; // Unique filename
     const dest = (FileSystem.documentDirectory ?? "") + fileName;
     let quit = false;
     if (imgUri === "" || type == null) {
@@ -164,7 +165,7 @@ const AddItemForm = () => {
       if (type == null) setShowTypeError(true);
 
       // if (size == "") setshowSizeError(true);
-      return;
+      return false;
     }
     try {
       await FileSystem.copyAsync({ from: imgUri, to: dest });
@@ -175,9 +176,9 @@ const AddItemForm = () => {
         type: type,
         color: color,
         imgUrl: dest,
-        backgroundRemoved: backgroundRemoved,
+        backgroundRemoved: true,
       };
-      insertItem(newItem);
+      await insertItem(newItem);
       setType(null);
       setColor("");
       setName("");
@@ -186,13 +187,15 @@ const AddItemForm = () => {
       showSnackbar("Item successfully added", "success");
 
       setTimeout(() => hideSnackbar(), 3000);
+      return true;
     } catch (error) {
       console.log(imgUri);
       console.error("Failed to copy photo:", error);
+      return false;
     }
   };
 
-  const updateItem = () => {
+  const updateItem = async (): Promise<boolean> => {
     if (imgUri === "" || type == null || name == "") {
       if (imgUri === "") setShowImgError(true);
       if (type == null) setShowTypeError(true);
@@ -206,23 +209,31 @@ const AddItemForm = () => {
       currentItem?.color != color ||
       currentItem.type != type
     ) {
-      const newItem: ItemsType = {
-        id: currentItemId,
-        name: name,
-        type: type,
-        color: color,
-        imgUrl: imgUri,
-        backgroundRemoved: backgroundRemoved,
-      };
-      itemRepo.updateItem(newItem);
-      //setUpdateVisablity(!updateVisablity);
+      try {
+        const persistedUri = await ensurePersistedItemImageUri(imgUri);
+        const newItem: ItemsType = {
+          id: currentItemId,
+          name: name,
+          type: type,
+          color: color,
+          imgUrl: persistedUri,
+          backgroundRemoved: true,
+        };
+        await itemRepo.updateItem(newItem);
+        //setUpdateVisablity(!updateVisablity);
+        dispatch(updateNewItemImg(""));
+        dispatch(clearCurrentItem());
+        showSnackbar("Item successfully updated", "success");
 
-      showSnackbar("Item successfully updated", "success");
-      setTimeout(() => router.navigate("/pages"), 300);
-      //router.navigate("/pages");
-      setTimeout(() => hideSnackbar(), 3000);
-      //setTimeout(() => setVisablity(false), 3000);
+        setTimeout(() => hideSnackbar(), 3000);
+        return true;
+      } catch (e) {
+        console.error("Failed to persist item image:", e);
+        showSnackbar("Could not save image. Try again.", "error");
+        return false;
+      }
     }
+    return false;
   };
 
   const renderPicture = () => {
@@ -245,6 +256,47 @@ const AddItemForm = () => {
 
   return (
     <View style={[styles.container, gap]}>
+      <AppButton
+        onPress={() => {
+          router.navigate("/pages");
+          dispatch(clearCurrentItem());
+          dispatch(updateNewItemImg(""));
+        }}
+        style={{
+          padding: 15,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          backgroundColor: "transparent",
+          zIndex: 100,
+        }}
+      >
+        <Icon
+          name="arrow-back-ios-new"
+          type="material"
+          color="black"
+          size={24}
+        />
+      </AppButton>
+      {currentItemId == -1 ? null : (
+        <AppButton
+          type="text"
+          onPress={() => {
+            setDeleteModal(!deleteModal);
+          }}
+          style={{
+            padding: 15,
+            position: "absolute",
+            top: 0,
+            right: 0,
+            backgroundColor: "transparent",
+            zIndex: 100,
+          }}
+        >
+          <AppText style={{ color: Colors.light.destructive }}>Delete</AppText>
+        </AppButton>
+      )}
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
@@ -258,45 +310,18 @@ const AddItemForm = () => {
                   contentFit="cover"
                   style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
                 />
-                <Pressable
+                <AppButton
+                  type="text"
                   onPress={() => {
-                    dispatch(updateNewItemImg(""));
-                    setBackgroudRemoved(false);
+                    router.navigate("/camera-screen");
+                    //dispatch(updateNewItemImg(""));
                   }}
-                  style={styles.clearIcon}
-                  hitSlop={10}
                 >
-                  <Icon
-                    reverse
-                    name="close"
-                    type="material"
-                    color="black"
-                    size={15}
-                  />
-                </Pressable>
+                  <AppText type="p3">Retake Image</AppText>
+                </AppButton>
               </View>
             ) : (
-              <Pressable
-                onPress={() => {
-                  //router.navigate("/camera-screen");
-                  Alert.alert(
-                    "Add Photo",
-                    "Choose how you'd like to add your item",
-                    [
-                      {
-                        text: "Library",
-                        onPress: () => handlePickImage(),
-                        style: "cancel",
-                      },
-                      {
-                        text: "Camera",
-                        onPress: () => router.navigate("/camera-screen"),
-                      },
-                    ],
-                  );
-                }}
-                style={styles.cameraButton}
-              >
+              <Pressable style={styles.cameraButton}>
                 <Icon
                   name="add-photo-alternate"
                   type="material"
@@ -321,6 +346,7 @@ const AddItemForm = () => {
             setOpen={setOpenColorDropdown}
             setValue={setColor}
             setItems={setColorValues}
+            dropDownDirection="BOTTOM"
             style={{
               backgroundColor: "transparent",
             }}
@@ -336,6 +362,7 @@ const AddItemForm = () => {
               setOpen={setOpen}
               setValue={setType}
               setItems={setItems}
+              dropDownDirection="BOTTOM"
               style={{
                 backgroundColor: "transparent",
               }}
@@ -348,46 +375,50 @@ const AddItemForm = () => {
       <View style={{ zIndex: -10, gap: 15, paddingBottom: 15 }}>
         {currentItemId == -1 ? (
           <AppButton
-            onPress={() => {
-              createItem();
+            onPress={async () => {
+              const completed = await createItem();
+              if (completed) {
+                router.navigate("/pages");
+              }
             }}
           >
-            <AppText style={{ color: "white" }}>Create Item</AppText>
+            <AppText style={{ color: "white" }}>Done</AppText>
           </AppButton>
         ) : (
           <AppButton
-            onPress={() => {
-              if (updateItem()) {
-                router.navigate("/pages");
-              }
+            onPress={async () => {
+              const ok = await updateItem();
+              if (ok) router.navigate("/pages");
             }}
           >
             <AppText style={{ color: "white" }}>Update Item</AppText>
           </AppButton>
         )}
 
-        <AppButton
-          type="secondary"
-          onPress={() => {
-            router.navigate("/pages");
-            dispatch(clearCurrentItem());
-            dispatch(updateNewItemImg(""));
-          }}
-        >
-          <AppText>Cancel</AppText>
-        </AppButton>
         {currentItemId != -1 ? (
           <AppButton
-            type="text"
+            type="secondary"
             onPress={() => {
-              setDeleteModal(!deleteModal);
+              router.navigate("/pages");
+              dispatch(clearCurrentItem());
+              dispatch(updateNewItemImg(""));
             }}
           >
-            <AppText style={{ color: Colors.light.destructive }}>
-              Delete
-            </AppText>
+            <AppText>Cancel</AppText>
           </AppButton>
-        ) : null}
+        ) : (
+          <AppButton
+            type="secondary"
+            onPress={async () => {
+              const completed = await createItem();
+              if (completed) {
+                router.navigate("/camera-screen");
+              }
+            }}
+          >
+            <AppText>Add Another Item</AppText>
+          </AppButton>
+        )}
       </View>
 
       <AppModal modalVisible={deleteModal} setModalVisible={setDeleteModal}>
