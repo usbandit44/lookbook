@@ -117,6 +117,7 @@ class SqliteOutfitRepo extends OutfitRepo {
       const result = await this.drizzleDb
         .update(outfits)
         .set({ imgUrl: imgUrl })
+        .where(eq(outfits.id, id))
         .returning();
       if (result == null) {
         throw new Error("Outfit doesn't exist");

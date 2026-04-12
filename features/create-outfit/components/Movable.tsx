@@ -401,7 +401,7 @@
 // });
 
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -409,7 +409,9 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
-const BASE_SIZE = 100;
+const isIpad = Platform.OS === "ios" && Platform.isPad;
+
+const BASE_SIZE = isIpad ? 250 : 100;
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 2.5;
 

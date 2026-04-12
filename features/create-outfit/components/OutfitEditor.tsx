@@ -4,6 +4,7 @@ import AppText from "@/components/ui/AppText";
 import { Colors } from "@/constants/constants";
 import icons from "@/constants/icons";
 import { ItemsType } from "@/db/schemas/items";
+import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import {
@@ -30,7 +31,6 @@ import {
 import { Icon } from "react-native-elements";
 import { captureRef } from "react-native-view-shot";
 import Movable from "./Movable";
-import { normalizeImageUri } from "@/functions/normalizeImageUri";
 
 const BASE_SIZE = 100;
 
@@ -259,7 +259,7 @@ const OutfitEditor: React.FC = () => {
                   const dest = (FileSystem.documentDirectory ?? "") + fileName;
                   await FileSystem.copyAsync({ from: imgUri, to: dest });
                   outfitRepo.updateOutfitImgUrl(currentOutfit.id, dest);
-                  outfitRepo.updateOutfitUpdateImgUrl(currentOutfit.id, true);
+                  outfitRepo.updateOutfitUpdateImgUrl(currentOutfit.id, false);
                 }
                 dispatch(clearAllItems());
                 dispatch(clearCurrentOutfit());
@@ -282,7 +282,7 @@ const OutfitEditor: React.FC = () => {
         <TextInput
           onChangeText={setOutfitName}
           value={outfitName}
-          placeholderTextColor="black"
+          placeholderTextColor="grey"
           placeholder={defaultName}
           style={styles.name}
         />

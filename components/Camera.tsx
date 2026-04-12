@@ -1,11 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-
 import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
 import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
 import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -72,7 +72,14 @@ export function Camera() {
         <Text style={{ textAlign: "center" }}>
           We need your permission to use the camera
         </Text>
-        <Button onPress={requestPermission} title="Grant permission" />
+        <Button
+          onPress={
+            permission.canAskAgain
+              ? requestPermission
+              : () => Linking.openSettings()
+          }
+          title={"Continue"}
+        />
       </View>
     );
   }

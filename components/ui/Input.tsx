@@ -11,7 +11,7 @@ const Input: React.FC<{
       onChangeText={props.onChangeText}
       value={props.value}
       placeholder={props.placeholder}
-      placeholderTextColor="black"
+      placeholderTextColor="grey"
       style={styles.input}
     />
   );
