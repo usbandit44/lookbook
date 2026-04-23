@@ -1,23 +1,16 @@
 import Snackbar from "@/components/ui/Snackbar";
 import { Colors } from "@/constants/constants";
-import migrations from "@/drizzle/migrations";
+import { DrizzleProvider } from "@/hooks/DrizzleContext";
 import SnackbarProvider, { useSnackbar } from "@/hooks/useSnackBar";
 import { store } from "@/redux/store";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useFonts } from "expo-font";
 import { Slot, usePathname } from "expo-router";
-import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
+import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import { Suspense } from "react";
-import {
-  ActivityIndicator,
-  Keyboard,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import {
@@ -37,10 +30,6 @@ function AppShell() {
 
   const isCamera = pathname.includes("/camera-screen");
   const backgroundColor = isCamera ? "black" : Colors.light.background;
-
-  const expoDb = openDatabaseSync(DATABASE_NAME);
-  const db = drizzle(expoDb);
-  useMigrations(db, migrations);
 
   // ← merge both useFonts into one call
   const [fontsLoaded] = useFonts({
@@ -75,36 +64,26 @@ function AppShell() {
   const { settings, hideSnackbar } = snackbarSettingsContext;
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => Keyboard.dismiss()}
-      accessible={false}
-    >
-      <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
-        {/* 🔹 Paint status bar background */}
-        <View
-          style={{
-            height: insets.top,
-            backgroundColor,
-          }}
-        />
+    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
+        {/* Status bar fill */}
+        <View style={{ height: insets.top, backgroundColor }} />
 
-        {/* 🔹 App content */}
-
-        <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
+        {/* Content — now flex: 1 so it fills remaining space */}
+        <View style={{ flex: 1 }}>
           <Slot />
-          <Snackbar
-            visibility={settings.visibility}
-            onClose={hideSnackbar}
-            type={settings.type}
-          >
-            {settings.children}
-          </Snackbar>
-        </GestureHandlerRootView>
+        </View>
 
-        {/* 🔹 Status bar text */}
-        <StatusBar style={isCamera ? "light" : "dark"} />
-      </View>
-    </TouchableWithoutFeedback>
+        <Snackbar
+          visibility={settings.visibility}
+          onClose={hideSnackbar}
+          type={settings.type}
+        >
+          {settings.children}
+        </Snackbar>
+      </GestureHandlerRootView>
+      <StatusBar style={isCamera ? "light" : "dark"} />
+    </View>
   );
 }
 
@@ -123,9 +102,11 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <ThemeProvider value={DefaultTheme}>
               <SnackbarProvider>
-                <Provider store={store}>
-                  <AppShell />
-                </Provider>
+                <DrizzleProvider>
+                  <Provider store={store}>
+                    <AppShell />
+                  </Provider>
+                </DrizzleProvider>
               </SnackbarProvider>
             </ThemeProvider>
           </QueryClientProvider>

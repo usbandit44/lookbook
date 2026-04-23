@@ -26,9 +26,9 @@ const AppButton: React.FC<{
       break;
     case "secondary":
       typeStyling = {
-        padding: 15,
-        paddingLeft: 25,
-        paddingRight: 25,
+        padding: 14,
+        paddingLeft: 24,
+        paddingRight: 24,
         borderWidth: 1,
       };
       break;

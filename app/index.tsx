@@ -1,10 +1,17 @@
 import { Colors } from "@/constants/constants";
+import { items } from "@/db/schemas/items";
+import { useDrizzle } from "@/hooks/DrizzleContext";
+import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import AppUserRepo from "@/repo/user_repo/AppUserRepo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 export function LoginPage() {
+  const drizzleDb = useDrizzle();
+
+  const itemRepo = new AppItemRepo();
   const userRepo = new AppUserRepo();
   const router = useRouter();
 
@@ -24,6 +31,24 @@ export function LoginPage() {
       }
     }
     checkUser();
+  }, []);
+
+  useEffect(() => {
+    async function tagsMigration() {
+      const tagsUpdate = await AsyncStorage.getItem("tagsUpdate");
+      if (tagsUpdate) return;
+      const itemsList = await drizzleDb.select().from(items);
+      itemsList.forEach((item) => {
+        if (item.tags.length == 0) {
+          const tempTags = [item.type];
+          if (item.color) tempTags.push(item.color);
+          itemRepo.updateTags(item.id, tempTags);
+        }
+      });
+      await AsyncStorage.setItem("tagsUpdate", "true");
+    }
+
+    tagsMigration();
   }, []);
 
   // Optional loading indicator

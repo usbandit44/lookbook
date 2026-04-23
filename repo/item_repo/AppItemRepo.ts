@@ -9,6 +9,7 @@ class AppItemRepo extends ItemRepo {
     name: string;
     type: string;
     color: string;
+    tags: string[];
     imgUrl: string;
     backgroundRemoved: boolean;
   }): Promise<number> {
@@ -97,9 +98,28 @@ class AppItemRepo extends ItemRepo {
       throw error;
     }
   }
+
+  async getIdsByTags(tags: string[]): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getIdsByTags(tags);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async updateItem(item: ItemsType): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateItem(item);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateTags(id: number, tags: string[]): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateTags(id, tags);
       return result;
     } catch (err) {
       throw err;

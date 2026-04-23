@@ -2,10 +2,19 @@ import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
 import FormElement from "@/components/ui/FormElement";
-import Input from "@/components/ui/Input";
-import { Colors, itemColors, itemTypes } from "@/constants/constants";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
+import Tag from "@/components/ui/Tag";
+import {
+  Colors,
+  itemColors,
+  itemSubTypes,
+  itemTypes,
+  itemTypesArray,
+} from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
+import { user } from "@/db/schemas/user";
 import { normalizeImageUri } from "@/functions/normalizeImageUri";
+import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
 import { useSnackbar } from "@/hooks/useSnackBar";
@@ -13,11 +22,13 @@ import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
 import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
+import AppUserRepo from "@/repo/user_repo/AppUserRepo";
 import { useFocusEffect } from "@react-navigation/native";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -25,8 +36,9 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
 import { Icon } from "react-native-elements";
+import { ScrollView } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FormValues = {
   img: string;
@@ -50,6 +62,13 @@ async function ensurePersistedItemImageUri(uri: string): Promise<string> {
 }
 
 const AddItemForm = () => {
+  const drizzleDb = useDrizzle();
+  const { data: liveUserData } = useLiveQuery(drizzleDb.select().from(user));
+
+  const customTags = liveUserData?.[0]?.customTags ?? [];
+
+  const scrollRef = useRef<ScrollView>(null);
+
   const snackbarSettingsContext = useSnackbar();
   if (!snackbarSettingsContext) {
     throw new Error("useSnackbar must be used within a SnackbarProvider");
@@ -61,8 +80,12 @@ const AddItemForm = () => {
 
   const itemRepo = new AppItemRepo();
   const outfitRepo = new AppOutfitRepo();
+  const userRepo = new AppUserRepo();
 
   const currentItemId = useAppSelector(selectCurrentItem);
+
+  // Added at top of AddItemForm
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -74,6 +97,8 @@ const AddItemForm = () => {
       };
     }, []),
   );
+
+  const [searchCustomTags, setSearchCustomTags] = useState("");
 
   const [deleteModal, setDeleteModal] = useState(false);
 
@@ -97,6 +122,8 @@ const AddItemForm = () => {
 
         setColor(item.color ?? "");
         setType(item.type);
+        setTags(item.tags);
+        console.log(item.tags);
       }
       getCurrentItem();
     } else {
@@ -128,7 +155,8 @@ const AddItemForm = () => {
       value: color,
     })),
   );
-  //const [backgroundRemoved, setBackgroudRemoved] = useState(false);
+
+  const [tags, setTags] = useState<string[]>([]);
 
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
@@ -143,6 +171,7 @@ const AddItemForm = () => {
     name: string;
     type: string;
     color: string;
+    tags: string[];
     imgUrl: string;
     backgroundRemoved: boolean;
   }) => {
@@ -175,6 +204,7 @@ const AddItemForm = () => {
         name: finalName,
         type: type,
         color: color,
+        tags: tags,
         imgUrl: dest,
         backgroundRemoved: true,
       };
@@ -182,6 +212,7 @@ const AddItemForm = () => {
       setType(null);
       setColor("");
       setName("");
+      setTags([]);
       dispatch(updateNewItemImg(""));
       //setVisablity(!visablity);
       showSnackbar("Item successfully added", "success");
@@ -207,7 +238,8 @@ const AddItemForm = () => {
       currentItem?.imgUrl != imgUri ||
       currentItem?.name != name ||
       currentItem?.color != color ||
-      currentItem.type != type
+      currentItem.type != type ||
+      currentItem.tags != tags
     ) {
       try {
         const persistedUri = await ensurePersistedItemImageUri(imgUri);
@@ -216,6 +248,7 @@ const AddItemForm = () => {
           name: name,
           type: type,
           color: color,
+          tags: tags,
           imgUrl: persistedUri,
           backgroundRemoved: true,
         };
@@ -255,7 +288,7 @@ const AddItemForm = () => {
   };
 
   return (
-    <View style={[styles.container, gap]}>
+    <View style={[styles.container]}>
       <AppButton
         onPress={() => {
           router.navigate("/pages");
@@ -300,8 +333,13 @@ const AddItemForm = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        style={{ flex: 1 }}
       >
-        <View style={styles.form}>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          bounces={true}
+          ref={scrollRef}
+        >
           <FormElement showError={showImgError} errorMsg="Add a Image">
             {imgUri ? (
               <View style={styles.imageWrapper}>
@@ -331,46 +369,224 @@ const AddItemForm = () => {
               </Pressable>
             )}
           </FormElement>
-          <FormElement showError={showNameError} errorMsg="Enter a name">
-            <Input
-              onChangeText={setName}
-              value={name}
-              placeholder={defaultName}
-            />
-          </FormElement>
 
-          <DropDownPicker
-            open={openColorDropdown}
-            value={color}
-            items={colorValues}
-            setOpen={setOpenColorDropdown}
-            setValue={setColor}
-            setItems={setColorValues}
-            dropDownDirection="BOTTOM"
-            style={{
-              backgroundColor: "transparent",
-            }}
-            textStyle={{ fontFamily: "Lora-Regular" }}
-            placeholder="Select Color"
-          />
+          <View style={styles.tagSection}>
+            {tags.length != 0 ? (
+              <ScrollView
+                bounces={true}
+                horizontal={true}
+                style={{ width: "100%" }}
+                contentContainerStyle={{ gap: 8 }}
+                showsHorizontalScrollIndicator={false}
+              >
+                {tags.map((tag, index) => {
+                  return (
+                    <Tag
+                      key={index}
+                      onClear={() => {
+                        setTags((prev) => prev.filter((t) => t !== tag));
+                        if (type == tag) {
+                          setType(null);
+                        }
+                      }}
+                    >
+                      {tag}
+                    </Tag>
+                  );
+                })}
+              </ScrollView>
+            ) : null}
 
-          <FormElement showError={showTypeError} errorMsg="Select a type">
-            <DropDownPicker
-              open={open}
-              value={type}
-              items={items}
-              setOpen={setOpen}
-              setValue={setType}
-              setItems={setItems}
-              dropDownDirection="BOTTOM"
+            {type ? (
+              <View
+                style={{
+                  alignItems: "flex-start",
+                  width: "100%",
+                  gap: 8,
+                }}
+              >
+                <AppText type="p3">Subtypes</AppText>
+                <ScrollView
+                  bounces={true}
+                  horizontal={true}
+                  style={{ width: "100%", gap: 50 }}
+                  contentContainerStyle={{ gap: 8 }}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {itemSubTypes
+                    .filter((i) => i.key === type)
+                    .map((i) => i.value)
+                    .map((type, index) => {
+                      const selected = tags.includes(type);
+
+                      return (
+                        <AppButton
+                          onPress={() => {
+                            setTags((prev) =>
+                              prev.includes(type)
+                                ? prev.filter((t) => t !== type)
+                                : [...prev, type],
+                            );
+                          }}
+                          type={selected ? "primary" : "secondary"}
+                          key={index}
+                          style={styles.tagSelects}
+                        >
+                          <AppText
+                            style={
+                              selected ? { color: "white" } : { color: "black" }
+                            }
+                          >
+                            {type}
+                          </AppText>
+                        </AppButton>
+                      );
+                    })}
+                </ScrollView>
+              </View>
+            ) : (
+              <View
+                style={{
+                  alignItems: "flex-start",
+                  width: "100%",
+                  gap: 8,
+                }}
+              >
+                <AppText type="p3">Type</AppText>
+                <FormElement showError={showTypeError} errorMsg="Select a type">
+                  <ScrollView
+                    bounces={true}
+                    horizontal={true}
+                    style={{ height: 50, width: "100%", gap: 50 }}
+                    contentContainerStyle={{ gap: 8 }}
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    {itemTypesArray.map((type, index) => {
+                      const selected = tags.includes(type);
+
+                      return (
+                        <AppButton
+                          onPress={() => {
+                            setTags((prev) =>
+                              prev.includes(type)
+                                ? prev.filter((t) => t !== type)
+                                : [...prev, type],
+                            );
+                            setType(type);
+                            if (showTypeError) setShowTypeError(false);
+                          }}
+                          type={selected ? "primary" : "secondary"}
+                          key={index}
+                          style={styles.tagSelects}
+                        >
+                          <AppText
+                            style={
+                              selected ? { color: "white" } : { color: "black" }
+                            }
+                          >
+                            {type}
+                          </AppText>
+                        </AppButton>
+                      );
+                    })}
+                  </ScrollView>
+                </FormElement>
+              </View>
+            )}
+            <View
               style={{
-                backgroundColor: "transparent",
+                alignItems: "flex-start",
+                width: "100%",
+                gap: 8,
               }}
-              textStyle={{ fontFamily: "Lora-Regular" }}
-              placeholder="Select Type"
-            />
-          </FormElement>
-        </View>
+            >
+              <AppText type="p3">Color</AppText>
+              <ScrollView
+                bounces={true}
+                horizontal={true}
+                style={{ height: 50, width: "100%", gap: 50 }}
+                contentContainerStyle={{ gap: 8 }}
+                showsHorizontalScrollIndicator={false}
+              >
+                {itemColors.map((color, index) => {
+                  const selected = tags.includes(color);
+
+                  return (
+                    <AppButton
+                      onPress={() => {
+                        setTags((prev) =>
+                          prev.includes(color)
+                            ? prev.filter((t) => t !== color)
+                            : [...prev, color],
+                        );
+                      }}
+                      type={selected ? "primary" : "secondary"}
+                      key={index}
+                      style={styles.tagSelects}
+                    >
+                      <AppText
+                        style={
+                          selected ? { color: "white" } : { color: "black" }
+                        }
+                      >
+                        {color}
+                      </AppText>
+                    </AppButton>
+                  );
+                })}
+              </ScrollView>
+            </View>
+            <View
+              style={{
+                alignItems: "flex-start",
+                width: "100%",
+                gap: 8,
+              }}
+            >
+              <AppText type="p3">Custom Tags</AppText>
+              <SearchableDropdown
+                options={customTags}
+                onSelect={(value) => {
+                  setTags((prev) =>
+                    prev.includes(value)
+                      ? prev.filter((t) => t !== value)
+                      : [...prev, value],
+                  );
+                }}
+                value={searchCustomTags}
+                onChangeText={setSearchCustomTags}
+                scrollRef={scrollRef}
+                footer={
+                  <View style={{ paddingHorizontal: 15, paddingVertical: 10 }}>
+                    <Pressable
+                      onPress={() => {
+                        if (!customTags.includes(searchCustomTags.trim())) {
+                          userRepo.addCustomTag(searchCustomTags.trim());
+                          setTags((prev) =>
+                            prev.includes(searchCustomTags.trim())
+                              ? prev.filter(
+                                  (t) => t !== searchCustomTags.trim(),
+                                )
+                              : [...prev, searchCustomTags.trim()],
+                          );
+                        }
+                      }}
+                      style={{ width: "100%", alignItems: "center" }}
+                    >
+                      <AppText style={{ color: "black" }}>+ Add Tag</AppText>
+                    </Pressable>
+                  </View>
+                }
+                onClearItem={(item) => {
+                  userRepo.removeCustomTag(item);
+                  setTags((prev) =>
+                    prev.filter((t) => t !== searchCustomTags.trim()),
+                  );
+                }}
+              ></SearchableDropdown>
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
       <View style={{ zIndex: -10, gap: 15, paddingBottom: 15 }}>
         {currentItemId == -1 ? (
@@ -454,20 +670,23 @@ export default AddItemForm;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: "flex-end",
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingBottom: 20,
+    justifyContent: "space-between",
     paddingTop: 50,
   },
   form: {
     width: "100%",
-    aspectRatio: 1,
+    //aspectRatio: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
+    paddingBottom: 30,
   },
   imageWrapper: {
     position: "relative",
-    width: "100%",
+    width: "90%",
     aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -490,5 +709,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     aspectRatio: 1,
+  },
+  tagSelects: { height: 40, padding: 0 },
+  tagSection: {
+    width: "100%",
+    //aspectRatio: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
   },
 });

@@ -13,6 +13,7 @@ class SqliteItemRepo extends ItemRepo {
     type: string;
     color: string;
     imgUrl: string;
+    tags: string[];
     backgroundRemoved: boolean;
   }): Promise<number> {
     try {
@@ -175,6 +176,25 @@ class SqliteItemRepo extends ItemRepo {
     }
   }
 
+  async getIdsByTags(tags: string[]): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb.select().from(items);
+
+      if (result == null) {
+        throw new Error("No items found");
+      }
+
+      const filtered = result.filter((item) =>
+        item.tags.some((tag) => tags.includes(tag)),
+      );
+
+      return filtered.map((item) => item.id);
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
+  }
+
   async updateItem(item: ItemsType): Promise<number> {
     try {
       const result = await this.drizzleDb
@@ -184,6 +204,7 @@ class SqliteItemRepo extends ItemRepo {
           name: item.name,
           color: item.color,
           type: item.type,
+          tags: item.tags,
         })
         .where(eq(items.id, item.id))
         .returning();
@@ -196,6 +217,26 @@ class SqliteItemRepo extends ItemRepo {
       throw error;
     }
   }
+
+  async updateTags(id: number, tags: string[]): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(items)
+        .set({
+          tags: tags,
+        })
+        .where(eq(items.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Item doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      throw error;
+    }
+  }
+
   async deleteItem(id: number): Promise<void> {
     try {
       const result = await this.drizzleDb.delete(items).where(eq(items.id, id));

@@ -1,19 +1,13 @@
+import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import {
   addNewItem,
   itemInOutfit,
   removeItem,
 } from "@/redux/slices/outfitSlice";
-import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { CheckBox, Icon } from "react-native-elements";
 
 const SelectableItem: React.FC<{
@@ -52,7 +46,7 @@ const SelectableItem: React.FC<{
     >
       <Image
         source={{ uri: imageUri }}
-        contentFit="cover"
+        contentFit="contain"
         style={styles.img}
       />
       <View
@@ -63,8 +57,8 @@ const SelectableItem: React.FC<{
         }}
       >
         <View style={styles.container}>
-          <Text>{props.name}</Text>
-          <Text>{props.size}</Text>
+          {/* <Text>{props.name}</Text>
+          <Text>{props.size}</Text> */}
         </View>
         <CheckBox
           checked={selected}
@@ -85,7 +79,7 @@ const SelectableItem: React.FC<{
 export default SelectableItem;
 
 const styles = StyleSheet.create({
-  container: { gap: 5 },
+  container: { gap: 0 },
   img: {
     aspectRatio: 4 / 5,
     width: "100%",

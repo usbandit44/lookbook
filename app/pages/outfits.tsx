@@ -1,15 +1,14 @@
 import ItemPreview from "@/components/ItemPreview";
 import AppButton from "@/components/ui/AppButton";
 import { outfits } from "@/db/schemas/outfits";
-import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDrizzle } from "@/hooks/DrizzleContext";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, FlatList, StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 
 const OutfitsPage = () => {
-  const db = useSQLiteContext();
-  const drizzleDb = drizzle(db);
+  const drizzleDb = useDrizzle();
   //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
 
   const { data: itemsData } = useLiveQuery(drizzleDb.select().from(outfits));

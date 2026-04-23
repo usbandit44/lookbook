@@ -23,7 +23,10 @@ abstract class ItemRepo {
   abstract getAllAccessoriesIds(): Promise<number[]>;
   abstract getAllBeltIds(): Promise<number[]>;
 
+  abstract getIdsByTags(tags: string[]): Promise<number[]>;
+
   abstract updateItem(item: ItemsType): Promise<number>;
+  abstract updateTags(id: number, tags: string[]): Promise<number>;
 
   abstract deleteItem(id: number): Promise<void>;
 }

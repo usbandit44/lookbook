@@ -48,6 +48,102 @@ export const itemTypesArray = [
   "Accessories",
 ];
 
+export const itemSubTypes = [
+  // Tops
+  { key: "Tops", value: "T-Shirt" },
+  { key: "Tops", value: "Long Sleeve Tee" },
+  { key: "Tops", value: "Button-Down" },
+  { key: "Tops", value: "Blouse" },
+  { key: "Tops", value: "Sweater" },
+  { key: "Tops", value: "Tank Top" },
+  { key: "Tops", value: "Polo" },
+  { key: "Tops", value: "Vest" },
+  { key: "Tops", value: "Dress Shirt" },
+
+  // Bottoms
+  { key: "Bottoms", value: "Jeans" },
+  { key: "Bottoms", value: "Dress Pants" },
+  { key: "Bottoms", value: "Sweatpants" },
+  { key: "Bottoms", value: "Cargo Pants" },
+  { key: "Bottoms", value: "Leggings" },
+  { key: "Bottoms", value: "Shorts" },
+  { key: "Bottoms", value: "Denim Shorts" },
+  { key: "Bottoms", value: "Skirt" },
+  { key: "Bottoms", value: "Mini Skirt" },
+  { key: "Bottoms", value: "Midi Skirt" },
+  { key: "Bottoms", value: "Maxi Skirt" },
+  { key: "Bottoms", value: "Overalls" },
+
+  // Outerwear
+  { key: "Outerwears", value: "Hoodie" },
+  { key: "Outerwear", value: "Jacket" },
+  { key: "Outerwear", value: "Coat" },
+  { key: "Outerwear", value: "Puffer Jacket" },
+  { key: "Outerwear", value: "Blazer" },
+  { key: "Outerwear", value: "Bomber Jacket" },
+  { key: "Outerwear", value: "Denim Jacket" },
+  { key: "Outerwear", value: "Raincoat" },
+  { key: "Outerwear", value: "Fleece" },
+  { key: "Outerwear", value: "Windbreaker" },
+  { key: "Outerwear", value: "Trench Coat" },
+
+  // Dresses
+  { key: "Dresses", value: "Mini Dress" },
+  { key: "Dresses", value: "Midi Dress" },
+  { key: "Dresses", value: "Maxi Dress" },
+  { key: "Dresses", value: "Sundress" },
+  { key: "Dresses", value: "Wrap Dress" },
+  { key: "Dresses", value: "Bodycon Dress" },
+  { key: "Dresses", value: "Slip Dress" },
+  { key: "Dresses", value: "Romper" },
+
+  // Shoes
+  { key: "Shoes", value: "Sneakers" },
+  { key: "Shoes", value: "Running Shoes" },
+  { key: "Shoes", value: "Boots" },
+  { key: "Shoes", value: "Loafers" },
+  { key: "Shoes", value: "Dress Shoes" },
+  { key: "Shoes", value: "Sandals" },
+  { key: "Shoes", value: "Slides" },
+  { key: "Shoes", value: "Heels" },
+  { key: "Shoes", value: "Flats" },
+  { key: "Shoes", value: "Mules" },
+
+  // Belt
+  { key: "Belt", value: "Leather Belt" },
+  { key: "Belt", value: "Canvas Belt" },
+  { key: "Belt", value: "Chain Belt" },
+  { key: "Belt", value: "Braided Belt" },
+
+  // Headwear
+  { key: "Headwear", value: "Baseball Cap" },
+  { key: "Headwear", value: "Fitted Hat" },
+  { key: "Headwear", value: "Beanie" },
+  { key: "Headwear", value: "Bucket Hat" },
+  { key: "Headwear", value: "Snapback" },
+  { key: "Headwear", value: "Beret" },
+  { key: "Headwear", value: "Fedora" },
+  { key: "Headwear", value: "Visor" },
+  { key: "Headwear", value: "Headband" },
+
+  // Accessories
+  { key: "Accessories", value: "Watch" },
+  { key: "Accessories", value: "Sunglasses" },
+  { key: "Accessories", value: "Necklace" },
+  { key: "Accessories", value: "Bracelet" },
+  { key: "Accessories", value: "Ring" },
+  { key: "Accessories", value: "Earrings" },
+  { key: "Accessories", value: "Scarf" },
+  { key: "Accessories", value: "Gloves" },
+  { key: "Accessories", value: "Bag" },
+  { key: "Accessories", value: "Backpack" },
+  { key: "Accessories", value: "Tote Bag" },
+  { key: "Accessories", value: "Wallet" },
+  { key: "Accessories", value: "Tie" },
+  { key: "Accessories", value: "Bow Tie" },
+  { key: "Accessories", value: "Socks" },
+];
+
 export const itemColors = [
   "White",
   "Black",

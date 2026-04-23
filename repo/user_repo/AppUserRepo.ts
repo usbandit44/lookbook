@@ -35,6 +35,29 @@ class AppUserRepo extends UserRepo {
       throw err;
     }
   }
+
+  async getCustomTags(): Promise<string[]> {
+    try {
+      const result = await this.sqliteRepo.getCustomTags();
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+  async addCustomTag(tag: string): Promise<void> {
+    try {
+      const result = await this.sqliteRepo.addCustomTag(tag);
+    } catch (err) {
+      throw err;
+    }
+  }
+  async removeCustomTag(tag: string): Promise<void> {
+    try {
+      const result = await this.sqliteRepo.removeCustomTag(tag);
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 export default AppUserRepo;

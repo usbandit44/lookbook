@@ -1,13 +1,13 @@
 import AppButton from "@/components/ui/AppButton";
 import AppText from "@/components/ui/AppText";
-import { Colors } from "@/constants/constants";
+import { Colors, itemSubTypes, itemTypesArray } from "@/constants/constants";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { addNewItem, clearAllItems } from "@/redux/slices/outfitSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { CheckBox, Icon } from "react-native-elements";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Icon } from "react-native-elements";
 export enum itemTypes {
   Tops = "Tops",
   Bottoms = "Bottoms",
@@ -48,14 +48,27 @@ const GenerateOutfitForm = () => {
   }
   async function GenerateOutfit() {
     dispatch(clearAllItems());
-    await RandomItem(topSelected, () => repo.getAllTopIds());
-    await RandomItem(bottomSelected, () => repo.getAllBottomIds());
-    await RandomItem(outerwearSelected, () => repo.getAllOuterwearIds());
-    await RandomItem(shoesSelected, () => repo.getAllShoeIds());
-    await RandomItem(headwearSelected, () => repo.getAllHeadwearIds());
-    await RandomItem(accessoriesSelected, () => repo.getAllAccessoriesIds());
-    await RandomItem(beltSelected, () => repo.getAllBeltIds());
+    itemTypesArray.forEach(async (type) => {
+      await RandomItem(selectedMap[type].length != 0, () =>
+        repo.getIdsByTags(selectedMap[type]),
+      );
+    });
+    // await RandomItem(topSelected, () => repo.getAllTopIds());
+    // await RandomItem(bottomSelected, () => repo.getAllBottomIds());
+    // await RandomItem(outerwearSelected, () => repo.getAllOuterwearIds());
+    // await RandomItem(shoesSelected, () => repo.getAllShoeIds());
+    // await RandomItem(headwearSelected, () => repo.getAllHeadwearIds());
+    // await RandomItem(accessoriesSelected, () => repo.getAllAccessoriesIds());
+    // await RandomItem(beltSelected, () => repo.getAllBeltIds());
   }
+
+  const [selectedMap, setSelectedMap] = useState<Record<string, string[]>>(
+    Object.fromEntries(itemTypesArray.map((type) => [type, []])),
+  );
+
+  const [showAll, setShowAll] = useState<Record<string, boolean>>(
+    Object.fromEntries(itemTypesArray.map((type) => [type, false])),
+  );
 
   return (
     <View style={styles.container}>
@@ -88,7 +101,120 @@ const GenerateOutfitForm = () => {
       </View>
       <View style={styles.formContainer}>
         <View>
-          <Pressable
+          {itemTypesArray.map((type, index) => {
+            const selected = (selectedMap[type] ?? []).includes(type);
+            const showSubtypes = showAll[type];
+            const subtypeArray = itemSubTypes
+              .filter((i) => i.key === type)
+              .map((i) => i.value);
+
+            return (
+              <View key={index} style={styles.option}>
+                <ScrollView
+                  bounces={true}
+                  horizontal={true}
+                  style={{
+                    height: 50,
+                    flexShrink: 1,
+                  }}
+                  contentContainerStyle={styles.optionScroll}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  <AppButton
+                    onPress={() => {
+                      setSelectedMap((prev) => {
+                        const current = prev[type] ?? [];
+                        const allValues = [type, ...subtypeArray];
+
+                        return {
+                          ...prev,
+                          [type]: current.includes(type)
+                            ? current.filter((v) => !allValues.includes(v))
+                            : allValues,
+                        };
+                      });
+                    }}
+                    type={selected ? "primary" : "secondary"}
+                    key={index}
+                    style={styles.optionButton}
+                  >
+                    <AppText
+                      style={selected ? { color: "white" } : { color: "black" }}
+                    >
+                      {type}
+                    </AppText>
+                  </AppButton>
+                  {showSubtypes
+                    ? subtypeArray.map((subtype, index) => {
+                        const selected =
+                          (selectedMap[type] ?? []).includes(subtype) ||
+                          (selectedMap[type] ?? []).includes(type);
+                        return (
+                          <AppButton
+                            onPress={() => {
+                              setSelectedMap((prev) => {
+                                const current = prev[type] ?? [];
+                                return {
+                                  ...prev,
+                                  [type]: current.includes(subtype)
+                                    ? current.filter(
+                                        (v) => v !== subtype && v !== type,
+                                      )
+                                    : [...current, subtype],
+                                };
+                              });
+                            }}
+                            type={selected ? "primary" : "secondary"}
+                            key={index}
+                            style={styles.optionButton}
+                          >
+                            <AppText
+                              style={
+                                selected
+                                  ? { color: "white" }
+                                  : { color: "black" }
+                              }
+                            >
+                              {subtype}
+                            </AppText>
+                          </AppButton>
+                        );
+                      })
+                    : null}
+                  {showSubtypes ? null : (
+                    <Pressable
+                      onPress={() => {
+                        setShowAll((prev) => {
+                          return {
+                            ...prev,
+                            [type]: true,
+                          };
+                        });
+                      }}
+                    >
+                      <Icon name="add" type="material" color="#888" size={20} />
+                    </Pressable>
+                  )}
+                </ScrollView>
+                {showSubtypes ? (
+                  <Pressable
+                    onPress={() => {
+                      setShowAll((prev) => {
+                        return {
+                          ...prev,
+                          [type]: false,
+                        };
+                      });
+                    }}
+                  >
+                    <Icon name="clear" type="material" color="#888" size={20} />
+                  </Pressable>
+                ) : null}
+              </View>
+            );
+          })}
+
+          {/* <Pressable
             style={styles.option}
             onPress={() => setTopSelected(!topSelected)}
           >
@@ -170,7 +296,7 @@ const GenerateOutfitForm = () => {
               checkedIcon={<Icon name="check-box" type="material" size={24} />}
               onPress={() => setAccessoriesSelected(!accessoriesSelected)}
             />
-          </Pressable>
+          </Pressable> */}
         </View>
         <View style={{ width: "100%", paddingLeft: 25, paddingRight: 25 }}>
           <AppButton
@@ -213,8 +339,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     flexDirection: "row",
-    paddingLeft: 30,
-    paddingRight: 30,
+    paddingVertical: 5,
+    paddingLeft: 20,
+    paddingRight: 8,
+    gap: 8,
     borderTopWidth: 0.5,
     borderColor: "#979C9E",
   },
@@ -223,4 +351,9 @@ const styles = StyleSheet.create({
     fontWeight: "light",
     fontSize: 16,
   },
+  optionScroll: {
+    gap: 8,
+    alignItems: "center",
+  },
+  optionButton: { height: 40, padding: 0 },
 });

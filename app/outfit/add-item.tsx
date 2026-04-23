@@ -1,33 +1,25 @@
 import AppButton from "@/components/ui/AppButton";
-import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
-import { Colors, itemColors, itemTypesArray } from "@/constants/constants";
+import Searchbar from "@/components/ui/SearchBar";
 import { items } from "@/db/schemas/items";
 import AddItemHeader from "@/features/create-outfit/components/AddItemHeader";
 import SelectableItem from "@/features/create-outfit/components/SelectableItem";
-import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
+import { useDrizzle } from "@/hooks/DrizzleContext";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
+import Fuse from "fuse.js";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { CheckBox, Icon } from "react-native-elements";
+import { Animated, FlatList, StyleSheet, View } from "react-native";
+import { Icon } from "react-native-elements";
 
 const AddItem = () => {
   const router = useRouter();
-  const db = useSQLiteContext();
-  const drizzleDb = drizzle(db);
+  const drizzleDb = useDrizzle();
   //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
 
   const { data: itemsData } = useLiveQuery(drizzleDb.select().from(items));
-  const [typeFilter, setTypeFilter] = useState<string[]>([]);
-  const [colorFilter, setColorFilter] = useState<string[]>([]);
+
   const [filteredData, setFilteredData] = useState<
     | {
         id: number;
@@ -38,41 +30,51 @@ const AddItem = () => {
       }[]
     | null
   >(null);
-  const [applyFilter, setApplyFilter] = useState(0);
-  const [modalVisible, setModalVisible] = useState(false);
 
-  const [showColorPage, setShowColorPage] = useState(false);
+  const [search, setSearch] = useState<string>("");
 
-  const toggleType = (type: string) => {
-    setTypeFilter((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
-    );
-  };
-
-  const toggleColor = (color: string) => {
-    setColorFilter((prev) =>
-      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color],
-    );
-  };
-
+  const isFirstRender = useRef(true);
   useEffect(() => {
-    let filtered = itemsData.filter((item) => {
-      const typeMatch =
-        typeFilter.length === 0 || typeFilter.includes(item.type);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      setFilteredData(
+        itemsData.length % 2 === 1
+          ? [
+              ...itemsData,
+              { id: -1, name: "", type: "", color: null, imgUrl: "" },
+            ]
+          : itemsData,
+      );
+      return;
+    }
 
-      const colorMatch =
-        colorFilter.length === 0 || colorFilter.includes(item.color ?? "");
+    const timer = setTimeout(() => {
+      const tagFilters = search.split(" ").filter((t) => t !== "");
+      let filtered = itemsData;
 
-      return typeMatch && colorMatch;
-    });
+      if (tagFilters.length > 0) {
+        filtered = itemsData.filter((item) => {
+          return tagFilters.every((tag) => {
+            const normalized = normalizeSearchTerm(tag) ?? tag;
+            const fuse = new Fuse(item.tags, { threshold: 0.4 });
+            return fuse.search(normalized).length > 0;
+          });
+        });
+      }
 
-    const formattedData =
-      filtered.length % 2 === 1
-        ? [...filtered, { id: -1, name: "", type: "", color: null, imgUrl: "" }]
-        : filtered;
+      const formattedData =
+        filtered.length % 2 === 1
+          ? [
+              ...filtered,
+              { id: -1, name: "", type: "", color: null, imgUrl: "" },
+            ]
+          : filtered;
 
-    setFilteredData(formattedData);
-  }, [applyFilter, itemsData]);
+      setFilteredData(formattedData);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search, itemsData]);
 
   const [showScroolButton, setShowScrollButton] = useState(false);
   const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
@@ -123,18 +125,12 @@ const AddItem = () => {
         numColumns={2}
         columnWrapperStyle={styles.itemsGrid}
         ListHeaderComponent={
-          <View
-            style={{ paddingTop: 15, paddingLeft: 15, alignSelf: "flex-start" }}
-          >
-            <AppButton onPress={() => setModalVisible(true)}>
-              <Icon
-                name="filter-menu-outline"
-                type="material-community"
-                color="white"
-                size={20}
-              />
-              <AppText style={{ color: "white" }}>Filter</AppText>
-            </AppButton>
+          <View style={styles.header}>
+            <Searchbar
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search your clothes"
+            ></Searchbar>
           </View>
         }
         renderItem={({ item }) => (
@@ -148,11 +144,6 @@ const AddItem = () => {
       />
       <View style={styles.footerContainer}>
         <AppButton
-          // style={{
-          //   position: "absolute",
-          //   bottom: 20,
-          //   alignSelf: "center",
-          // }}
           fullWidth={true}
           onPress={() => router.navigate("/outfit/create-outfit")}
         >
@@ -188,141 +179,6 @@ const AddItem = () => {
           />
         </AppButton>
       </Animated.View>
-      <AppModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        style={{ height: 500 }}
-      >
-        {!showColorPage ? (
-          <>
-            <AppText>Filter</AppText>
-
-            <ScrollView style={{ flex: 1 }}>
-              {itemTypesArray.map((type) => {
-                const selected = typeFilter.includes(type);
-
-                return (
-                  <Pressable
-                    key={type}
-                    style={[styles.option, selected && styles.optionSelected]}
-                    onPress={() => toggleType(type)}
-                  >
-                    <AppText>{type}</AppText>
-
-                    <CheckBox
-                      checked={selected}
-                      onPress={() => toggleType(type)}
-                      checkedIcon={
-                        <Icon name="check-box" type="material" size={24} />
-                      }
-                      uncheckedIcon={
-                        <Icon
-                          name="check-box-outline-blank"
-                          type="material"
-                          size={24}
-                        />
-                      }
-                      containerStyle={styles.checkboxContainer}
-                    />
-                  </Pressable>
-                );
-              })}
-
-              {/* 👉 Navigate to Color Page */}
-              <Pressable
-                style={[
-                  styles.option,
-                  { paddingVertical: 12, paddingRight: 20 },
-                ]}
-                onPress={() => setShowColorPage(true)}
-              >
-                <AppText>Colors</AppText>
-                <Icon name="arrow-forward-ios" type="material" size={20} />
-              </Pressable>
-            </ScrollView>
-
-            {/* Apply */}
-            <AppButton
-              onPress={() => {
-                setApplyFilter((prev) => prev + 1);
-                setModalVisible(false);
-              }}
-            >
-              <AppText style={{ color: "white" }}>Apply</AppText>
-            </AppButton>
-
-            {/* Reset */}
-            <AppButton
-              onPress={() => {
-                setTypeFilter([]);
-                setColorFilter([]);
-                setApplyFilter((prev) => prev + 1);
-              }}
-              type="text"
-            >
-              <AppText style={{ color: Colors.light.destructive }}>
-                Reset
-              </AppText>
-            </AppButton>
-          </>
-        ) : (
-          /* ───────── PAGE 2: COLOR FILTER ───────── */
-          <>
-            {/* Header */}
-            <View
-              style={{
-                paddingLeft: 15,
-                width: "100%",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <Pressable
-                onPress={() => setShowColorPage(false)}
-                hitSlop={10}
-                style={{ position: "absolute", left: 0, top: 0 }}
-              >
-                <Icon name="arrow-back-ios" type="material" size={20} />
-              </Pressable>
-              <AppText>Colors</AppText>
-              <View style={{ width: 20 }} />
-            </View>
-
-            <ScrollView style={{ flex: 1 }}>
-              {itemColors.map((color) => {
-                const selected = colorFilter.includes(color);
-
-                return (
-                  <Pressable
-                    key={color}
-                    style={[styles.option, selected && styles.optionSelected]}
-                    onPress={() => toggleColor(color)}
-                  >
-                    <AppText>{color}</AppText>
-
-                    <CheckBox
-                      checked={selected}
-                      onPress={() => toggleColor(color)}
-                      checkedIcon={
-                        <Icon name="check-box" type="material" size={24} />
-                      }
-                      uncheckedIcon={
-                        <Icon
-                          name="check-box-outline-blank"
-                          type="material"
-                          size={24}
-                        />
-                      }
-                      containerStyle={styles.checkboxContainer}
-                    />
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </>
-        )}
-      </AppModal>
     </View>
   );
 };
@@ -390,5 +246,11 @@ const styles = StyleSheet.create({
     padding: 25,
     borderTopColor: "black",
     borderWidth: 0.5,
+  },
+  header: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    alignSelf: "flex-start",
+    width: "100%",
   },
 });

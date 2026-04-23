@@ -65,7 +65,6 @@
 //   },
 // });
 
-import AppText from "@/components/ui/AppText";
 import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { setCurrentItem } from "@/redux/slices/itemSlice";
@@ -113,11 +112,11 @@ const ItemPreview: React.FC<{
     >
       <Image
         source={{ uri: imageUri }}
-        contentFit="cover"
+        contentFit={props.type == "outfit" ? "cover" : "contain"}
         style={[styles.img, { height: itemHeight }]}
       />
-      <AppText>{props.name}</AppText>
-      <AppText>{props.color}</AppText>
+      {/* <AppText>{props.name}</AppText>
+      <AppText>{props.color}</AppText> */}
     </Pressable>
   );
 };
