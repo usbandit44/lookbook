@@ -38,7 +38,6 @@ import {
 } from "react-native";
 import { Icon } from "react-native-elements";
 import { ScrollView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FormValues = {
   img: string;
@@ -83,9 +82,6 @@ const AddItemForm = () => {
   const userRepo = new AppUserRepo();
 
   const currentItemId = useAppSelector(selectCurrentItem);
-
-  // Added at top of AddItemForm
-  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {

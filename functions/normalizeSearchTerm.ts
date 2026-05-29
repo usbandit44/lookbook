@@ -196,6 +196,7 @@ export const searchNormalizeMap: Record<string, string> = {
   gloves: "Gloves",
   bag: "Bag",
   bags: "Bag",
+  purse: "Purse",
   backpack: "Backpack",
   backpacks: "Backpack",
   "tote bag": "Tote Bag",

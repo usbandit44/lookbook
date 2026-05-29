@@ -52,7 +52,7 @@ export const itemSubTypes = [
   // Tops
   { key: "Tops", value: "T-Shirt" },
   { key: "Tops", value: "Long Sleeve Tee" },
-  { key: "Tops", value: "Button-Down" },
+  { key: "Tops", value: "Button Down" },
   { key: "Tops", value: "Blouse" },
   { key: "Tops", value: "Sweater" },
   { key: "Tops", value: "Tank Top" },
@@ -75,8 +75,8 @@ export const itemSubTypes = [
   { key: "Bottoms", value: "Overalls" },
 
   // Outerwear
-  { key: "Outerwears", value: "Hoodie" },
-  { key: "Outerwear", value: "Jacket" },
+  { key: "Outerwear", value: "Hoodie" },
+  { key: "Outerwear", value: "Zip-Up Jacket" },
   { key: "Outerwear", value: "Coat" },
   { key: "Outerwear", value: "Puffer Jacket" },
   { key: "Outerwear", value: "Blazer" },
@@ -117,10 +117,8 @@ export const itemSubTypes = [
 
   // Headwear
   { key: "Headwear", value: "Baseball Cap" },
-  { key: "Headwear", value: "Fitted Hat" },
   { key: "Headwear", value: "Beanie" },
   { key: "Headwear", value: "Bucket Hat" },
-  { key: "Headwear", value: "Snapback" },
   { key: "Headwear", value: "Beret" },
   { key: "Headwear", value: "Fedora" },
   { key: "Headwear", value: "Visor" },
@@ -136,6 +134,7 @@ export const itemSubTypes = [
   { key: "Accessories", value: "Scarf" },
   { key: "Accessories", value: "Gloves" },
   { key: "Accessories", value: "Bag" },
+  { key: "Accessories", value: "Purse" },
   { key: "Accessories", value: "Backpack" },
   { key: "Accessories", value: "Tote Bag" },
   { key: "Accessories", value: "Wallet" },
@@ -161,3 +160,20 @@ export const itemColors = [
   "Gold",
   "Multicolor",
 ];
+
+export const COLOR_NAMES_MAP = new Map([
+  ["000000", "Black"],
+  ["0000FF", "Blue"],
+  ["00FF00", "Green"],
+  ["660099", "Purple"],
+  ["808080", "Grey"],
+  ["964B00", "Brown"],
+  ["C0C0C0", "Silver"],
+  ["F0E68C", "Khaki"],
+  ["FF0000", "Red"],
+  ["FF681F", "Orange"],
+  ["FFC0CB", "Pink"],
+  ["FFD700", "Gold"],
+  ["FFFF00", "Yellow"],
+  ["FFFFFF", "White"],
+]);

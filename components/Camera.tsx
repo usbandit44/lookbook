@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { Icon } from "react-native-elements";
+import ClothingSubtypeClassifier from "../modules/clothing-subtype-classifier";
 import AppButton from "./ui/AppButton";
 import AppText from "./ui/AppText";
 
@@ -35,10 +36,17 @@ export function Camera() {
   };
 
   useEffect(() => {
-    if (state.status === "done") {
-      dispatch(updateNewItemImg(state.resultUri));
-      router.navigate("/add-item");
+    async function Temp() {
+      if (state.status === "done") {
+        const classification = await ClothingSubtypeClassifier.classify(
+          state.resultUri,
+        );
+        console.log(classification.label);
+        dispatch(updateNewItemImg(state.resultUri));
+        router.navigate("/add-item");
+      }
     }
+    Temp();
   }, [state]);
 
   const [openToolTip, setOpenToolTip] = useState(false);
@@ -85,6 +93,7 @@ export function Camera() {
   }
 
   const takePicture = async () => {
+    console.log(ClothingSubtypeClassifier.hello());
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
       await dispatch(updateNewItemImg(photo.uri));
