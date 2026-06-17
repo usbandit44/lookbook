@@ -1,0 +1,51 @@
+{
+  "activityEntities" : [
+    "dataSourceTrainingStarted",
+    [
+      {
+        "createdDate" : "2026-06-15T23:20:19Z",
+        "event" : "dataSourceTrainingStarted",
+        "id" : "9DAE0CFE-F841-4EEF-BC11-00DA3A4600E9",
+        "subtitle" : "ClothingColorClassifier 1",
+        "title" : "Used By"
+      }
+    ],
+    "dataSourceMetrics",
+    [
+      {
+        "createdDate" : "2026-06-15T23:20:19Z",
+        "event" : "dataSourceMetrics",
+        "id" : "D27099CA-BBA5-44B0-B946-9E91798BA88A",
+        "subtitle" : "15 Classes, 1,201 Items",
+        "title" : "Data Summary"
+      }
+    ],
+    "dataSourceCreated",
+    [
+      {
+        "createdDate" : "2026-06-15T23:19:44Z",
+        "event" : "dataSourceCreated",
+        "id" : "4C40BFFC-EC18-4A69-9059-55F542D462A3",
+        "subtitle" : "training",
+        "title" : "Data Source Created"
+      }
+    ]
+  ],
+  "createdDate" : "2026-06-15T23:19:44Z",
+  "dataPathRelativeToProjectURL" : "../../fashion1k_project/color_training/training/",
+  "dataResult" : {
+    "createdDate" : "2026-06-15T23:19:44Z",
+    "dataSourceID" : "435FB859-2292-4D98-8B28-A277C99ACE24",
+    "dataURL" : "file:///Users/arvinedouard/fashion1k_project/color_training/training/"
+  },
+  "dataURL" : "file:///Users/arvinedouard/fashion1k_project/color_training/training/",
+  "experimentIDs" : [
+    "8AA2622B-D841-41D3-98EA-1582ACC0ACEE"
+  ],
+  "id" : "435FB859-2292-4D98-8B28-A277C99ACE24",
+  "modifiedDate" : "2026-06-15T23:20:19Z",
+  "pathType" : 0,
+  "preferredFilename" : "training",
+  "title" : "training",
+  "version" : "1.0"
+}

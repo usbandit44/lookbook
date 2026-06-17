@@ -1,8 +1,8 @@
 import AppText from "@/components/ui/AppText";
 import icons from "@/constants/icons";
 import { useAppDispatch } from "@/hooks/redux-hooks";
-import { updateNewItemImg } from "@/redux/slices/cameraSlice";
-import { clearCurrentItem } from "@/redux/slices/itemSlice";
+
+import { clearCurrentItemId } from "@/redux/slices/itemSlice";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -75,8 +75,7 @@ const BottomNav = () => {
             <Pressable
               onPress={() => {
                 setActive(false);
-                dispatch(updateNewItemImg(""));
-                dispatch(clearCurrentItem());
+                dispatch(clearCurrentItemId());
                 router.navigate("/camera-screen");
               }}
               style={styles.navButton}

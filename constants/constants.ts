@@ -177,3 +177,12 @@ export const COLOR_NAMES_MAP = new Map([
   ["FFFF00", "Yellow"],
   ["FFFFFF", "White"],
 ]);
+
+export type NewItemType = {
+  name: string;
+  type: string;
+  color: string;
+  tags: string[];
+  imgUrl: string;
+  backgroundRemoved: boolean;
+};

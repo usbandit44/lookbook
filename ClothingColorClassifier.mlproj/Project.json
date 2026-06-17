@@ -1,0 +1,29 @@
+{
+  "activityEntities" : [
+    "projectCreated",
+    [
+      {
+        "createdDate" : "2026-06-15T23:18:30Z",
+        "event" : "projectCreated",
+        "id" : "2728FCA9-15A4-429F-BEF3-4D7E93C7DE6E",
+        "subtitle" : "ClothingColorClassifier",
+        "title" : "Project Created"
+      }
+    ]
+  ],
+  "authorName" : "Arvin Edouard",
+  "createdDate" : "2026-06-15T23:18:30Z",
+  "description" : "Determine the color of clothing items",
+  "id" : "FA994C3E-ABE0-4DD0-86D7-EEF5F7F82859",
+  "license" : "",
+  "location" : "",
+  "modifiedDate" : "2026-06-15T23:18:30Z",
+  "projectName" : "ClothingColorClassifier",
+  "settingsEntity" : {
+    "snapshotOnExtendTraining" : true,
+    "snapshotOnResumeTraining" : false
+  },
+  "taskType" : "imageClassifier",
+  "title" : "Image Classification",
+  "version" : "1.1"
+}

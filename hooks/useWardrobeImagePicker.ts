@@ -3,7 +3,7 @@ import * as MediaLibrary from "expo-media-library";
 import { Alert, Linking } from "react-native";
 
 export function useWardrobeImagePicker() {
-  const pickImage = async (): Promise<string | null> => {
+  const pickSingleImage = async (): Promise<string | null> => {
     const { status, accessPrivileges } =
       await MediaLibrary.getPermissionsAsync();
 
@@ -35,6 +35,32 @@ export function useWardrobeImagePicker() {
     if (result.canceled) return null;
     return result.assets[0].uri;
   };
+  const pickMultipleImages = async (): Promise<string[] | null> => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  return { pickImage };
+    if (!permission.granted) {
+      Alert.alert(
+        "Photos access required",
+        "Enable photo access in Settings to add wardrobe items.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: () => Linking.openSettings() },
+        ],
+      );
+      return null;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: false,
+      quality: 0.85,
+      allowsMultipleSelection: true,
+      selectionLimit: 0,
+    });
+
+    if (result.canceled) return null;
+
+    return result.assets.map((asset) => asset.uri);
+  };
+  return { pickSingleImage, pickMultipleImages };
 }

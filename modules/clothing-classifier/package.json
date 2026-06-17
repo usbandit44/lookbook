@@ -1,0 +1,7 @@
+{
+  "name": "clothing-classifier",
+  "version": "1.0.0",
+  "description": "Clothing color classifier native module",
+  "main": "src/index.ts",
+  "types": "src/index.ts"
+}

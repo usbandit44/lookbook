@@ -24,6 +24,7 @@
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		C57B8329CD9B44BEA37FF25E /* Lora-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FC996D519B5D4DCCBAFCA34B /* Lora-BoldItalic.ttf */; };
 		C5A4244CC2A44DB58ADE7AED /* InriaSerif-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 83BADA7A35934BE0BFF4927F /* InriaSerif-BoldItalic.ttf */; };
+		CB98204A2FE0CF05005921DC /* ClothingColorClassifier.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = CB9820492FE0CF04005921DC /* ClothingColorClassifier.mlmodel */; };
 		D1B654273570F6BF79903341 /* libPods-Lookbook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB4224DDC468D2B03D117981 /* libPods-Lookbook.a */; };
 		D9DE3B3AC0AD4F5FBEA053DD /* InriaSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9490F1B7BE5548D8B027A7E8 /* InriaSerif-Regular.ttf */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
@@ -50,6 +51,7 @@
 		B100237FD9B3431F88FD4037 /* Lora-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Medium.ttf"; path = "../assets/fonts/Lora-Medium.ttf"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		BDD9FF1A1D5F43C490DF2544 /* InriaSerif-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InriaSerif-Italic.ttf"; path = "../assets/fonts/InriaSerif-Italic.ttf"; sourceTree = "<group>"; };
+		CB9820492FE0CF04005921DC /* ClothingColorClassifier.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = ClothingColorClassifier.mlmodel; sourceTree = "<group>"; };
 		DB4A02A8E1A041C7B77EC76B /* Lora-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-Regular.ttf"; path = "../assets/fonts/Lora-Regular.ttf"; sourceTree = "<group>"; };
 		E4604A352DCD41539BD32FBE /* Lora-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-MediumItalic.ttf"; path = "../assets/fonts/Lora-MediumItalic.ttf"; sourceTree = "<group>"; };
 		E8E8E8B064C242C1AED8ED28 /* Lora-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lora-SemiBoldItalic.ttf"; path = "../assets/fonts/Lora-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 		13B07FAE1A68108700A75B9A /* Lookbook */ = {
 			isa = PBXGroup;
 			children = (
+				CB9820492FE0CF04005921DC /* ClothingColorClassifier.mlmodel */,
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
 				F11748442D0722820044C1D9 /* Lookbook-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
@@ -439,6 +442,7 @@
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
 				F58A9EC5935FC90E0D209314 /* ExpoModulesProvider.swift in Sources */,
+				CB98204A2FE0CF05005921DC /* ClothingColorClassifier.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -568,10 +572,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -626,10 +627,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

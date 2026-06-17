@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ClothingClassifierModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.clothingclassifier.ClothingClassifierModule"]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "activityEntities" : [
+    "dataSourceCreated",
+    [
+      {
+        "createdDate" : "2026-06-15T23:19:56Z",
+        "event" : "dataSourceCreated",
+        "id" : "7B56CAB5-1EBD-476C-800B-BAA7D5E6EF02",
+        "subtitle" : "testing",
+        "title" : "Data Source Created"
+      }
+    ]
+  ],
+  "createdDate" : "2026-06-15T23:19:56Z",
+  "dataPathRelativeToProjectURL" : "../../fashion1k_project/color_training/testing/",
+  "dataResult" : {
+    "createdDate" : "2026-06-15T23:19:56Z",
+    "dataSourceID" : "A32CDCF6-8C6B-4705-ADB5-387C45195686",
+    "dataURL" : "file:///Users/arvinedouard/fashion1k_project/color_training/testing/"
+  },
+  "dataURL" : "file:///Users/arvinedouard/fashion1k_project/color_training/testing/",
+  "experimentIDs" : [
+    "8AA2622B-D841-41D3-98EA-1582ACC0ACEE"
+  ],
+  "id" : "A32CDCF6-8C6B-4705-ADB5-387C45195686",
+  "modifiedDate" : "2026-06-15T23:19:56Z",
+  "pathType" : 0,
+  "preferredFilename" : "testing",
+  "title" : "testing",
+  "version" : "1.0"
+}

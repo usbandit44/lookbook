@@ -1,6 +1,4 @@
 import AddItemForm from "@/features/add-item/components/AddItemForm";
-import { useAppSelector } from "@/hooks/redux-hooks";
-import { selectNewItemImg } from "@/redux/slices/cameraSlice";
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet } from "react-native";
@@ -9,7 +7,7 @@ const AddItemPage = () => {
   const [selectedItem, setSelectedItem] = React.useState("");
 
   const router = useRouter();
-  const imgUri = useAppSelector(selectNewItemImg);
+  // const imgUri = useAppSelector(selectNewItemImg);
 
   return <AddItemForm />;
 };

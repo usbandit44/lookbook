@@ -8,7 +8,6 @@ import {
   Colors,
   itemColors,
   itemSubTypes,
-  itemTypes,
   itemTypesArray,
 } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
@@ -16,10 +15,22 @@ import { user } from "@/db/schemas/user";
 import { normalizeImageUri } from "@/functions/normalizeImageUri";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
 import { useSnackbar } from "@/hooks/useSnackBar";
-import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
-import { clearCurrentItem, selectCurrentItem } from "@/redux/slices/itemSlice";
+
+import {
+  addItemTag,
+  clearCurrentItemId,
+  clearItems,
+  clearItemType,
+  increaseIndex,
+  removeItemTag,
+  selectCurrentItem,
+  selectIndex,
+  selectItems,
+  setItemImgUrl,
+  setItemName,
+  setItemType,
+} from "@/redux/slices/itemSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import AppUserRepo from "@/repo/user_repo/AppUserRepo";
@@ -75,20 +86,21 @@ const AddItemForm = () => {
 
   const { setSettings, showSnackbar, hideSnackbar, settings } =
     snackbarSettingsContext;
-  const { state, process } = useBackgroundRemover();
 
   const itemRepo = new AppItemRepo();
   const outfitRepo = new AppOutfitRepo();
   const userRepo = new AppUserRepo();
 
   const currentItemId = useAppSelector(selectCurrentItem);
+  const itemsIndex = useAppSelector(selectIndex);
+  const itemsList = useAppSelector(selectItems);
+  const item = itemsList[itemsIndex];
 
   useFocusEffect(
     useCallback(() => {
       return () => {
         setShowImgError(false);
         setShowTypeError(false);
-        setshowNameError(false);
         // setshowSizeError(false);
       };
     }, []),
@@ -98,7 +110,6 @@ const AddItemForm = () => {
 
   const [deleteModal, setDeleteModal] = useState(false);
 
-  let imgUri = useAppSelector(selectNewItemImg);
   const [currentItem, setCurrentItem] = useState<ItemsType | null>(null);
   let gap = { gap: 180 };
   if (currentItemId != -1) {
@@ -108,60 +119,46 @@ const AddItemForm = () => {
   useEffect(() => {
     if (currentItemId != -1) {
       async function getCurrentItem() {
-        const item = await itemRepo.getItem(currentItemId);
+        const oldItem = await itemRepo.getItem(currentItemId);
         const normalizedImgUrl = normalizeImageUri(item.imgUrl);
-        setCurrentItem(item);
-        setName(item.name);
-        if (imgUri == "") {
-          dispatch(updateNewItemImg(normalizedImgUrl));
-        }
 
-        setColor(item.color ?? "");
-        setType(item.type);
-        setTags(item.tags);
-        console.log(item.tags);
+        setCurrentItem(oldItem);
+        dispatch(setItemImgUrl({ index: itemsIndex, url: normalizedImgUrl }));
+        // dispatch(
+        //   addItem({
+        //     name: queriedItem.name,
+        //     type: queriedItem.type,
+        //     color: queriedItem.color ?? "",
+        //     tags: queriedItem.tags,
+        //     imgUrl: queriedItem.imgUrl,
+        //     backgroundRemoved: queriedItem.backgroundRemoved,
+        //   }),
+        // );
+        console.log("new: " + item.imgUrl);
       }
       getCurrentItem();
     } else {
       async function getItemCount() {
         const count = await itemRepo.countNumberOfItem();
-        setDefaultName("Item #" + (Number(count) + 1));
+
+        dispatch(
+          setItemName({
+            index: itemsIndex,
+            name: "Item #" + (Number(count) + 1),
+          }),
+        );
+        //setImg(item.imgUrl);
       }
       getItemCount();
     }
   }, [currentItemId, settings]);
 
-  const [selectedItem, setSelectedItem] = React.useState("");
   const dispatch = useAppDispatch();
 
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
-  const [openColorDropdown, setOpenColorDropdown] = useState(false);
-  const [type, setType] = useState<string | null>(null);
-  const [items, setItems] = useState(
-    Object.entries(itemTypes).map(([key, label]) => ({
-      label: String(label),
-      value: String(key), // unique internal value (enum key)
-    })),
-  );
-  const [colorValues, setColorValues] = useState(
-    itemColors.map((color) => ({
-      label: color,
-      value: color,
-    })),
-  );
-
-  const [tags, setTags] = useState<string[]>([]);
-
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
-  const [showNameError, setshowNameError] = useState(false);
-  // const [showSizeError, setshowSizeError] = useState(false);
-
-  const [name, setName] = useState("");
-  const [defaultName, setDefaultName] = useState("");
-  const [color, setColor] = useState("");
 
   const insertItem = async (item: {
     name: string;
@@ -179,79 +176,77 @@ const AddItemForm = () => {
   };
 
   const createItem = async () => {
-    // Preserve the actual image type we were given (e.g. background remover outputs PNG).
-    const isPng = (imgUri ?? "").toLowerCase().endsWith(".png");
-    const fileExt = isPng ? "png" : "jpg";
-    const fileName = `photo_${Date.now()}.${fileExt}`; // Unique filename
-    const dest = (FileSystem.documentDirectory ?? "") + fileName;
-    let quit = false;
-    if (imgUri === "" || type == null) {
-      if (imgUri === "") setShowImgError(true);
-      if (type == null) setShowTypeError(true);
+    console.log(item);
+    if (item.imgUrl === "" || item.type == null) {
+      if (item.imgUrl === "") setShowImgError(true);
+      if (item.type == null) setShowTypeError(true);
 
-      // if (size == "") setshowSizeError(true);
       return false;
     }
+    const persistedUri = await ensurePersistedItemImageUri(item.imgUrl);
     try {
-      await FileSystem.copyAsync({ from: imgUri, to: dest });
-      const finalName = name === "" ? defaultName : name;
-      console.log(name);
       const newItem = {
-        name: finalName,
-        type: type,
-        color: color,
-        tags: tags,
-        imgUrl: dest,
+        name: item.name,
+        type: item.type,
+        color: item.color,
+        tags: item.tags,
+        imgUrl: persistedUri,
         backgroundRemoved: true,
       };
       await insertItem(newItem);
-      setType(null);
-      setColor("");
-      setName("");
-      setTags([]);
-      dispatch(updateNewItemImg(""));
+      if (itemsIndex + 1 != itemsList.length) {
+        console.log("hello");
+        dispatch(increaseIndex());
+      } else {
+        dispatch(clearItems());
+        router.navigate("/pages");
+      }
+
       //setVisablity(!visablity);
       showSnackbar("Item successfully added", "success");
 
       setTimeout(() => hideSnackbar(), 3000);
       return true;
     } catch (error) {
-      console.log(imgUri);
       console.error("Failed to copy photo:", error);
       return false;
     }
   };
 
   const updateItem = async (): Promise<boolean> => {
-    if (imgUri === "" || type == null || name == "") {
-      if (imgUri === "") setShowImgError(true);
-      if (type == null) setShowTypeError(true);
-      if (name == "") setshowNameError(true);
+    if (item.imgUrl === "" || item.type == null) {
+      if (item.imgUrl === "") setShowImgError(true);
+      if (item.type == null) setShowTypeError(true);
+
       // if (size == "") setshowSizeError(true);
       return false;
     }
+    console.log(currentItem?.imgUrl);
+    console.log(item.imgUrl);
     if (
-      currentItem?.imgUrl != imgUri ||
-      currentItem?.name != name ||
-      currentItem?.color != color ||
-      currentItem.type != type ||
-      currentItem.tags != tags
+      currentItem?.imgUrl != item.imgUrl ||
+      currentItem?.name != item.name ||
+      currentItem?.color != item.color ||
+      currentItem.type != item.type ||
+      currentItem.tags != item.tags
     ) {
       try {
-        const persistedUri = await ensurePersistedItemImageUri(imgUri);
+        console.log("hello");
+        const persistedUri = await ensurePersistedItemImageUri(item.imgUrl);
         const newItem: ItemsType = {
           id: currentItemId,
-          name: name,
-          type: type,
-          color: color,
-          tags: tags,
+          name: item.name,
+          type: item.type,
+          color: item.color,
+          tags: item.tags,
           imgUrl: persistedUri,
           backgroundRemoved: true,
         };
+
         await itemRepo.updateItem(newItem);
         //setUpdateVisablity(!updateVisablity);
-        dispatch(updateNewItemImg(""));
-        dispatch(clearCurrentItem());
+        dispatch(clearItems());
+        dispatch(clearCurrentItemId());
         showSnackbar("Item successfully updated", "success");
 
         setTimeout(() => hideSnackbar(), 3000);
@@ -265,31 +260,15 @@ const AddItemForm = () => {
     return false;
   };
 
-  const renderPicture = () => {
-    return (
-      <View>
-        <Icon
-          reverse
-          name="add-photo-alternate"
-          type="material"
-          color="#517fa4"
-        />
-        <Image
-          source={{ uri: imgUri }}
-          contentFit="contain"
-          style={{ width: 500, aspectRatio: 1 }}
-        />
-      </View>
-    );
-  };
+  if (!item) return null;
 
   return (
     <View style={[styles.container]}>
       <AppButton
         onPress={() => {
           router.navigate("/pages");
-          dispatch(clearCurrentItem());
-          dispatch(updateNewItemImg(""));
+          dispatch(clearCurrentItemId());
+          dispatch(clearItems());
         }}
         style={{
           padding: 15,
@@ -337,37 +316,26 @@ const AddItemForm = () => {
           ref={scrollRef}
         >
           <FormElement showError={showImgError} errorMsg="Add a Image">
-            {imgUri ? (
-              <View style={styles.imageWrapper}>
-                <Image
-                  source={{ uri: imgUri }}
-                  contentFit="cover"
-                  style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
-                />
-                <AppButton
-                  type="text"
-                  onPress={() => {
-                    router.navigate("/camera-screen");
-                    //dispatch(updateNewItemImg(""));
-                  }}
-                >
-                  <AppText type="p3">Retake Image</AppText>
-                </AppButton>
-              </View>
-            ) : (
-              <Pressable style={styles.cameraButton}>
-                <Icon
-                  name="add-photo-alternate"
-                  type="material"
-                  color="#3c3636ff"
-                  size={50}
-                />
-              </Pressable>
-            )}
+            <View style={styles.imageWrapper}>
+              <Image
+                source={{ uri: item.imgUrl }}
+                contentFit="cover"
+                style={{ aspectRatio: 1, width: "100%", borderRadius: 2 }}
+              />
+              <AppButton
+                type="text"
+                onPress={() => {
+                  router.navigate("/camera-screen");
+                  //dispatch(updateNewItemImg(""));
+                }}
+              >
+                <AppText type="p3">Retake Image</AppText>
+              </AppButton>
+            </View>
           </FormElement>
 
           <View style={styles.tagSection}>
-            {tags.length != 0 ? (
+            {item.tags.length != 0 ? (
               <ScrollView
                 bounces={true}
                 horizontal={true}
@@ -375,14 +343,28 @@ const AddItemForm = () => {
                 contentContainerStyle={{ gap: 8 }}
                 showsHorizontalScrollIndicator={false}
               >
-                {tags.map((tag, index) => {
+                {item.tags.map((tag, index) => {
                   return (
                     <Tag
                       key={index}
                       onClear={() => {
-                        setTags((prev) => prev.filter((t) => t !== tag));
-                        if (type == tag) {
-                          setType(null);
+                        dispatch(removeItemTag({ index: itemsIndex, tag }));
+                        if (item.type == tag) {
+                          dispatch(clearItemType({ index: itemsIndex }));
+                          const subTypes = itemSubTypes.filter(
+                            (item) => item.key === tag,
+                          );
+
+                          for (const subType of subTypes) {
+                            if (item.tags.includes(subType.value)) {
+                              dispatch(
+                                removeItemTag({
+                                  index: itemsIndex,
+                                  tag: subType.value,
+                                }),
+                              );
+                            }
+                          }
                         }
                       }}
                     >
@@ -393,7 +375,7 @@ const AddItemForm = () => {
               </ScrollView>
             ) : null}
 
-            {type ? (
+            {item.type != "" ? (
               <View
                 style={{
                   alignItems: "flex-start",
@@ -410,18 +392,16 @@ const AddItemForm = () => {
                   showsHorizontalScrollIndicator={false}
                 >
                   {itemSubTypes
-                    .filter((i) => i.key === type)
+                    .filter((i) => i.key === item.type)
                     .map((i) => i.value)
                     .map((type, index) => {
-                      const selected = tags.includes(type);
+                      const selected = item.tags.includes(type);
 
                       return (
                         <AppButton
                           onPress={() => {
-                            setTags((prev) =>
-                              prev.includes(type)
-                                ? prev.filter((t) => t !== type)
-                                : [...prev, type],
+                            dispatch(
+                              addItemTag({ index: itemsIndex, tag: type }),
                             );
                           }}
                           type={selected ? "primary" : "secondary"}
@@ -458,17 +438,16 @@ const AddItemForm = () => {
                     showsHorizontalScrollIndicator={false}
                   >
                     {itemTypesArray.map((type, index) => {
-                      const selected = tags.includes(type);
+                      const selected = item.tags.includes(type);
 
                       return (
                         <AppButton
                           onPress={() => {
-                            setTags((prev) =>
-                              prev.includes(type)
-                                ? prev.filter((t) => t !== type)
-                                : [...prev, type],
+                            dispatch(
+                              addItemTag({ index: itemsIndex, tag: type }),
                             );
-                            setType(type);
+                            dispatch(setItemType({ index: itemsIndex, type }));
+
                             if (showTypeError) setShowTypeError(false);
                           }}
                           type={selected ? "primary" : "secondary"}
@@ -505,16 +484,12 @@ const AddItemForm = () => {
                 showsHorizontalScrollIndicator={false}
               >
                 {itemColors.map((color, index) => {
-                  const selected = tags.includes(color);
+                  const selected = item.tags.includes(color);
 
                   return (
                     <AppButton
                       onPress={() => {
-                        setTags((prev) =>
-                          prev.includes(color)
-                            ? prev.filter((t) => t !== color)
-                            : [...prev, color],
-                        );
+                        dispatch(addItemTag({ index: itemsIndex, tag: color }));
                       }}
                       type={selected ? "primary" : "secondary"}
                       key={index}
@@ -543,11 +518,7 @@ const AddItemForm = () => {
               <SearchableDropdown
                 options={customTags}
                 onSelect={(value) => {
-                  setTags((prev) =>
-                    prev.includes(value)
-                      ? prev.filter((t) => t !== value)
-                      : [...prev, value],
-                  );
+                  dispatch(addItemTag({ index: itemsIndex, tag: value }));
                 }}
                 value={searchCustomTags}
                 onChangeText={setSearchCustomTags}
@@ -558,12 +529,12 @@ const AddItemForm = () => {
                       onPress={() => {
                         if (!customTags.includes(searchCustomTags.trim())) {
                           userRepo.addCustomTag(searchCustomTags.trim());
-                          setTags((prev) =>
-                            prev.includes(searchCustomTags.trim())
-                              ? prev.filter(
-                                  (t) => t !== searchCustomTags.trim(),
-                                )
-                              : [...prev, searchCustomTags.trim()],
+
+                          dispatch(
+                            addItemTag({
+                              index: itemsIndex,
+                              tag: searchCustomTags.trim(),
+                            }),
                           );
                         }
                       }}
@@ -575,8 +546,11 @@ const AddItemForm = () => {
                 }
                 onClearItem={(item) => {
                   userRepo.removeCustomTag(item);
-                  setTags((prev) =>
-                    prev.filter((t) => t !== searchCustomTags.trim()),
+                  dispatch(
+                    removeItemTag({
+                      index: itemsIndex,
+                      tag: searchCustomTags.trim(),
+                    }),
                   );
                 }}
               ></SearchableDropdown>
@@ -589,9 +563,6 @@ const AddItemForm = () => {
           <AppButton
             onPress={async () => {
               const completed = await createItem();
-              if (completed) {
-                router.navigate("/pages");
-              }
             }}
           >
             <AppText style={{ color: "white" }}>Done</AppText>
@@ -612,8 +583,8 @@ const AddItemForm = () => {
             type="secondary"
             onPress={() => {
               router.navigate("/pages");
-              dispatch(clearCurrentItem());
-              dispatch(updateNewItemImg(""));
+              dispatch(clearCurrentItemId());
+              dispatch(clearItems());
             }}
           >
             <AppText>Cancel</AppText>
@@ -623,9 +594,6 @@ const AddItemForm = () => {
             type="secondary"
             onPress={async () => {
               const completed = await createItem();
-              if (completed) {
-                router.navigate("/camera-screen");
-              }
             }}
           >
             <AppText>Add Another Item</AppText>
@@ -641,8 +609,8 @@ const AddItemForm = () => {
             router.navigate("/pages");
             itemRepo.deleteItem(currentItemId);
             outfitRepo.removeItemFromAllOutfits(currentItemId);
-            dispatch(clearCurrentItem());
-            dispatch(updateNewItemImg(""));
+            dispatch(clearCurrentItemId());
+            dispatch(clearItems());
           }}
         >
           <AppText style={{ color: "white" }}>Delete</AppText>

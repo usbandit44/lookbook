@@ -1,97 +1,12 @@
+import Camera from "@/components/Camera";
 import React from "react";
-import {
-  ActivityIndicator,
-  Dimensions,
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useBackgroundRemover } from "../hooks/useBackgroundRemover";
+import { Dimensions, StyleSheet } from "react-native";
 
 const { width } = Dimensions.get("window");
 const IMG_SIZE = width / 2 - 24;
 
 const playground = () => {
-  const { state, process, reset } = useBackgroundRemover();
-
-  if (Platform.OS !== "ios") {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>iOS only feature</Text>
-      </View>
-    );
-  }
-
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Background Remover</Text>
-      <Text style={styles.subtitle}>
-        Powered by VNGenerateForegroundInstanceMaskRequest
-      </Text>
-
-      {/* Pick button */}
-      <TouchableOpacity
-        style={[
-          styles.button,
-          state.status === "loading" && styles.buttonDisabled,
-        ]}
-        onPress={() => process()}
-        disabled={state.status === "loading"}
-      >
-        <Text style={styles.buttonText}>
-          {state.status === "idle" ? "Pick a Photo" : "Pick Another"}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Loading */}
-      {state.status === "loading" && (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C63FF" />
-          <Text style={styles.loadingText}>Removing background...</Text>
-        </View>
-      )}
-
-      {/* Error */}
-      {state.status === "error" && (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>⚠️ {state.message}</Text>
-          <TouchableOpacity onPress={reset}>
-            <Text style={styles.retryText}>Try again</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Result */}
-      {state.status === "done" && (
-        <View style={styles.resultContainer}>
-          <View style={styles.imageColumn}>
-            <Text style={styles.label}>Original</Text>
-            <Image
-              source={{ uri: state.originalUri }}
-              style={styles.image}
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={styles.imageColumn}>
-            <Text style={styles.label}>Result</Text>
-            {/* Checkered pattern background to show transparency */}
-            <View style={[styles.image, styles.checkerboard]}>
-              <Image
-                source={{ uri: state.resultUri }}
-                style={StyleSheet.absoluteFill}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
-        </View>
-      )}
-    </ScrollView>
-  );
+  return <Camera />;
 };
 
 export default playground;

@@ -151,7 +151,7 @@ const Home = () => {
         filtered = itemsData.filter((item) => {
           return tagFilters.every((tag) => {
             const normalized = normalizeSearchTerm(tag) ?? tag;
-            const fuse = new Fuse(item.tags, { threshold: 0.4 });
+            const fuse = new Fuse(item.tags, { threshold: 0.2 });
             return fuse.search(normalized).length > 0;
           });
         });
