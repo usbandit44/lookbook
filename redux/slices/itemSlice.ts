@@ -71,6 +71,19 @@ const itemSlice = createSlice({
     ) {
       state.items[action.payload.index].imgUrl = action.payload.url;
     },
+    setItemColor(
+      state,
+      action: PayloadAction<{ index: number; color: string }>,
+    ) {
+      state.items[action.payload.index].color = action.payload.color;
+    },
+    setItemBackgroundRemoved(
+      state,
+      action: PayloadAction<{ index: number; backgroundRemoved: boolean }>,
+    ) {
+      state.items[action.payload.index].backgroundRemoved =
+        action.payload.backgroundRemoved;
+    },
   },
 });
 
@@ -82,6 +95,7 @@ export const {
   setCurrentItemId,
   clearCurrentItemId,
   clearItems,
+  setItems,
   addItem,
   addItemTag,
   removeItemTag,
@@ -91,6 +105,8 @@ export const {
   setItemName,
   setItemImgUrl,
   addItemTagToFront,
+  setItemColor,
+  setItemBackgroundRemoved,
 } = itemSlice.actions;
 
 export default itemSlice.reducer;

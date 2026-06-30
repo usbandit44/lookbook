@@ -1,7 +1,6 @@
 import AppButton from "@/components/ui/AppButton";
 import AppModal from "@/components/ui/AppModal";
 import AppText from "@/components/ui/AppText";
-import { Colors } from "@/constants/constants";
 import icons from "@/constants/icons";
 import { ItemsType } from "@/db/schemas/items";
 import { normalizeImageUri } from "@/functions/normalizeImageUri";
@@ -21,13 +20,7 @@ import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  InteractionManager,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { InteractionManager, Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { captureRef } from "react-native-view-shot";
 import Movable from "./Movable";
@@ -46,7 +39,8 @@ const OutfitEditor: React.FC = () => {
     throw new Error("useSnackbar must be used within a SnackbarProvider");
   }
 
-  const { showSnackbar, hideSnackbar } = snackbarSettingsContext;
+  const { showSnackbar, hideSnackbar, settings } = snackbarSettingsContext;
+
   const dispatch = useAppDispatch();
   const viewRef = useRef<View>(null);
 
@@ -65,6 +59,22 @@ const OutfitEditor: React.FC = () => {
   const [savedOutfitId, setSavedOutfitId] = useState<number>(-1);
   const [modalVisible, setModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const [editing, setEditing] = useState(false);
+
+  const [oldOutfit, setOldOutfit] = useState<{
+    id: number;
+    name: string;
+    items: number[];
+    imgUrl: string;
+    updateImgUrl: boolean;
+  }>({
+    id: 0,
+    name: "",
+    items: [],
+    imgUrl: "",
+    updateImgUrl: false,
+  });
 
   // ── Screenshot helper — hides UI, captures, restores ─────────────────────
   // const captureOutfit = async (): Promise<string> => {
@@ -181,15 +191,83 @@ const OutfitEditor: React.FC = () => {
     dispatch(setItems(oldOutfit.items));
   };
 
-  const saveButton = () => {
+  const leftButton = () => {
+    return editing ? (
+      <AppButton
+        type="icon"
+        onPress={() => {
+          undoOutfitChanges();
+        }}
+      >
+        <Icon name="close" type="material" size={24} />
+      </AppButton>
+    ) : (
+      <AppButton
+        type="icon"
+        onPress={async () => {
+          if (currentOutfit.id != -1) {
+            if (
+              !arraysEqualUnordered(oldOutfit.items, items) ||
+              oldOutfit.name != outfitName
+            ) {
+              setModalVisible(!modalVisible);
+            } else {
+              if (oldOutfit.updateImgUrl) {
+                const imgUri = await captureOutfit();
+                const fileName = `screenshot_${Date.now()}.jpg`;
+                const dest = (FileSystem.documentDirectory ?? "") + fileName;
+                await FileSystem.copyAsync({ from: imgUri, to: dest });
+                outfitRepo.updateOutfitImgUrl(currentOutfit.id, dest);
+                outfitRepo.updateOutfitUpdateImgUrl(currentOutfit.id, false);
+              }
+              dispatch(clearAllItems());
+              dispatch(clearCurrentOutfit());
+              router.navigate("/pages/outfits");
+            }
+          } else {
+            // if (saved) {
+            //   console.log(saved);
+            //   await saveOutfit();
+            // }
+            dispatch(clearAllItems());
+            dispatch(clearCurrentOutfit());
+            router.navigate("/pages/outfits");
+          }
+        }}
+      >
+        <Icon name="arrow-back-ios" type="material" size={24} />
+      </AppButton>
+    );
+  };
+
+  const rightButton = () => {
     if (currentOutfit.id != -1) {
       return (
-        <AppButton
-          type="text"
-          onPress={() => setDeleteModalVisible(!deleteModalVisible)}
-        >
-          <AppText style={{ color: Colors.light.destructive }}>Delete</AppText>
-        </AppButton>
+        // <AppButton
+        //   type="text"
+        //   onPress={() => setDeleteModalVisible(!deleteModalVisible)}
+        // >
+        //   <AppText style={{ color: Colors.light.destructive }}>Delete</AppText>
+        // </AppButton>
+        editing ? (
+          <AppButton type="icon">
+            <Icon
+              name="check"
+              type="material"
+              size={24}
+              onPress={async () => {
+                await updateOutfit();
+                showSnackbar("Outfit saved!", "success");
+                // setTimeout(() => router.navigate("/pages/outfits"), 300);
+                setTimeout(() => hideSnackbar(), 3000);
+              }}
+            />
+          </AppButton>
+        ) : (
+          <AppButton type="icon">
+            <Icon name="more-vert" type="material" size={24} />
+          </AppButton>
+        )
       );
     } else {
       return (
@@ -222,6 +300,18 @@ const OutfitEditor: React.FC = () => {
   useEffect(() => {
     if (currentOutfit.id != -1) {
       setOutfitName(currentOutfit.name);
+      async function setup() {
+        const pastOutfit = await outfitRepo.getOutfit(currentOutfit.id);
+        const results = await Promise.all(items.map((id) => repo.getItem(id)));
+        if (!arraysEqualUnordered(pastOutfit.items, items)) {
+          setEditing(true);
+        } else {
+          setEditing(false);
+        }
+        setOutfit(results);
+        setOldOutfit(pastOutfit);
+      }
+      setup();
     } else {
       async function getItemCount() {
         const count = await outfitRepo.countNumberOfOutfit();
@@ -229,65 +319,34 @@ const OutfitEditor: React.FC = () => {
       }
       getItemCount();
     }
-  }, []);
+  }, [items, settings]);
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      const results = await Promise.all(items.map((id) => repo.getItem(id)));
-      setOutfit(results);
-    };
-    fetchItems();
-  }, [items]);
+  // useEffect(() => {
+  //   const fetchItems = async () => {
+  //     const results = await Promise.all(items.map((id) => repo.getItem(id)));
+  //     if (!arraysEqualUnordered(oldOutfit.items, items)) {
+  //       console.log("hello");
+  //       setEditing(true);
+  //     }
+  //     setOutfit(results);
+  //   };
+  //   fetchItems();
+  // }, [items]);
 
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.headerContainer}>
-        <AppButton
-          type="icon"
-          onPress={async () => {
-            if (currentOutfit.id != -1) {
-              const oldOutfit = await outfitRepo.getOutfit(currentOutfit.id);
-              if (
-                !arraysEqualUnordered(oldOutfit.items, items) ||
-                oldOutfit.name != outfitName
-              ) {
-                setModalVisible(!modalVisible);
-              } else {
-                if (oldOutfit.updateImgUrl) {
-                  const imgUri = await captureOutfit();
-                  const fileName = `screenshot_${Date.now()}.jpg`;
-                  const dest = (FileSystem.documentDirectory ?? "") + fileName;
-                  await FileSystem.copyAsync({ from: imgUri, to: dest });
-                  outfitRepo.updateOutfitImgUrl(currentOutfit.id, dest);
-                  outfitRepo.updateOutfitUpdateImgUrl(currentOutfit.id, false);
-                }
-                dispatch(clearAllItems());
-                dispatch(clearCurrentOutfit());
-                router.navigate("/pages/outfits");
-              }
-            } else {
-              // if (saved) {
-              //   console.log(saved);
-              //   await saveOutfit();
-              // }
-              dispatch(clearAllItems());
-              dispatch(clearCurrentOutfit());
-              router.navigate("/pages/outfits");
-            }
-          }}
-        >
-          <Icon name="arrow-back-ios" type="material" size={24} />
-        </AppButton>
+        {leftButton()}
 
-        <TextInput
+        {/* <TextInput
           onChangeText={setOutfitName}
           value={outfitName}
           placeholderTextColor="grey"
           placeholder={defaultName}
           style={styles.name}
-        />
+        /> */}
 
-        {saveButton()}
+        {rightButton()}
       </View>
 
       <View

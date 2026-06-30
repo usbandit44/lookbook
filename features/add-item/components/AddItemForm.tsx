@@ -578,7 +578,7 @@ const AddItemForm = () => {
           </AppButton>
         )}
 
-        {currentItemId != -1 ? (
+        {/* {currentItemId != -1 ? (
           <AppButton
             type="secondary"
             onPress={() => {
@@ -598,7 +598,7 @@ const AddItemForm = () => {
           >
             <AppText>Add Another Item</AppText>
           </AppButton>
-        )}
+        )} */}
       </View>
 
       <AppModal modalVisible={deleteModal} setModalVisible={setDeleteModal}>

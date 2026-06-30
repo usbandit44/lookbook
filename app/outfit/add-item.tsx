@@ -9,7 +9,7 @@ import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, FlatList, StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 
@@ -18,63 +18,54 @@ const AddItem = () => {
   const drizzleDb = useDrizzle();
   //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
 
-  const { data: itemsData } = useLiveQuery(drizzleDb.select().from(items));
-
-  const [filteredData, setFilteredData] = useState<
-    | {
-        id: number;
-        name: string;
-        type: string;
-        color: string | null;
-        imgUrl: string;
-      }[]
-    | null
-  >(null);
+  const { data: liveItems } = useLiveQuery(drizzleDb.select().from(items));
 
   const [search, setSearch] = useState<string>("");
 
   const isFirstRender = useRef(true);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      setFilteredData(
-        itemsData.length % 2 === 1
-          ? [
-              ...itemsData,
-              { id: -1, name: "", type: "", color: null, imgUrl: "" },
-            ]
-          : itemsData,
-      );
-      return;
-    }
-
     const timer = setTimeout(() => {
-      const tagFilters = search.split(" ").filter((t) => t !== "");
-      let filtered = itemsData;
-
-      if (tagFilters.length > 0) {
-        filtered = itemsData.filter((item) => {
-          return tagFilters.every((tag) => {
-            const normalized = normalizeSearchTerm(tag) ?? tag;
-            const fuse = new Fuse(item.tags, { threshold: 0.2 });
-            return fuse.search(normalized).length > 0;
-          });
-        });
-      }
-
-      const formattedData =
-        filtered.length % 2 === 1
-          ? [
-              ...filtered,
-              { id: -1, name: "", type: "", color: null, imgUrl: "" },
-            ]
-          : filtered;
-
-      setFilteredData(formattedData);
+      setDebouncedSearch(search);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [search, itemsData]);
+  }, [search]);
+
+  const filteredData = useMemo(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+
+      return liveItems.length % 2 === 1
+        ? [
+            ...liveItems,
+            { id: -1, name: "", type: "", color: null, imgUrl: "" },
+          ]
+        : liveItems;
+    }
+
+    const tagFilters = debouncedSearch.split(" ").filter((t) => t !== "");
+    let filtered = liveItems;
+
+    if (tagFilters.length > 0) {
+      filtered = liveItems.filter((item) => {
+        return tagFilters.every((tag) => {
+          const normalized = normalizeSearchTerm(tag) ?? tag;
+          const fuse = new Fuse(item.tags, { threshold: 0.2 });
+          return fuse.search(normalized).length > 0;
+        });
+      });
+    }
+
+    const formattedData =
+      filtered.length % 2 === 1
+        ? [...filtered, { id: -1, name: "", type: "", color: null, imgUrl: "" }]
+        : filtered;
+
+    //setFilteredData(formattedData);
+    return formattedData;
+  }, [debouncedSearch, liveItems]);
 
   const [showScroolButton, setShowScrollButton] = useState(false);
   const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
@@ -116,7 +107,7 @@ const AddItem = () => {
       <FlatList
         initialNumToRender={6} // render first 3 rows only
         maxToRenderPerBatch={6} // render 3 more rows per batch
-        windowSize={5}
+        windowSize={10}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         ref={flatListRef}

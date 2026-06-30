@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import * as Notifications from "expo-notifications";
 import Fuse from "fuse.js";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, FlatList, StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 
@@ -64,35 +64,35 @@ const Home = () => {
   const drizzleDb = useDrizzle();
 
   const { data: liveItems } = useLiveQuery(drizzleDb.select().from(items));
-  const [itemsData, setItemsData] = useState<
-    {
-      id: number;
-      name: string;
-      type: string;
-      color: string | null;
-      tags: string[];
-      imgUrl: string;
-    }[]
-  >([]);
+  // const [itemsData, setItemsData] = useState<
+  //   {
+  //     id: number;
+  //     name: string;
+  //     type: string;
+  //     color: string | null;
+  //     tags: string[];
+  //     imgUrl: string;
+  //   }[]
+  // >([]);
 
-  useEffect(() => {
-    if (liveItems && JSON.stringify(liveItems) !== JSON.stringify(itemsData)) {
-      setItemsData(liveItems);
-    }
-  }, [liveItems]);
+  // useEffect(() => {
+  //   if (liveItems && JSON.stringify(liveItems) !== JSON.stringify(itemsData)) {
+  //     setItemsData(liveItems);
+  //   }
+  // }, [liveItems]);
 
   const [search, setSearch] = useState<string>("");
 
-  const [filteredData, setFilteredData] = useState<
-    | {
-        id: number;
-        name: string;
-        type: string;
-        color: string | null;
-        imgUrl: string;
-      }[]
-    | null
-  >(null);
+  // const [filteredData, setFilteredData] = useState<
+  //   | {
+  //       id: number;
+  //       name: string;
+  //       type: string;
+  //       color: string | null;
+  //       imgUrl: string;
+  //     }[]
+  //   | null
+  // >(null);
 
   const [showScroolButton, setShowScrollButton] = useState(false);
 
@@ -129,47 +129,91 @@ const Home = () => {
 
   const isFirstRender = useRef(true);
 
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      setFilteredData(
-        itemsData.length % 2 === 1
-          ? [
-              ...itemsData,
-              { id: -1, name: "", type: "", color: null, imgUrl: "" },
-            ]
-          : itemsData,
-      );
-      return;
-    }
-
     const timer = setTimeout(() => {
-      const tagFilters = search.split(" ").filter((t) => t !== "");
-      let filtered = itemsData;
-
-      if (tagFilters.length > 0) {
-        filtered = itemsData.filter((item) => {
-          return tagFilters.every((tag) => {
-            const normalized = normalizeSearchTerm(tag) ?? tag;
-            const fuse = new Fuse(item.tags, { threshold: 0.2 });
-            return fuse.search(normalized).length > 0;
-          });
-        });
-      }
-
-      const formattedData =
-        filtered.length % 2 === 1
-          ? [
-              ...filtered,
-              { id: -1, name: "", type: "", color: null, imgUrl: "" },
-            ]
-          : filtered;
-
-      setFilteredData(formattedData);
+      setDebouncedSearch(search);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [search, itemsData]);
+  }, [search]);
+
+  const filteredData = useMemo(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+
+      return liveItems.length % 2 === 1
+        ? [
+            ...liveItems,
+            { id: -1, name: "", type: "", color: null, imgUrl: "" },
+          ]
+        : liveItems;
+    }
+
+    const tagFilters = debouncedSearch.split(" ").filter((t) => t !== "");
+    let filtered = liveItems;
+
+    if (tagFilters.length > 0) {
+      filtered = liveItems.filter((item) => {
+        return tagFilters.every((tag) => {
+          const normalized = normalizeSearchTerm(tag) ?? tag;
+          const fuse = new Fuse(item.tags, { threshold: 0.2 });
+          return fuse.search(normalized).length > 0;
+        });
+      });
+    }
+
+    const formattedData =
+      filtered.length % 2 === 1
+        ? [...filtered, { id: -1, name: "", type: "", color: null, imgUrl: "" }]
+        : filtered;
+
+    //setFilteredData(formattedData);
+    return formattedData;
+  }, [debouncedSearch, liveItems]);
+
+  // useEffect(() => {
+  //   // if (isFirstRender.current) {
+  //   //   isFirstRender.current = false;
+  //   // //   setFilteredData(
+  //   // //     liveItems.length % 2 === 1
+  //   // //       ? [
+  //   // //           ...liveItems,
+  //   // //           { id: -1, name: "", type: "", color: null, imgUrl: "" },
+  //   // //         ]
+  //   // //       : liveItems,
+  //   // //   );
+  //   // //   return;
+  //   // // }
+
+  //   const timer = setTimeout(() => {
+  //     const tagFilters = search.split(" ").filter((t) => t !== "");
+  //     let filtered = liveItems;
+
+  //     if (tagFilters.length > 0) {
+  //       filtered = liveItems.filter((item) => {
+  //         return tagFilters.every((tag) => {
+  //           const normalized = normalizeSearchTerm(tag) ?? tag;
+  //           const fuse = new Fuse(item.tags, { threshold: 0.2 });
+  //           return fuse.search(normalized).length > 0;
+  //         });
+  //       });
+  //     }
+
+  //     const formattedData =
+  //       filtered.length % 2 === 1
+  //         ? [
+  //             ...filtered,
+  //             { id: -1, name: "", type: "", color: null, imgUrl: "" },
+  //           ]
+  //         : filtered;
+
+  //     setFilteredData(formattedData);
+  //   }, 500);
+
+  //   return () => clearTimeout(timer);
+  // }, [search, liveItems]);
 
   return (
     <View style={styles.container}>
@@ -178,7 +222,7 @@ const Home = () => {
         contentContainerStyle={styles.listContent}
         initialNumToRender={6}
         maxToRenderPerBatch={6}
-        windowSize={5}
+        windowSize={21}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         ref={flatListRef}
