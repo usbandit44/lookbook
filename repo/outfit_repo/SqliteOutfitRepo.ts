@@ -1,3 +1,4 @@
+import { OutfitPositions } from "@/constants/constants";
 import { outfits } from "@/db/schemas/outfits";
 import OutfitRepo from "@/repo/outfit_repo/OutfitRepo";
 import { eq, sql } from "drizzle-orm";
@@ -12,6 +13,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     items: number[];
     name: string;
     imgUrl: string;
+    positions: OutfitPositions;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -23,6 +25,7 @@ class SqliteOutfitRepo extends OutfitRepo {
           name: outfit.name,
           imgUrl: outfit.imgUrl,
           items: itemsString,
+          positions: outfit.positions,
         })
         .returning();
       if (result[0].id == null) {
@@ -41,6 +44,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     items: number[];
     imgUrl: string;
     updateImgUrl: boolean;
+    positions: OutfitPositions;
   }> {
     try {
       const result = await this.drizzleDb
@@ -50,6 +54,7 @@ class SqliteOutfitRepo extends OutfitRepo {
       if (result == null) {
         throw new Error("Outfit doesn't exist");
       }
+      const positions = result[0].positions ?? ({} as OutfitPositions);
       const returningOutfit = {
         id: result[0].id,
         name: result[0].name,
@@ -58,6 +63,7 @@ class SqliteOutfitRepo extends OutfitRepo {
         }),
         imgUrl: result[0].imgUrl ?? "",
         updateImgUrl: result[0].updateImgUrl,
+        positions,
       };
       return returningOutfit;
     } catch (error) {
@@ -92,6 +98,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     imgUrl: string;
     items: number[];
     updateImgUrl: boolean;
+    positions: OutfitPositions;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -99,7 +106,12 @@ class SqliteOutfitRepo extends OutfitRepo {
       });
       const result = await this.drizzleDb
         .update(outfits)
-        .set({ name: outfit.name, imgUrl: outfit.imgUrl, items: itemsString })
+        .set({
+          name: outfit.name,
+          imgUrl: outfit.imgUrl,
+          items: itemsString,
+          positions: outfit.positions,
+        })
         .where(eq(outfits.id, outfit.id))
         .returning();
       if (result == null) {
@@ -123,6 +135,27 @@ class SqliteOutfitRepo extends OutfitRepo {
         throw new Error("Outfit doesn't exist");
       }
       console.log(result);
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update outfit:", error);
+      throw error;
+    }
+  }
+
+  async updatePositions(
+    id: number,
+    positions: OutfitPositions,
+  ): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(outfits)
+        .set({ positions: positions })
+        .where(eq(outfits.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Outfit doesn't exist");
+      }
+      console.log(JSON.stringify(result, null, 2));
       return result[0].id;
     } catch (error) {
       console.error("Failed to update outfit:", error);

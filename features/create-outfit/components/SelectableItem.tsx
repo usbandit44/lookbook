@@ -4,6 +4,8 @@ import {
   addNewItem,
   itemInOutfit,
   removeItem,
+  removeItemPosition,
+  setItemPosition,
 } from "@/redux/slices/outfitSlice";
 import { Image } from "expo-image";
 import React, { useState } from "react";
@@ -34,8 +36,15 @@ const SelectableItem: React.FC<{
       onPress={() => {
         if (selected) {
           dispatch(removeItem(props.id));
+          dispatch(removeItemPosition({ id: props.id }));
         } else {
           dispatch(addNewItem(props.id));
+          dispatch(
+            setItemPosition({
+              id: props.id,
+              position: { x: 0, y: 0, scale: 1 },
+            }),
+          );
         }
         setSelected(!selected);
       }}
@@ -66,8 +75,15 @@ const SelectableItem: React.FC<{
           onPress={() => {
             if (selected) {
               dispatch(removeItem(props.id));
+              dispatch(removeItemPosition({ id: props.id }));
             } else {
               dispatch(addNewItem(props.id));
+              dispatch(
+                setItemPosition({
+                  id: props.id,
+                  position: { x: 0, y: 0, scale: 1 },
+                }),
+              );
             }
             setSelected(!selected);
           }}

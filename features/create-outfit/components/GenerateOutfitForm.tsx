@@ -2,7 +2,11 @@ import AppButton from "@/components/ui/AppButton";
 import AppText from "@/components/ui/AppText";
 import { Colors, itemSubTypes, itemTypesArray } from "@/constants/constants";
 import { useAppDispatch } from "@/hooks/redux-hooks";
-import { addNewItem, clearAllItems } from "@/redux/slices/outfitSlice";
+import {
+  addNewItem,
+  clearAllItems,
+  setItemPosition,
+} from "@/redux/slices/outfitSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -44,6 +48,12 @@ const GenerateOutfitForm = () => {
 
     const randomIndex = getRandomInt(list.length);
     dispatch(addNewItem(list[randomIndex]));
+    dispatch(
+      setItemPosition({
+        id: list[randomIndex],
+        position: { x: 0, y: 0, scale: 1 },
+      }),
+    );
     console.log(); // or set state instead
   }
   async function GenerateOutfit() {

@@ -2,6 +2,8 @@ import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { Alert, Linking } from "react-native";
 
+const MAX_PHOTOS = 15;
+
 export function useWardrobeImagePicker() {
   const pickSingleImage = async (): Promise<string | null> => {
     const { status, accessPrivileges } =
@@ -28,14 +30,25 @@ export function useWardrobeImagePicker() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
-      aspect: [3, 4], // portrait crop — good for clothing
+      aspect: [3, 4],
       quality: 0.85,
     });
 
     if (result.canceled) return null;
     return result.assets[0].uri;
   };
-  const pickMultipleImages = async (): Promise<string[] | null> => {
+
+  const pickMultipleImages = async (
+    remainingSlots: number = MAX_PHOTOS,
+  ): Promise<string[] | null> => {
+    if (remainingSlots <= 0) {
+      Alert.alert(
+        "Limit reached",
+        `You can only add up to ${MAX_PHOTOS} photos at a time.`,
+      );
+      return null;
+    }
+
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
@@ -55,12 +68,13 @@ export function useWardrobeImagePicker() {
       allowsEditing: false,
       quality: 0.85,
       allowsMultipleSelection: true,
-      selectionLimit: 0,
+      selectionLimit: remainingSlots,
     });
 
     if (result.canceled) return null;
 
     return result.assets.map((asset) => asset.uri);
   };
-  return { pickSingleImage, pickMultipleImages };
+
+  return { pickSingleImage, pickMultipleImages, MAX_PHOTOS };
 }

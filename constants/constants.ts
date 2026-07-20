@@ -186,3 +186,11 @@ export type NewItemType = {
   imgUrl: string;
   backgroundRemoved: boolean;
 };
+
+export type ItemPosition = {
+  x: number;
+  y: number;
+  scale: number;
+};
+
+export type OutfitPositions = Record<number, ItemPosition>;

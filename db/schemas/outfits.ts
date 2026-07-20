@@ -1,3 +1,4 @@
+import { OutfitPositions } from "@/constants/constants";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -12,6 +13,7 @@ export const outfits = sqliteTable("outfits", {
   updateImgUrl: integer("updateImgUrl", { mode: "boolean" })
     .notNull()
     .default(false),
+  positions: text("positions", { mode: "json" }).$type<OutfitPositions>(),
 });
 
 export type OutfitType = typeof outfits.$inferSelect;

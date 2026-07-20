@@ -1,7 +1,4 @@
-import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
-import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
-// import { selectNewItemImg, updateNewItemImg } from "@/redux/slices/cameraSlice";
+import ProcessingIndicator from "@/components/ui/ProcessingIndicator";
 import {
   itemColors,
   itemSubTypes,
@@ -9,6 +6,9 @@ import {
   NewItemType,
 } from "@/constants/constants";
 import { getClassification } from "@/functions/getClassification";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
+import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
 import {
   addItem,
   addItemTagToFront,
@@ -24,7 +24,7 @@ import * as Linking from "expo-linking";
 import { useRootNavigationState, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
+  Alert,
   Button,
   Image,
   Pressable,
@@ -38,34 +38,35 @@ import AppButton from "./ui/AppButton";
 import AppText from "./ui/AppText";
 
 export function Camera() {
-  //const apiHandler = new ApiHandler();
   const rootState = useRootNavigationState();
 
   const getPreviousRouteName = () => {
-    // Ensure the navigation state has finished initializing
     if (!rootState?.routes) return null;
-
     const routes = rootState.routes;
-
-    // If there is more than one page in the current stack
     if (routes.length > 1) {
-      // The second to last item is the previous page
       const previousRoute = routes[routes.length - 2];
       return previousRoute.name;
     }
-
     return null;
   };
   const previousPage = getPreviousRouteName();
 
   const { process } = useBackgroundRemover();
-  const { pickMultipleImages, pickSingleImage } = useWardrobeImagePicker();
+  const { pickMultipleImages, pickSingleImage, MAX_PHOTOS } =
+    useWardrobeImagePicker();
   const [processingImages, setProcessingImages] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressTotal, setProgressTotal] = useState(0);
+  const [statusText, setStatusText] = useState("Processing your photos...");
+
   async function processImages(imgs: string[]) {
-    setProcessingImages(true);
+    setProgress(0);
+    setProgressTotal(imgs.length);
+    setStatusText("Removing backgrounds and identifying items...");
+
+    let completed = 0;
     for (const img of imgs) {
       const color = await classifyClothing(img);
-
       const resultUri = await process(img);
 
       if (resultUri?.resultUri) {
@@ -80,18 +81,22 @@ export function Camera() {
         };
         dispatch(addItem(item));
       }
+      completed += 1;
+      setProgress(completed);
     }
     setProcessingImages(false);
     router.navigate("/add-item");
   }
 
   async function processUpdatedImage(img: string) {
-    setProcessingImages(true);
+    setProgress(0);
+    setProgressTotal(1);
+    setStatusText("Updating your item...");
+
     const color = await classifyClothing(img);
     const resultUri = await process(img);
     if (resultUri?.resultUri) {
       dispatch(setItemImgUrl({ index: itemsIndex, url: resultUri.resultUri }));
-      //remove old type and subtype
       for (const type of itemTypesArray) {
         if (item.tags.includes(type)) {
           dispatch(removeItemTag({ index: itemsIndex, tag: type }));
@@ -118,6 +123,7 @@ export function Camera() {
       dispatch(addItemTagToFront({ index: itemsIndex, tag: color.label }));
       dispatch(addItemTagToFront({ index: itemsIndex, tag: subtype }));
       dispatch(addItemTagToFront({ index: itemsIndex, tag: type }));
+      setProgress(1);
       setProcessingImages(false);
       router.navigate("/add-item");
     }
@@ -127,29 +133,25 @@ export function Camera() {
     if (retakeRef.current) {
       const uri = await pickSingleImage();
       if (uri) {
-        processUpdatedImage(uri);
+        setProcessingImages(true);
+        requestAnimationFrame(() => {
+          processUpdatedImage(uri);
+        });
       }
+      // uri is null → user canceled, do nothing, camera stays visible
     } else {
-      const uris = await pickMultipleImages();
+      const remainingSlots = MAX_PHOTOS - photos.length;
+      const uris = await pickMultipleImages(remainingSlots);
       if (uris) {
-        processImages(uris);
+        setProcessingImages(true);
+        requestAnimationFrame(() => {
+          processImages([...photos, ...uris]);
+        });
       }
+      // uris is null → user canceled, do nothing
     }
   };
 
-  // useEffect(() => {
-  //   async function Temp() {
-  //     if (state.status === "done") {
-  //       const classification = await ClothingSubtypeClassifier.classify(
-  //         state.resultUri,
-  //       );
-  //       console.log(classification.label);
-  //       dispatch(updateNewItemImg(state.resultUri));
-  //       router.navigate("/add-item");
-  //     }
-  //   }
-  //   Temp();
-  // }, [state]);
   const itemsIndex = useAppSelector(selectIndex);
   const itemsList = useAppSelector(selectItems);
   const item = itemsList[itemsIndex];
@@ -166,7 +168,6 @@ export function Camera() {
   const ref = useRef<CameraView>(null);
   const [facing, setFacing] = useState<CameraType>("back");
   const dispatch = useAppDispatch();
-  //const imgUri = useAppSelector(selectNewItemImg);
   const [photos, setPhotos] = useState<string[]>([]);
   const router = useRouter();
 
@@ -193,12 +194,17 @@ export function Camera() {
   }
 
   const takePicture = async () => {
+    if (photos.length >= MAX_PHOTOS) {
+      Alert.alert(
+        "Limit reached",
+        `You can only add up to ${MAX_PHOTOS} photos at a time.`,
+      );
+      return;
+    }
     const photo = await ref.current?.takePictureAsync();
     if (photo?.uri) {
-      //await dispatch(updateNewItemImg(photo.uri));
       setPhotos((prev) => [...prev, photo.uri]);
     }
-    // process(imgUri);
   };
 
   const toggleFacing = () => {
@@ -265,37 +271,46 @@ export function Camera() {
 
   return (
     <View style={styles.container}>
-      <AppButton
-        onPress={() => {
-          if (retakeRef.current) {
-            router.navigate("/add-item");
-          } else {
-            dispatch(clearItems());
-            router.navigate("/pages");
-          }
-        }}
-        style={{
-          padding: 15,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          backgroundColor: "transparent",
-        }}
-      >
-        <Icon
-          name="arrow-back-ios-new"
-          type="material"
-          color="white"
-          size={24}
-        />
-      </AppButton>
+      {processingImages ? null : (
+        <AppButton
+          onPress={() => {
+            if (retakeRef.current) {
+              router.navigate("/add-item");
+            } else {
+              dispatch(clearItems());
+              router.navigate("/pages");
+            }
+          }}
+          style={{
+            padding: 15,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            backgroundColor: "transparent",
+          }}
+        >
+          <Icon
+            name="arrow-back-ios-new"
+            type="material"
+            color="white"
+            size={24}
+          />
+        </AppButton>
+      )}
+
       {photos.length == 0 ? null : (
         <AppButton
           onPress={async () => {
             if (retakeRef.current) {
-              processUpdatedImage(photos[photos.length - 1]);
+              setProcessingImages(true);
+              requestAnimationFrame(() => {
+                processUpdatedImage(photos[photos.length - 1]);
+              });
             } else {
-              processImages(photos);
+              setProcessingImages(true);
+              requestAnimationFrame(() => {
+                processImages(photos);
+              });
             }
           }}
           style={{
@@ -310,7 +325,15 @@ export function Camera() {
         </AppButton>
       )}
 
-      {processingImages ? <ActivityIndicator size="large" /> : renderCamera()}
+      {processingImages ? (
+        <ProcessingIndicator
+          progress={progress}
+          total={progressTotal}
+          statusText={statusText}
+        />
+      ) : (
+        renderCamera()
+      )}
     </View>
   );
 }
@@ -322,9 +345,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   camera: {
-    //flex: 1,
     width: "100%",
-    // height: 500,
     aspectRatio: 1,
   },
   shutterContainer: {
@@ -332,7 +353,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-
     paddingHorizontal: 30,
     gap: 50,
   },

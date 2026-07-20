@@ -1,3 +1,4 @@
+import { OutfitPositions } from "@/constants/constants";
 import OutfitRepo from "@/repo/outfit_repo/OutfitRepo";
 import SqliteOutfitRepo from "@/repo/outfit_repo/SqliteOutfitRepo";
 
@@ -8,6 +9,7 @@ class AppOutfitRepo extends OutfitRepo {
     items: number[];
     name: string;
     imgUrl: string;
+    positions: OutfitPositions;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.addOutfit(outfit);
@@ -23,6 +25,7 @@ class AppOutfitRepo extends OutfitRepo {
     items: number[];
     imgUrl: string;
     updateImgUrl: boolean;
+    positions: OutfitPositions;
   }> {
     try {
       const result = await this.sqliteRepo.getOutfit(id);
@@ -46,6 +49,7 @@ class AppOutfitRepo extends OutfitRepo {
     imgUrl: string;
     items: number[];
     updateImgUrl: boolean;
+    positions: OutfitPositions;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateOutfit(outfit);
@@ -58,6 +62,17 @@ class AppOutfitRepo extends OutfitRepo {
   async updateOutfitImgUrl(id: number, imgUrl: string): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateOutfitImgUrl(id, imgUrl);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+  async updatePositions(
+    id: number,
+    positions: OutfitPositions,
+  ): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updatePositions(id, positions);
       return result;
     } catch (err) {
       throw err;

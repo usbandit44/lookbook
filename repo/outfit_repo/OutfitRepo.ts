@@ -1,3 +1,5 @@
+import { OutfitPositions } from "@/constants/constants";
+
 abstract class OutfitRepo {
   constructor() {}
 
@@ -5,6 +7,7 @@ abstract class OutfitRepo {
     items: number[];
     name: string;
     imgUrl: string;
+    positions: OutfitPositions;
   }): Promise<number>;
 
   abstract getOutfit(id: number): Promise<{
@@ -26,6 +29,11 @@ abstract class OutfitRepo {
   }): Promise<number>;
 
   abstract updateOutfitImgUrl(id: number, imgUrl: string): Promise<number>;
+
+  abstract updatePositions(
+    id: number,
+    positions: OutfitPositions,
+  ): Promise<number>;
 
   abstract countNumberOfOutfit(): Promise<number>;
 

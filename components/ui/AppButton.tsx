@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, ViewStyle } from "react-native";
 
 type ButtonType = "primary" | "secondary" | "icon" | "text" | "custom";
 
@@ -9,7 +9,7 @@ const AppButton: React.FC<{
   /** when true → full width (100%), when false/undefined → hug content */
   fullWidth?: boolean;
   type?: ButtonType;
-  style?: {};
+  style?: ViewStyle;
 }> = ({ type = "primary", fullWidth = false, ...props }) => {
   const widthStyle = fullWidth ? { alignSelf: "stretch" } : {};
 

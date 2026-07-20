@@ -1,13 +1,16 @@
+import { ItemPosition, OutfitPositions } from "@/constants/constants";
 import { RootState } from "@/redux/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type OutfitState = {
   items: number[];
   currentOutfit: { id: number; name: string };
+  outfitPositions: OutfitPositions;
 };
 const initialState: OutfitState = {
   items: [],
   currentOutfit: { id: -1, name: "" },
+  outfitPositions: {},
 };
 
 const outfitSlice = createSlice({
@@ -39,6 +42,24 @@ const outfitSlice = createSlice({
     clearCurrentOutfit(state) {
       state.currentOutfit = { id: -1, name: "" };
     },
+    clearOutfitPosition(state) {
+      state.outfitPositions = {};
+    },
+    setItemPosition(
+      state,
+      action: PayloadAction<{ id: number; position: ItemPosition }>,
+    ) {
+      state.outfitPositions[action.payload.id] = action.payload.position;
+    },
+    removeItemPosition(state, action: PayloadAction<{ id: number }>) {
+      delete state.outfitPositions[action.payload.id];
+    },
+    setOutfitPosition(
+      state,
+      action: PayloadAction<{ positions: OutfitPositions }>,
+    ) {
+      state.outfitPositions = action.payload.positions;
+    },
   },
 });
 
@@ -46,6 +67,9 @@ export const selectOutfit = (state: RootState) => state.outfit.items;
 
 export const selectCurrentOutfitId = (state: RootState) =>
   state.outfit.currentOutfit;
+
+export const getItemsPositions = (state: RootState) =>
+  state.outfit.outfitPositions;
 
 export const itemInOutfit =
   (id: number) =>
@@ -64,6 +88,10 @@ export const {
   clearAllItems,
   setCurrentOutfit,
   clearCurrentOutfit,
+  setItemPosition,
+  setOutfitPosition,
+  removeItemPosition,
+  clearOutfitPosition,
 } = outfitSlice.actions;
 
 export default outfitSlice.reducer;

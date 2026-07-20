@@ -578,27 +578,21 @@ const AddItemForm = () => {
           </AppButton>
         )}
 
-        {/* {currentItemId != -1 ? (
+        {currentItemId != -1 ? null : (
           <AppButton
             type="secondary"
             onPress={() => {
-              router.navigate("/pages");
-              dispatch(clearCurrentItemId());
-              dispatch(clearItems());
+              if (itemsIndex + 1 != itemsList.length) {
+                dispatch(increaseIndex());
+              } else {
+                dispatch(clearItems());
+                router.navigate("/pages");
+              }
             }}
           >
-            <AppText>Cancel</AppText>
+            <AppText>Skip</AppText>
           </AppButton>
-        ) : (
-          <AppButton
-            type="secondary"
-            onPress={async () => {
-              const completed = await createItem();
-            }}
-          >
-            <AppText>Add Another Item</AppText>
-          </AppButton>
-        )} */}
+        )}
       </View>
 
       <AppModal modalVisible={deleteModal} setModalVisible={setDeleteModal}>

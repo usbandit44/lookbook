@@ -28,7 +28,6 @@ const AddItemHeader = () => {
           dispatch(clearAllItems());
         }}
         type="text"
-        style
       >
         <AppText type="p3Bold" style={{ color: Colors.light.destructive }}>
           Reset
