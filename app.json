@@ -21,7 +21,15 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
       ],
       "package": "com.anonymous.lookbook"
     },
@@ -37,7 +45,6 @@
           "icon": "./assets/icons/logo.png",
           "color": "#ffffff",
           "defaultChannel": "default",
-
           "enableBackgroundRemoteNotifications": false
         }
       ],
@@ -52,7 +59,9 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos so you can add images of you wardrobe.",
           "isAccessMediaLocationEnabled": true,
-          "granularPermissions": ["photo"]
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ],
       "expo-router",
@@ -117,6 +126,10 @@
       "eas": {
         "projectId": "8a3a6c7e-ddf5-481f-9886-2dfcf8867973"
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/8a3a6c7e-ddf5-481f-9886-2dfcf8867973"
     }
   }
 }

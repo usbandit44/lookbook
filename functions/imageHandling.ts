@@ -20,3 +20,21 @@ export function normalizeImageUri(uri: string | null | undefined): string {
 
   return `${docDir}${fileName}`;
 }
+
+/** Cache/temp paths (e.g. background-remover output) are deleted by the OS; only documentDirectory is stable. */
+export async function ensurePersistedItemImageUri(
+  uri: string,
+): Promise<string> {
+  const doc = FileSystem.documentDirectory;
+  if (!doc) throw new Error("documentDirectory unavailable");
+
+  if (uri.startsWith(doc)) {
+    const info = await FileSystem.getInfoAsync(uri);
+    if (info.exists) return uri;
+  }
+
+  const ext = uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
+  const dest = `${doc}photo_${Date.now()}.${ext}`;
+  await FileSystem.copyAsync({ from: uri, to: dest });
+  return dest;
+}

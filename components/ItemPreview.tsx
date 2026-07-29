@@ -1,5 +1,5 @@
 import { OutfitPositions } from "@/constants/constants";
-import { normalizeImageUri } from "@/functions/normalizeImageUri";
+import { normalizeImageUri } from "@/functions/imageHandling";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { addItem, setCurrentItemId } from "@/redux/slices/itemSlice";
 import {

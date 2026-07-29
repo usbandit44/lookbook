@@ -1,4 +1,5 @@
-import { normalizeImageUri } from "@/functions/normalizeImageUri";
+import Skeleton from "@/components/ui/Skeleton";
+import { normalizeImageUri } from "@/functions/imageHandling";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import {
   addNewItem,
@@ -23,6 +24,8 @@ const SelectableItem: React.FC<{
   const included = useAppSelector(itemInOutfit(props.id));
   const [selected, setSelected] = useState(included);
   const imageUri = normalizeImageUri(props.imgUri);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   React.useEffect(() => {
     setSelected(included);
@@ -57,6 +60,8 @@ const SelectableItem: React.FC<{
         source={{ uri: imageUri }}
         contentFit="contain"
         style={styles.img}
+        onLoadStart={() => setIsLoading(true)}
+        onLoadEnd={() => setIsLoading(false)}
       />
       <View
         style={{
@@ -89,6 +94,7 @@ const SelectableItem: React.FC<{
           }}
         />
       </View>
+      <Skeleton width={"100%"} height={"100%"} showing={isLoading} />
     </Pressable>
   );
 };

@@ -12,7 +12,10 @@ import {
 } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
 import { user } from "@/db/schemas/user";
-import { normalizeImageUri } from "@/functions/normalizeImageUri";
+import {
+  ensurePersistedItemImageUri,
+  normalizeImageUri,
+} from "@/functions/imageHandling";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useSnackbar } from "@/hooks/useSnackBar";
@@ -36,7 +39,6 @@ import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import AppUserRepo from "@/repo/user_repo/AppUserRepo";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -54,22 +56,6 @@ type FormValues = {
   img: string;
   type: string;
 };
-
-/** Cache/temp paths (e.g. background-remover output) are deleted by the OS; only documentDirectory is stable. */
-async function ensurePersistedItemImageUri(uri: string): Promise<string> {
-  const doc = FileSystem.documentDirectory;
-  if (!doc) throw new Error("documentDirectory unavailable");
-
-  if (uri.startsWith(doc)) {
-    const info = await FileSystem.getInfoAsync(uri);
-    if (info.exists) return uri;
-  }
-
-  const ext = uri.toLowerCase().endsWith(".png") ? "png" : "jpg";
-  const dest = `${doc}photo_${Date.now()}.${ext}`;
-  await FileSystem.copyAsync({ from: uri, to: dest });
-  return dest;
-}
 
 const AddItemForm = () => {
   const drizzleDb = useDrizzle();
