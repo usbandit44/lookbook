@@ -253,11 +253,15 @@ const OutfitEditor: React.FC = () => {
           />
         </AppButton>
       ) : (
-        <AppButton type="icon" onPress={openMenu}>
-          <View ref={moreButtonRef} collapsable={false}>
-            <Icon name="more-vert" type="material" size={24} />
-          </View>
-        </AppButton>
+        <AppButton
+          type="icon"
+          onPress={openMenu}
+          icon={
+            <View ref={moreButtonRef} collapsable={false}>
+              <Icon name="more-vert" type="material" size={24} />
+            </View>
+          }
+        ></AppButton>
       );
     } else {
       return (

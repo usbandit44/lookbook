@@ -77,6 +77,15 @@ const itemSlice = createSlice({
     ) {
       state.items[action.payload.index].color = action.payload.color;
     },
+    clearItemColor(state, action: PayloadAction<{ index: number }>) {
+      state.items[action.payload.index].color = "";
+    },
+    setItemFavorited(
+      state,
+      action: PayloadAction<{ index: number; favorited: boolean }>,
+    ) {
+      state.items[action.payload.index].favorited = action.payload.favorited;
+    },
     setItemBackgroundRemoved(
       state,
       action: PayloadAction<{ index: number; backgroundRemoved: boolean }>,
@@ -106,7 +115,9 @@ export const {
   setItemImgUrl,
   addItemTagToFront,
   setItemColor,
+  clearItemColor,
   setItemBackgroundRemoved,
+  setItemFavorited,
 } = itemSlice.actions;
 
 export default itemSlice.reducer;

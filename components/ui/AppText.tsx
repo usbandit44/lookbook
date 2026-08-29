@@ -1,36 +1,20 @@
+import { TextToken } from "@/constants/themes";
+import { useTheme } from "@/hooks/ThemeProvider";
 import React from "react";
 import { StyleSheet, Text } from "react-native";
 
 type TextType = "p1" | "p2" | "p3" | "p3Bold" | "p3SemiBold";
 
 const AppText: React.FC<{
-  children: string;
-  type?: TextType;
+  text: string;
+  type: TextToken;
   style?: {};
-}> = ({ type = "p3", ...props }) => {
-  let styling = {};
-  switch (type) {
-    case "p1":
-      styling = styles.p1;
-      break;
-    case "p2":
-      styling = styles.p2;
-      break;
-    case "p3":
-      styling = styles.p3;
-      break;
-    case "p3SemiBold":
-      styling = styles.p3SemiBold;
-      break;
-    case "p3Bold":
-      styling = styles.p3Bold;
-      break;
+}> = ({ ...props }) => {
+  const { theme } = useTheme();
 
-    default:
-      styling = styles.p3;
-      break;
-  }
-  return <Text style={[styling, props.style]}>{props.children}</Text>;
+  return (
+    <Text style={[theme.text[props.type], props.style]}>{props.text}</Text>
+  );
 };
 
 export default AppText;

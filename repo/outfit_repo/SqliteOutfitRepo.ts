@@ -14,6 +14,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     name: string;
     imgUrl: string;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -45,6 +46,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     imgUrl: string;
     updateImgUrl: boolean;
     positions: OutfitPositions;
+    favorited: boolean;
   }> {
     try {
       const result = await this.drizzleDb
@@ -64,6 +66,7 @@ class SqliteOutfitRepo extends OutfitRepo {
         imgUrl: result[0].imgUrl ?? "",
         updateImgUrl: result[0].updateImgUrl,
         positions,
+        favorited: result[0].favorited ?? false,
       };
       return returningOutfit;
     } catch (error) {
@@ -99,6 +102,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     items: number[];
     updateImgUrl: boolean;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -227,6 +231,23 @@ class SqliteOutfitRepo extends OutfitRepo {
       const result = await this.drizzleDb
         .update(outfits)
         .set({ updateImgUrl: updateImgUrl })
+        .where(eq(outfits.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Outfit doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update outfit:", error);
+      throw error;
+    }
+  }
+
+  async updateOutfitFavorited(id: number, favorited: boolean): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(outfits)
+        .set({ favorited: favorited })
         .where(eq(outfits.id, id))
         .returning();
       if (result == null) {

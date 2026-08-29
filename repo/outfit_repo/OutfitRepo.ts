@@ -8,6 +8,7 @@ abstract class OutfitRepo {
     name: string;
     imgUrl: string;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number>;
 
   abstract getOutfit(id: number): Promise<{
@@ -16,6 +17,7 @@ abstract class OutfitRepo {
     items: number[];
     imgUrl: string;
     updateImgUrl: boolean;
+    favorited: boolean;
   }>;
 
   abstract updateOutfitItems(id: number, items: number[]): Promise<number>;
@@ -26,6 +28,7 @@ abstract class OutfitRepo {
     imgUrl: string;
     items: number[];
     updateImgUrl: boolean;
+    favorited: boolean;
   }): Promise<number>;
 
   abstract updateOutfitImgUrl(id: number, imgUrl: string): Promise<number>;
@@ -44,6 +47,11 @@ abstract class OutfitRepo {
   abstract updateOutfitUpdateImgUrl(
     id: number,
     updateImgUrl: boolean,
+  ): Promise<number>;
+
+  abstract updateOutfitFavorited(
+    id: number,
+    favorited: boolean,
   ): Promise<number>;
 }
 

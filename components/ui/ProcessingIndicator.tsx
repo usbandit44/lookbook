@@ -1,7 +1,10 @@
 import AppText from "@/components/ui/AppText";
+import { useTheme } from "@/hooks/ThemeProvider";
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
+  FadeIn,
+  FadeOut,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -18,6 +21,7 @@ export function ProcessingIndicator({
   total,
   statusText,
 }: ProcessingIndicatorProps) {
+  const { theme } = useTheme();
   const fillWidth = useSharedValue(0);
   const textOpacity = useSharedValue(0);
 
@@ -25,17 +29,6 @@ export function ProcessingIndicator({
     const pct = total > 0 ? progress / total : 0;
     fillWidth.value = withTiming(pct, { duration: 300 });
   }, [progress, total]);
-
-  useEffect(() => {
-    textOpacity.value = 0;
-    const timer = setTimeout(() => {
-      textOpacity.value = withTiming(1, { duration: 500 });
-    }, 3000);
-    return () => {
-      clearTimeout(timer);
-      textOpacity.value = withTiming(0, { duration: 300 });
-    };
-  }, [statusText]);
 
   const barStyle = useAnimatedStyle(() => ({
     width: `${fillWidth.value * 100}%`,
@@ -50,11 +43,20 @@ export function ProcessingIndicator({
       <View style={styles.track}>
         <Animated.View style={[styles.fill, barStyle]} />
       </View>
-      <Animated.View style={textWrapperStyle}>
-        <AppText type="p3" style={{ color: "white", textAlign: "center" }}>
-          {statusText}
-        </AppText>
-      </Animated.View>
+      <View style={styles.textSlot}>
+        <Animated.View
+          key={statusText}
+          entering={FadeIn.duration(500).delay(3000)}
+          exiting={FadeOut.duration(300)}
+          style={styles.textLayer}
+        >
+          <AppText
+            type={"p5"}
+            style={{ color: theme.whiteA[80], textAlign: "center" }}
+            text={statusText}
+          />
+        </Animated.View>
+      </View>
     </View>
   );
 }
@@ -76,6 +78,17 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 3,
     backgroundColor: "white",
+  },
+  textSlot: {
+    width: "100%",
+    minHeight: 18,
+    justifyContent: "center",
+  },
+  textLayer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    paddingTop: 15,
   },
 });
 

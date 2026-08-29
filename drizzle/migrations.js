@@ -14,6 +14,8 @@ import m0009 from './0009_rainy_ogun.sql';
 import m0010 from './0010_green_prima.sql';
 import m0011 from './0011_large_toxin.sql';
 import m0012 from './0012_brown_luminals.sql';
+import m0013 from './0013_bouncy_the_hand.sql';
+import m0014 from './0014_loud_wasp.sql';
 
   export default {
     journal,
@@ -30,7 +32,9 @@ m0008,
 m0009,
 m0010,
 m0011,
-m0012
+m0012,
+m0013,
+m0014
     }
   }
   

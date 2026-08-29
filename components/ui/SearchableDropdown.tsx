@@ -1,4 +1,5 @@
 import AppText from "@/components/ui/AppText";
+import { useTheme } from "@/hooks/ThemeProvider";
 import AppUserRepo from "@/repo/user_repo/AppUserRepo";
 import Fuse from "fuse.js";
 import { useRef, useState } from "react";
@@ -30,6 +31,7 @@ const SearchableDropdown: React.FC<{
   scrollRef,
   onClearItem,
 }) => {
+  const { theme } = useTheme();
   const userRepo = new AppUserRepo();
   const [open, setOpen] = useState(false);
 
@@ -42,7 +44,14 @@ const SearchableDropdown: React.FC<{
   };
   return (
     <View style={{ width: "100%" }}>
-      <View style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { borderColor: theme.inkA[16], backgroundColor: theme.surface },
+          open && styles.fieldOpen,
+        ]}
+      >
+        <Icon name="search" type="material" size={16} color={theme.inkA[45]} />
         <TextInput
           value={value}
           onChangeText={(text) => {
@@ -54,50 +63,91 @@ const SearchableDropdown: React.FC<{
             setTimeout(() => scrollToDropdown(), 300);
           }}
           placeholder={placeholder}
-          style={styles.input}
+          placeholderTextColor={theme.inkA[38]}
+          style={[styles.input, theme.text.p4]}
         />
-        {open ? (
-          <Pressable
-            onPress={() => {
+
+        <Pressable
+          onPress={() => {
+            if (open) {
               onChangeText("");
-              setOpen(false);
-            }}
-            hitSlop={20}
-          >
-            <Icon name="close" type="material" color="#888" size={20} />
-          </Pressable>
-        ) : null}
+              setOpen(!open);
+            } else {
+              setOpen(!open);
+            }
+          }}
+          hitSlop={20}
+        >
+          {open ? (
+            <Icon
+              name="keyboard-arrow-up"
+              type="material"
+              color={theme.inkA[55]}
+              size={20}
+            />
+          ) : (
+            <Icon
+              name="expand-more"
+              type="material"
+              color={theme.inkA[55]}
+              size={20}
+            />
+          )}
+        </Pressable>
       </View>
       {open && (
-        <View style={styles.dropdown}>
+        <View
+          style={[
+            styles.dropdown,
+            { borderColor: theme.inkA[16], backgroundColor: theme.surface },
+          ]}
+        >
           <ScrollView
             keyboardShouldPersistTaps="handled"
             nestedScrollEnabled
-            style={{ maxHeight: 200 }}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            style={{ maxHeight: 196 }}
           >
-            {results.map((item) => (
-              <Pressable
-                key={item}
-                style={styles.option}
-                onPress={() => {
-                  onSelect(item);
-                  onChangeText("");
-                  setOpen(false);
-                }}
-              >
-                <AppText>{item}</AppText>
-                {onClearItem ? (
-                  <Pressable
-                    onPress={() => {
-                      onClearItem(item);
-                    }}
-                    hitSlop={20}
-                  >
-                    <Icon name="close" type="material" color="#888" size={20} />
-                  </Pressable>
-                ) : null}
-              </Pressable>
-            ))}
+            {results.length ? (
+              results.map((item) => (
+                <Pressable
+                  key={item}
+                  style={({ pressed }) => [
+                    styles.option,
+                    { borderBottomColor: theme.inkA[8] },
+                    pressed && { backgroundColor: theme.inkA[7] },
+                  ]}
+                  onPress={() => {
+                    onSelect(item);
+                    onChangeText("");
+                    setOpen(false);
+                  }}
+                >
+                  <AppText
+                    type="p4"
+                    style={[styles.optionLabel]}
+                    text={item}
+                  ></AppText>
+                  {onClearItem ? (
+                    <Pressable onPress={() => onClearItem(item)} hitSlop={20}>
+                      <Icon
+                        name="close"
+                        type="material"
+                        color={theme.inkA[35]}
+                        size={16}
+                      />
+                    </Pressable>
+                  ) : null}
+                </Pressable>
+              ))
+            ) : (
+              <AppText
+                type="p6"
+                style={[styles.empty]}
+                text="No matching tags"
+              ></AppText>
+            )}
           </ScrollView>
           {footer}
         </View>
@@ -111,28 +161,34 @@ export default SearchableDropdown;
 const styles = StyleSheet.create({
   input: { flex: 1 },
   container: {
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    width: "100%",
-    justifyContent: "center",
+    height: 46,
+    paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 0,
   },
+  fieldOpen: { borderBottomWidth: 1 },
   dropdown: {
     borderWidth: 1,
-    borderRadius: 8,
-    maxHeight: 200,
-    marginTop: 4,
-    backgroundColor: "white",
-    zIndex: 100,
+    borderTopWidth: 0, // shares the seam with the field above
+    borderRadius: 0,
   },
   option: {
-    padding: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
-    justifyContent: "space-between",
+    height: 44,
+    paddingHorizontal: 14,
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    borderBottomWidth: 1,
+  },
+  optionLabel: {
+    flex: 1,
+  },
+  empty: {
+    padding: 14,
+    textAlign: "center",
   },
 });

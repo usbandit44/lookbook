@@ -1,3 +1,4 @@
+import { NewItemType } from "@/constants/constants";
 import { items, ItemsType } from "@/db/schemas/items";
 import ItemRepo from "@/repo/item_repo/ItemRepo";
 import { eq } from "drizzle-orm";
@@ -8,14 +9,7 @@ class SqliteItemRepo extends ItemRepo {
   private db = useSQLiteContext();
   private drizzleDb = drizzle(this.db);
 
-  async addItem(item: {
-    name: string;
-    type: string;
-    color: string;
-    imgUrl: string;
-    tags: string[];
-    backgroundRemoved: boolean;
-  }): Promise<number> {
+  async addItem(item: NewItemType): Promise<number> {
     try {
       const result = await this.drizzleDb
         .insert(items)
@@ -205,6 +199,7 @@ class SqliteItemRepo extends ItemRepo {
           color: item.color,
           type: item.type,
           tags: item.tags,
+          favorited: item.favorited,
         })
         .where(eq(items.id, item.id))
         .returning();
@@ -224,6 +219,25 @@ class SqliteItemRepo extends ItemRepo {
         .update(items)
         .set({
           tags: tags,
+        })
+        .where(eq(items.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Item doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      throw error;
+    }
+  }
+
+  async updateFavorited(id: number, favorited: boolean): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(items)
+        .set({
+          favorited: favorited,
         })
         .where(eq(items.id, id))
         .returning();

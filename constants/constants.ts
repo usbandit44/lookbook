@@ -3,6 +3,9 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
+import { ItemsType } from "@/db/schemas/items";
+import { OutfitType } from "@/db/schemas/outfits";
+
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
@@ -52,7 +55,7 @@ export const itemSubTypes = [
   // Tops
   { key: "Tops", value: "T-Shirt" },
   { key: "Tops", value: "Long Sleeve Tee" },
-  { key: "Tops", value: "Button Down" },
+  { key: "Tops", value: "Button-Down" },
   { key: "Tops", value: "Blouse" },
   { key: "Tops", value: "Sweater" },
   { key: "Tops", value: "Tank Top" },
@@ -178,15 +181,8 @@ export const COLOR_NAMES_MAP = new Map([
   ["FFFFFF", "White"],
 ]);
 
-export type NewItemType = {
-  name: string;
-  type: string;
-  color: string;
-  tags: string[];
-  imgUrl: string;
-  backgroundRemoved: boolean;
-};
-
+export type NewItemType = Omit<ItemsType, "id" | "size">;
+export type NewOutfitType = Omit<OutfitType, "id">;
 export type ItemPosition = {
   x: number;
   y: number;

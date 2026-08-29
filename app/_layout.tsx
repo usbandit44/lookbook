@@ -1,11 +1,21 @@
 import Snackbar from "@/components/ui/Snackbar";
-import { Colors } from "@/constants/constants";
 import { DrizzleProvider } from "@/hooks/DrizzleContext";
+import { ThemeProvider, useTheme } from "@/hooks/ThemeProvider";
+import { AppModalProvider } from "@/hooks/useAppModal";
 import SnackbarProvider, { useSnackbar } from "@/hooks/useSnackBar";
 import { store } from "@/redux/store";
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import {
+  Archivo_400Regular,
+  Archivo_500Medium,
+  Archivo_600SemiBold,
+  Archivo_700Bold,
+  useFonts,
+} from "@expo-google-fonts/archivo";
+import {
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+} from "@expo-google-fonts/ibm-plex-mono";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useFonts } from "expo-font";
 import { Slot, usePathname } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
@@ -24,12 +34,13 @@ export const DATABASE_NAME = "lookbook";
 /* ------------------ INNER APP ------------------ */
 
 function AppShell() {
+  const { theme } = useTheme();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const snackbarSettingsContext = useSnackbar();
 
   const isCamera = pathname.includes("/camera-screen");
-  const backgroundColor = isCamera ? "black" : Colors.light.background;
+  const backgroundColor = isCamera ? theme.inkAlt : theme.surface;
 
   // ← merge both useFonts into one call
   const [fontsLoaded] = useFonts({
@@ -52,6 +63,12 @@ function AppShell() {
     "Lora-VariableFont_wght": require("@/assets/fonts/Lora-VariableFont_wght.ttf"),
     "SpaceMono-Regular": require("@/assets/fonts/SpaceMono-Regular.ttf"),
     "Nunito-VariableFont_wght": require("@/assets/fonts/Nunito-VariableFont_wght.ttf"),
+    Archivo_400Regular,
+    Archivo_500Medium,
+    Archivo_600SemiBold,
+    Archivo_700Bold,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_600SemiBold,
   });
 
   // ← early returns AFTER all hooks
@@ -64,7 +81,7 @@ function AppShell() {
   const { settings, hideSnackbar } = snackbarSettingsContext;
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+    <View style={{ flex: 1, backgroundColor }}>
       <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
         {/* Status bar fill */}
         <View style={{ height: insets.top, backgroundColor }} />
@@ -100,14 +117,16 @@ export default function RootLayout() {
           useSuspense
         >
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider value={DefaultTheme}>
-              <SnackbarProvider>
-                <DrizzleProvider>
-                  <Provider store={store}>
-                    <AppShell />
-                  </Provider>
-                </DrizzleProvider>
-              </SnackbarProvider>
+            <ThemeProvider>
+              <AppModalProvider>
+                <SnackbarProvider>
+                  <DrizzleProvider>
+                    <Provider store={store}>
+                      <AppShell />
+                    </Provider>
+                  </DrizzleProvider>
+                </SnackbarProvider>
+              </AppModalProvider>
             </ThemeProvider>
           </QueryClientProvider>
         </SQLiteProvider>

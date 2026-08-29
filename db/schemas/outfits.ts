@@ -14,6 +14,7 @@ export const outfits = sqliteTable("outfits", {
     .notNull()
     .default(false),
   positions: text("positions", { mode: "json" }).$type<OutfitPositions>(),
+  favorited: integer("favorited", { mode: "boolean" }).default(false),
 });
 
 export type OutfitType = typeof outfits.$inferSelect;

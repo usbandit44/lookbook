@@ -1,3 +1,4 @@
+import { NewItemType } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
 import ItemRepo from "@/repo/item_repo/ItemRepo";
 import SqliteItemRepo from "@/repo/item_repo/SqliteItemRepo";
@@ -5,14 +6,7 @@ import SqliteItemRepo from "@/repo/item_repo/SqliteItemRepo";
 class AppItemRepo extends ItemRepo {
   private sqliteRepo = new SqliteItemRepo();
 
-  async addItem(item: {
-    name: string;
-    type: string;
-    color: string;
-    tags: string[];
-    imgUrl: string;
-    backgroundRemoved: boolean;
-  }): Promise<number> {
+  async addItem(item: NewItemType): Promise<number> {
     try {
       const result = await this.sqliteRepo.addItem(item);
       return result;
@@ -120,6 +114,15 @@ class AppItemRepo extends ItemRepo {
   async updateTags(id: number, tags: string[]): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateTags(id, tags);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateFavorited(id: number, favorited: boolean): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateFavorited(id, favorited);
       return result;
     } catch (err) {
       throw err;

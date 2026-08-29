@@ -6,11 +6,13 @@ type OutfitState = {
   items: number[];
   currentOutfit: { id: number; name: string };
   outfitPositions: OutfitPositions;
+  favorited: boolean;
 };
 const initialState: OutfitState = {
   items: [],
   currentOutfit: { id: -1, name: "" },
   outfitPositions: {},
+  favorited: false,
 };
 
 const outfitSlice = createSlice({
@@ -59,6 +61,9 @@ const outfitSlice = createSlice({
       action: PayloadAction<{ positions: OutfitPositions }>,
     ) {
       state.outfitPositions = action.payload.positions;
+    },
+    setFavorited(state, action: PayloadAction<{ favorited: boolean }>) {
+      state.favorited = action.payload.favorited;
     },
   },
 });
