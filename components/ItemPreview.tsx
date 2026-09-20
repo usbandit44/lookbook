@@ -1,7 +1,6 @@
 import AppText from "@/components/ui/AppText";
 import Skeleton from "@/components/ui/Skeleton";
 import Swatch from "@/components/ui/Swatch";
-import { OutfitPositions } from "@/constants/constants";
 import { Theme } from "@/constants/themes";
 import { normalizeImageUri } from "@/functions/imageHandling";
 import { useAppDispatch } from "@/hooks/redux-hooks";
@@ -10,8 +9,7 @@ import { useAppModal } from "@/hooks/useAppModal";
 import { addItem, setCurrentItemId } from "@/redux/slices/itemSlice";
 import {
   setCurrentOutfit,
-  setItemPosition,
-  setItems,
+  setOutfitItems,
   setOutfitPosition,
 } from "@/redux/slices/outfitSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
@@ -145,7 +143,7 @@ const ItemPreview: React.FC<{
           <AppText
             text={"Delete"}
             type={"p3"}
-            style={{ fontSize: 15 }}
+            style={{ fontSize: 15, color: theme.danger }}
           ></AppText>
         </Pressable>
       </View>
@@ -186,7 +184,7 @@ const ItemPreview: React.FC<{
           <AppText
             text={"Delete"}
             type={"p3"}
-            style={{ fontSize: 15 }}
+            style={{ fontSize: 15, color: theme.danger }}
           ></AppText>
         </Pressable>
       </View>
@@ -209,25 +207,13 @@ const ItemPreview: React.FC<{
         if (props.id == -1) return;
         if (props.type == "outfit") {
           const outfit = await outfitRepo.getOutfit(props.id);
-
-          if (Object.keys(outfit.positions).length === 0) {
-            const positions: OutfitPositions = {};
-            outfit.items.forEach((item) => {
-              positions[item] = { x: 0, y: 0, scale: 1 };
-              dispatch(
-                setItemPosition({
-                  id: item,
-                  position: { x: 0, y: 0, scale: 1 },
-                }),
-              );
-            });
-            outfitRepo.updatePositions(outfit.id, positions);
-          } else {
+          dispatch(setCurrentOutfit({ id: outfit.id, name: outfit.name }));
+          dispatch(setOutfitItems({ items: outfit.items }));
+          if (Object.keys(outfit.positions).length != 0) {
             console.log(outfit.positions);
             dispatch(setOutfitPosition({ positions: outfit.positions }));
           }
-          dispatch(setCurrentOutfit({ id: outfit.id, name: outfit.name }));
-          dispatch(setItems(outfit.items));
+
           router.navigate("/outfit/create-outfit");
         }
         if (props.type == "item") {

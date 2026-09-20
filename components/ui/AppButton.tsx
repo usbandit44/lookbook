@@ -1,10 +1,17 @@
-import { TextToken } from "@/constants/themes";
+import { TextToken, Theme } from "@/constants/themes";
 import { useTheme } from "@/hooks/ThemeProvider";
-import React from "react";
-import { Pressable, StyleSheet, ViewStyle } from "react-native";
+import React, { useState } from "react";
+import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
 import AppText from "./AppText";
 
-type ButtonType = "primary" | "secondary" | "ghost" | "text" | "icon" | "link";
+type ButtonType =
+  | "primary"
+  | "secondary"
+  | "ghostPrimary"
+  | "ghostSecondary"
+  | "text"
+  | "icon"
+  | "link";
 
 const AppButton: React.FC<{
   label?: string;
@@ -13,8 +20,14 @@ const AppButton: React.FC<{
   style?: ViewStyle;
   icon?: React.ReactNode | null;
   textColor?: string;
+  disabled?: boolean;
 }> = ({ type = "primary", icon = null, ...props }) => {
   const { theme } = useTheme();
+  const t = theme;
+  const styles = s(t);
+
+  const [isPressed, setIsPressed] = useState(false);
+  const isDarkBackground = type === "primary";
 
   let typeStyling: any = {};
   let textType: TextToken = "m3";
@@ -25,6 +38,8 @@ const AppButton: React.FC<{
         backgroundColor: theme.ink,
         // paddingLeft: 25,
         // paddingRight: 25,
+        borderWidth: 1,
+        borderColor: theme.ink,
         padding: 15,
       };
 
@@ -42,7 +57,19 @@ const AppButton: React.FC<{
       textType = "m13";
 
       break;
-    case "ghost":
+    case "ghostPrimary":
+      typeStyling = {
+        backgroundColor: theme.inkA[35],
+        // paddingLeft: 25,
+        // paddingRight: 25,
+        borderWidth: 1,
+        borderColor: "transparent",
+        padding: 15,
+      };
+
+      textType = "m3";
+      break;
+    case "ghostSecondary":
       typeStyling = {
         padding: 15,
         // paddingLeft: 25,
@@ -81,7 +108,19 @@ const AppButton: React.FC<{
         onPress={props.onPress}
         style={[typeStyling, props.style]}
         hitSlop={10}
+        disabled={props.disabled}
+        onPressIn={() => setIsPressed(true)}
+        onPressOut={() => setIsPressed(false)}
       >
+        {isPressed && (
+          <View
+            style={[
+              styles.pressOverlay,
+              { borderRadius: 25, width: "100%", height: "100%" },
+            ]}
+            pointerEvents="none"
+          />
+        )}
         {icon}
         {type == "icon" ? null : (
           <AppText
@@ -98,7 +137,23 @@ const AppButton: React.FC<{
     <Pressable
       onPress={props.onPress}
       style={[styles.mainButton, typeStyling, props.style]}
+      disabled={props.disabled}
+      onPressIn={() => setIsPressed(true)}
+      onPressOut={() => setIsPressed(false)}
     >
+      {isPressed && (
+        <View
+          style={[
+            styles.pressOverlay,
+            {
+              backgroundColor: isDarkBackground
+                ? t.whiteA[30] // light tint on dark buttons
+                : t.inkA[20], // dark tint on light/transparent buttons
+            },
+          ]}
+          pointerEvents="none"
+        />
+      )}
       <AppText
         type={textType}
         style={[styles.label]}
@@ -110,17 +165,22 @@ const AppButton: React.FC<{
 
 export default AppButton;
 
-const styles = StyleSheet.create({
-  mainButton: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-    flexDirection: "row",
-    gap: 9,
-    height: 52,
-  },
-  label: {
-    textAlign: "center",
-  },
-});
+const s = (t: Theme) =>
+  StyleSheet.create({
+    mainButton: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+      flexDirection: "row",
+      gap: 9,
+      height: 52,
+    },
+    label: {
+      textAlign: "center",
+    },
+    pressOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: t.inkA[20],
+    },
+  });

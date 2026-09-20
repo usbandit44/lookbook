@@ -59,6 +59,7 @@ const s = (t: Theme) =>
       borderColor: t.inkA[12],
       height: 42,
       paddingHorizontal: 10,
+      color: t.ink,
     },
     input: { flex: 1 },
   });

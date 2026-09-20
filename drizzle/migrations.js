@@ -16,6 +16,8 @@ import m0011 from './0011_large_toxin.sql';
 import m0012 from './0012_brown_luminals.sql';
 import m0013 from './0013_bouncy_the_hand.sql';
 import m0014 from './0014_loud_wasp.sql';
+import m0015 from './0015_bright_morg.sql';
+import m0016 from './0016_condemned_purifiers.sql';
 
   export default {
     journal,
@@ -34,7 +36,9 @@ m0010,
 m0011,
 m0012,
 m0013,
-m0014
+m0014,
+m0015,
+m0016
     }
   }
   

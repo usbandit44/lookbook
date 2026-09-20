@@ -41,6 +41,7 @@ import {
   setItemName,
   setItemType,
 } from "@/redux/slices/itemSlice";
+import { addNewItem, setItemPosition } from "@/redux/slices/outfitSlice";
 import AppItemRepo from "@/repo/item_repo/AppItemRepo";
 import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import AppUserRepo from "@/repo/user_repo/AppUserRepo";
@@ -152,13 +153,15 @@ const AddItemForm = () => {
   const [showImgError, setShowImgError] = useState(false);
   const [showTypeError, setShowTypeError] = useState(false);
 
+  const getFilename = (uri?: string | null) => uri?.split("/").pop() ?? uri;
+
   const updatable = () => {
     if (!currentItem) return false;
-    if (currentItem.imgUrl !== item.imgUrl) return true;
+    if (getFilename(currentItem.imgUrl) !== getFilename(item.imgUrl))
+      return true;
     if (currentItem.name !== item.name) return true;
     if (currentItem.color !== item.color) return true;
     if (currentItem.type !== item.type) return true;
-    if (currentItem.favorited !== item.favorited) return true;
     const a = currentItem.tags ?? [];
     const b = item.tags ?? [];
     if (a.length !== b.length) return true;
@@ -297,7 +300,7 @@ const AddItemForm = () => {
           //   zIndex: 100,
           // }}
           type="icon"
-          icon={<AppIcon name="arrowLeft" color="black" size={24} />}
+          icon={<AppIcon name="arrowLeft" size={24} />}
         ></AppButton>
         {currentItemId == -1 ? (
           <AppText
@@ -313,6 +316,8 @@ const AddItemForm = () => {
               outfitRepo.removeItemFromAllOutfits(currentItemId);
               dispatch(clearCurrentItemId());
               dispatch(clearItems());
+              showSnackbar("Item Deleted", "success");
+              setTimeout(() => hideSnackbar(), 3000);
             }}
             // style={{
             //   padding: 15,
@@ -365,7 +370,9 @@ const AddItemForm = () => {
                 )
               }
               onPress={() => {
-                console.log(!item.favorited);
+                if (currentItemId != -1) {
+                  itemRepo.updateFavorited(currentItemId, !item.favorited);
+                }
                 dispatch(
                   setItemFavorited({
                     index: itemsIndex,
@@ -444,7 +451,14 @@ const AddItemForm = () => {
                           removeSubtypeOfType(type);
                         } else {
                           if (item.type != "") {
-                            return;
+                            dispatch(
+                              removeItemTag({
+                                index: itemsIndex,
+                                tag: item.type,
+                              }),
+                            );
+                            dispatch(clearItemType({ index: itemsIndex }));
+                            removeSubtypeOfType(item.type);
                           }
                           dispatch(
                             addItemTagToFront({ index: itemsIndex, tag: type }),
@@ -545,9 +559,9 @@ const AddItemForm = () => {
                           );
                           dispatch(clearItemColor({ index: itemsIndex }));
                         } else {
-                          if (item.color != "") {
-                            return;
-                          }
+                          // if (item.color != "") {
+                          //   return;
+                          // }
                           dispatch(
                             addItemTag({ index: itemsIndex, tag: color }),
                           );
@@ -661,7 +675,7 @@ const AddItemForm = () => {
           ></AppButton>
         ) : (
           <AppButton
-            type={updatable() ? "secondary" : "ghost"}
+            type={updatable() ? "secondary" : "ghostSecondary"}
             onPress={async () => {
               const ok = await updateItem();
               if (ok) router.navigate("/pages");
@@ -673,8 +687,14 @@ const AddItemForm = () => {
         {currentItemId != -1 ? (
           <AppButton
             onPress={async () => {
-              const ok = await updateItem();
-              if (ok) router.navigate("/pages");
+              dispatch(addNewItem(currentItemId));
+              dispatch(
+                setItemPosition({
+                  id: currentItemId,
+                  position: { x: 0, y: 0, scale: 1 },
+                }),
+              );
+              router.navigate("/outfit/create-outfit");
             }}
             label="BUILD FROM ITEM"
           ></AppButton>
@@ -702,7 +722,7 @@ const styles = StyleSheet.create({
     // justifyContent: "space-between",
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingBottom: 15,
     flexDirection: "row",
     justifyContent: "space-between",

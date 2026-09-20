@@ -22,8 +22,20 @@ const outfitSlice = createSlice({
     addNewItem(state, action: PayloadAction<number>) {
       state.items.push(action.payload);
     },
-    setItems(state, action: PayloadAction<number[]>) {
-      state.items = action.payload;
+    setOutfitItems(
+      state,
+      action: PayloadAction<{ items: number[]; positions?: OutfitPositions }>,
+    ) {
+      state.items = action.payload.items;
+      if (action.payload.positions) {
+        state.outfitPositions = action.payload.positions;
+      } else {
+        action.payload.items.forEach((id) => {
+          if (state.outfitPositions[id] == null) {
+            state.outfitPositions[id] = { x: 0, y: 0, scale: 1 };
+          }
+        });
+      }
     },
     removeItem(state, action: PayloadAction<number>) {
       const index: number = state.items.indexOf(action.payload);
@@ -34,6 +46,7 @@ const outfitSlice = createSlice({
     },
     clearAllItems(state) {
       state.items = [];
+      state.outfitPositions = {};
     },
     setCurrentOutfit(
       state,
@@ -62,8 +75,8 @@ const outfitSlice = createSlice({
     ) {
       state.outfitPositions = action.payload.positions;
     },
-    setFavorited(state, action: PayloadAction<{ favorited: boolean }>) {
-      state.favorited = action.payload.favorited;
+    setFavorited(state, action: PayloadAction<boolean>) {
+      state.favorited = action.payload;
     },
   },
 });
@@ -75,6 +88,7 @@ export const selectCurrentOutfitId = (state: RootState) =>
 
 export const getItemsPositions = (state: RootState) =>
   state.outfit.outfitPositions;
+export const getFavorited = (state: RootState) => state.outfit.favorited;
 
 export const itemInOutfit =
   (id: number) =>
@@ -88,7 +102,7 @@ export const itemInOutfit =
 
 export const {
   addNewItem,
-  setItems,
+  setOutfitItems,
   removeItem,
   clearAllItems,
   setCurrentOutfit,
@@ -97,6 +111,7 @@ export const {
   setOutfitPosition,
   removeItemPosition,
   clearOutfitPosition,
+  setFavorited,
 } = outfitSlice.actions;
 
 export default outfitSlice.reducer;

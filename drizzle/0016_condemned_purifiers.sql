@@ -1,0 +1,1 @@
+ALTER TABLE `presets` RENAME COLUMN "preset" TO "types";

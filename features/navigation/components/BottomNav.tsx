@@ -189,7 +189,7 @@ const BottomNav = () => {
             <Pressable
               style={[styles.addMenuOption]}
               onPress={() => {
-                router.navigate("/outfit/create-outfit");
+                router.navigate("/presets");
               }}
             >
               <AppIcon name="createOutfit" size={50} strokeWidth={0.85} />

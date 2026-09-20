@@ -5,6 +5,7 @@
 
 import { ItemsType } from "@/db/schemas/items";
 import { OutfitType } from "@/db/schemas/outfits";
+import { PresetType } from "@/db/schemas/presets";
 
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
@@ -183,6 +184,7 @@ export const COLOR_NAMES_MAP = new Map([
 
 export type NewItemType = Omit<ItemsType, "id" | "size">;
 export type NewOutfitType = Omit<OutfitType, "id">;
+export type NewPresetType = Omit<PresetType, "id">;
 export type ItemPosition = {
   x: number;
   y: number;
@@ -190,3 +192,4 @@ export type ItemPosition = {
 };
 
 export type OutfitPositions = Record<number, ItemPosition>;
+export type PresetTypesType = Record<string, string[]>;

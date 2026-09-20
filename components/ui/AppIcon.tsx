@@ -23,7 +23,9 @@ export type IconName =
   | "hanger"
   | "createOutfit"
   | "generate"
-  | "library";
+  | "library"
+  | "edit"
+  | "regenerate";
 
 type Glyph = (p: { color: string; sw: number }) => React.ReactNode;
 
@@ -285,6 +287,39 @@ const GLYPHS: Record<IconName, { draw: Glyph }> = {
         <Circle cx={7.2} cy={11.4} r={1.15} stroke={color} strokeWidth={sw} />
         <Polyline
           points="3.8,18.6 8.2,13.8 11,16.6 13,14.6 16.2,17.8"
+          stroke={color}
+          strokeWidth={sw}
+        />
+      </>
+    ),
+  },
+  edit: {
+    draw: ({ color, sw }) => (
+      <>
+        <Path d="M4 20h4l10-10-4-4L4 16z" stroke={color} strokeWidth={sw} />
+        <Line
+          x1={14.5}
+          y1={5.5}
+          x2={18.5}
+          y2={9.5}
+          stroke={color}
+          strokeWidth={sw}
+        />
+      </>
+    ),
+  },
+  regenerate: {
+    draw: ({ color, sw }) => (
+      <>
+        <Path d="M4 12a8 8 0 0 1 13.7-5.6" stroke={color} strokeWidth={sw} />
+        <Polyline
+          points="18.5,3 18.5,7 14.5,7"
+          stroke={color}
+          strokeWidth={sw}
+        />
+        <Path d="M20 12a8 8 0 0 1-13.7 5.6" stroke={color} strokeWidth={sw} />
+        <Polyline
+          points="5.5,21 5.5,17 9.5,17"
           stroke={color}
           strokeWidth={sw}
         />

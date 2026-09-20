@@ -9,6 +9,7 @@ import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -124,6 +125,86 @@ const OutfitsPage = () => {
   //   itemsData.length % 2 === 1
   //     ? [...itemsData, { id: -1, empty: true }]
   //     : itemsData;
+
+  const router = useRouter();
+  const filterScrollRef = useRef<ScrollView>(null);
+  const emptyState = () => {
+    if (itemsData.length > 0) {
+      return (
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <View
+            style={{
+              paddingTop: 80,
+              alignItems: "center",
+              maxWidth: 280,
+              gap: 15,
+            }}
+          >
+            <AppIcon
+              name={"search"}
+              size={44}
+              strokeWidth={0.8}
+              color={theme.inkA[40]}
+            ></AppIcon>
+            <AppText text={"No Matches"} type={"m1"}></AppText>
+            <AppText
+              text={
+                "None of your outfits fit that filter. Try something different."
+              }
+              type={"p5"}
+              style={{ textAlign: "center" }}
+            ></AppText>
+            <AppButton
+              label="Clear Filters"
+              type="primary"
+              style={{ flex: 0, alignSelf: "center" }}
+              onPress={() => {
+                setFilter("All");
+                setSearch("");
+                filterScrollRef.current?.scrollTo({ x: 0, animated: true });
+              }}
+            ></AppButton>
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <View
+            style={{
+              paddingTop: 80,
+              alignItems: "center",
+              maxWidth: 280,
+              gap: 15,
+            }}
+          >
+            <AppIcon
+              name={"createOutfit"}
+              size={44}
+              strokeWidth={0.8}
+              color={theme.inkA[40]}
+            ></AppIcon>
+            <AppText text={"No Outfits Yet"} type={"m1"}></AppText>
+            <AppText
+              text={
+                "Combine pieces from your wardrobe into a look, or generate one from a preset."
+              }
+              type={"p5"}
+              style={{ textAlign: "center" }}
+            ></AppText>
+            <AppButton
+              label="Add First Piece"
+              type="primary"
+              style={{ flex: 0, alignSelf: "center" }}
+              onPress={() => {
+                router.navigate("/presets");
+              }}
+            ></AppButton>
+          </View>
+        </View>
+      );
+    }
+  };
   return (
     <View style={{ flex: 1 }}>
       {showSearch ? (
@@ -134,6 +215,7 @@ const OutfitsPage = () => {
             placeholder="Search by outfit name"
           ></SearchBar>
           <ScrollView
+            ref={filterScrollRef}
             bounces={true}
             horizontal={true}
             style={{ width: "100%", gap: 50 }}
@@ -191,36 +273,40 @@ const OutfitsPage = () => {
           </Pressable>
         </View>
       )}
-      <FlatList
-        initialNumToRender={6} // render first 3 rows only
-        maxToRenderPerBatch={6} // render 3 more rows per batch
-        windowSize={5}
-        contentContainerStyle={styles.listContent}
-        onViewableItemsChanged={onViewableItemsChanged} // ← missing
-        viewabilityConfig={viewabilityConfig} // ← missing
-        ref={flatListRef}
-        data={filteredData}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.itemsGrid}
-        renderItem={({ item }) => (
-          // <View>
-          //   <Image
-          //     source={{ uri: item.imgUrl ?? undefined }}
-          //     contentFit="contain"
-          //     style={{ width: 500, aspectRatio: 1 }}
-          //   />
-          // </View>
-          <ItemPreview
-            id={item.id}
-            imgUri={item.imgUrl ?? ""}
-            name={item.name ?? ""}
-            color={""}
-            type={"outfit"}
-            favourite={item.favorited}
-          />
-        )}
-      />
+      {filteredData.length > 0 ? (
+        <FlatList
+          initialNumToRender={6} // render first 3 rows only
+          maxToRenderPerBatch={6} // render 3 more rows per batch
+          windowSize={5}
+          contentContainerStyle={styles.listContent}
+          onViewableItemsChanged={onViewableItemsChanged} // ← missing
+          viewabilityConfig={viewabilityConfig} // ← missing
+          ref={flatListRef}
+          data={filteredData}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.itemsGrid}
+          renderItem={({ item }) => (
+            // <View>
+            //   <Image
+            //     source={{ uri: item.imgUrl ?? undefined }}
+            //     contentFit="contain"
+            //     style={{ width: 500, aspectRatio: 1 }}
+            //   />
+            // </View>
+            <ItemPreview
+              id={item.id}
+              imgUri={item.imgUrl ?? ""}
+              name={item.name ?? ""}
+              color={""}
+              type={"outfit"}
+              favourite={item.favorited}
+            />
+          )}
+        />
+      ) : (
+        emptyState()
+      )}
     </View>
   );
 };

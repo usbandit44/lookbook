@@ -177,7 +177,7 @@ const makeText = (c: ThemeColors): ThemeText => ({
   },
   p2: {
     fontFamily: "Archivo-SemiBold",
-    fontSize: 23,
+    fontSize: 30,
     lineHeight: 27.6,
     letterSpacing: -0.23, // -.01em
     color: c.ink,

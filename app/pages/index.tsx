@@ -9,10 +9,13 @@ import { useScrollToTopListener } from "@/features/navigation/hooks/scrollEvents
 import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
 import { scheduleNotification } from "@/functions/notifications";
 import { useDrizzle } from "@/hooks/DrizzleContext";
+import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
+import { clearCurrentItemId } from "@/redux/slices/itemSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import * as Notifications from "expo-notifications";
+import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -158,6 +161,88 @@ const Home = () => {
     return formattedData;
   }, [debouncedSearch, liveItems, filter]);
 
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const filterScrollRef = useRef<ScrollView>(null);
+  const emptyState = () => {
+    if (liveItems.length > 0) {
+      return (
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <View
+            style={{
+              paddingTop: 80,
+              alignItems: "center",
+              maxWidth: 280,
+              gap: 15,
+            }}
+          >
+            <AppIcon
+              name={"search"}
+              size={44}
+              strokeWidth={0.8}
+              color={theme.inkA[40]}
+            ></AppIcon>
+            <AppText text={"No Matches"} type={"m1"}></AppText>
+            <AppText
+              text={
+                "Nothing in your wardrobe fits that filter. Try something different."
+              }
+              type={"p5"}
+              style={{ textAlign: "center" }}
+            ></AppText>
+            <AppButton
+              label="Clear Filters"
+              type="primary"
+              style={{ flex: 0, alignSelf: "center" }}
+              onPress={() => {
+                setFilter("All");
+                setSearch("");
+                filterScrollRef.current?.scrollTo({ x: 0, animated: true });
+              }}
+            ></AppButton>
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <View
+            style={{
+              paddingTop: 80,
+              alignItems: "center",
+              maxWidth: 280,
+              gap: 15,
+            }}
+          >
+            <AppIcon
+              name={"shirt"}
+              size={44}
+              strokeWidth={0.8}
+              color={theme.inkA[40]}
+            ></AppIcon>
+            <AppText text={"No Pieces Yet"} type={"m1"}></AppText>
+            <AppText
+              text={
+                "Photograph your first piece and Lookbook files it by type, colour and tags."
+              }
+              type={"p5"}
+              style={{ textAlign: "center" }}
+            ></AppText>
+            <AppButton
+              label="Add First Piece"
+              type="primary"
+              style={{ flex: 0, alignSelf: "center" }}
+              onPress={() => {
+                dispatch(clearCurrentItemId());
+                router.navigate("/camera-screen");
+              }}
+            ></AppButton>
+          </View>
+        </View>
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       {showSearch ? (
@@ -168,6 +253,7 @@ const Home = () => {
             placeholder="Search by tag, color, type"
           ></Searchbar>
           <ScrollView
+            ref={filterScrollRef}
             bounces={true}
             horizontal={true}
             style={{ width: "100%", gap: 50 }}
@@ -225,31 +311,35 @@ const Home = () => {
           </Pressable>
         </View>
       )}
-      <FlatList
-        style={styles.list}
-        contentContainerStyle={styles.listContent}
-        initialNumToRender={6}
-        maxToRenderPerBatch={6}
-        windowSize={21}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        ref={flatListRef}
-        data={filteredData}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        renderItem={({ item }) => (
-          <ItemPreview
-            imgUri={item.imgUrl ?? ""}
-            name={""}
-            color={item.color}
-            itemType={item.type}
-            type="item"
-            id={item.id}
-            favourite={item.favorited}
-          />
-        )}
-      />
+      {filteredData.length > 0 ? (
+        <FlatList
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+          initialNumToRender={6}
+          maxToRenderPerBatch={6}
+          windowSize={21}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          ref={flatListRef}
+          data={filteredData}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          renderItem={({ item }) => (
+            <ItemPreview
+              imgUri={item.imgUrl ?? ""}
+              name={""}
+              color={item.color}
+              itemType={item.type}
+              type="item"
+              id={item.id}
+              favourite={item.favorited}
+            />
+          )}
+        />
+      ) : (
+        emptyState()
+      )}
     </View>
   );
 };
@@ -277,31 +367,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     // paddingHorizontal: 15,
     paddingTop: 15,
-  },
-  scrollTopBtn: {
-    position: "absolute",
-    bottom: 20,
-    alignSelf: "flex-end",
-    paddingRight: 15,
-  },
-
-  option: {
-    width: "100%",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    borderTopWidth: 0.5,
-    borderColor: "#979C9E",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-  },
-
-  optionSelected: {
-    backgroundColor: "#f2f2f2", // 👈 subtle highlight
-  },
-
-  checkboxContainer: {
-    padding: 0,
-    margin: 0,
   },
 });
