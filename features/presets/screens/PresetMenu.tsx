@@ -117,7 +117,7 @@ const PresetMenu = () => {
             return (
               <PresetPreview
                 id={preset.id}
-                key={index}
+                key={preset.id}
                 name={preset.name}
                 types={preset.types}
                 favorited={preset.favorited ?? false}

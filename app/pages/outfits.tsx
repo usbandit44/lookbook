@@ -8,6 +8,7 @@ import { useScrollToTopListener } from "@/features/navigation/hooks/scrollEvents
 import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useTheme } from "@/hooks/ThemeProvider";
+import { usePostHog } from "posthog-react-native";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
@@ -121,6 +122,19 @@ const OutfitsPage = () => {
     return formattedData;
   }, [debouncedSearch, itemsData, filter]);
 
+  const posthog = usePostHog();
+
+  // Only counts are sent — never the raw search text.
+  useEffect(() => {
+    const termCount = debouncedSearch.split(" ").filter((t) => t !== "").length;
+    if (termCount === 0) return;
+    posthog.capture("search_performed", {
+      surface: "outfits",
+      term_count: termCount,
+      result_count: filteredData.filter((item) => item.id !== -1).length,
+    });
+  }, [debouncedSearch]);
+
   // const formattedData =
   //   itemsData.length % 2 === 1
   //     ? [...itemsData, { id: -1, empty: true }]
@@ -206,7 +220,7 @@ const OutfitsPage = () => {
     }
   };
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, paddingHorizontal: 15 }}>
       {showSearch ? (
         <View style={[styles.header, { backgroundColor: theme.surface }]}>
           <SearchBar
@@ -230,6 +244,10 @@ const OutfitsPage = () => {
                   onPress={() => {
                     if (!selected) {
                       setFilter(filt);
+                      posthog.capture("filter_selected", {
+                        surface: "outfits",
+                        filter: filt,
+                      });
                     }
                   }}
                   type={selected ? "primary" : "secondary"}
@@ -286,6 +304,7 @@ const OutfitsPage = () => {
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
           columnWrapperStyle={styles.itemsGrid}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             // <View>
             //   <Image
@@ -315,7 +334,7 @@ export default OutfitsPage;
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingBottom: 90,
+    paddingBottom: 100,
   },
   itemsGrid: {
     justifyContent: "space-between",

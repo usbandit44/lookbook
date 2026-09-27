@@ -17,6 +17,7 @@ abstract class OutfitRepo {
     items: number[];
     imgUrl: string;
     updateImgUrl: boolean;
+    positions: OutfitPositions;
     favorited: boolean;
   }>;
 

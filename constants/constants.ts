@@ -52,7 +52,22 @@ export const itemTypesArray = [
   "Accessories",
 ];
 
-export const itemSubTypes = [
+export type ItemTypeType =
+  | "Tops"
+  | "Bottoms"
+  | "Outerwear"
+  | "Dresses"
+  | "Shoes"
+  | "Belt"
+  | "Headwear"
+  | "Accessories";
+
+export interface SubType {
+  key: ItemTypeType;
+  value: string;
+}
+
+export const itemSubTypes: SubType[] = [
   // Tops
   { key: "Tops", value: "T-Shirt" },
   { key: "Tops", value: "Long Sleeve Tee" },

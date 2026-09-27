@@ -1,10 +1,11 @@
 import AppButton from "@/components/ui/AppButton";
 import AppText from "@/components/ui/AppText";
 import images from "@/constants/images";
-import AppUserRepo from "@/repo/user_repo/AppUserRepo";
+import { useRepo } from "@/hooks/RepoProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import { usePostHog } from "posthog-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { ImageBackground, StyleSheet, View } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
 
@@ -13,11 +14,16 @@ type Slide = {
 };
 
 const TutorialPage = () => {
-  const userRepo = new AppUserRepo();
+  const { userRepo } = useRepo();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const sliderRef = useRef<AppIntroSlider<Slide>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    posthog.capture("tutorial_started");
+  }, []);
 
   const slides: Slide[] = [
     {
@@ -81,6 +87,7 @@ const TutorialPage = () => {
       style={{ paddingHorizontal: 22, paddingVertical: 10 }}
       onPress={async () => {
         await userRepo.completeTutorial();
+        posthog.capture("tutorial_completed", { completion_method: "done" });
         router.navigate("/pages");
       }}
     >
@@ -109,6 +116,10 @@ const TutorialPage = () => {
       style={styles.skipButton}
       onPress={async () => {
         await userRepo.completeTutorial();
+        posthog.capture("tutorial_completed", {
+          completion_method: "skipped",
+          skipped_at_step: currentIndex + 1,
+        });
         router.navigate("/pages");
       }}
     >
@@ -129,7 +140,13 @@ const TutorialPage = () => {
         renderDoneButton={renderDoneButton}
         renderPrevButton={renderPrevButton}
         showPrevButton
-        onSlideChange={(index) => setCurrentIndex(index)}
+        onSlideChange={(index) => {
+          setCurrentIndex(index);
+          posthog.capture("tutorial_step_viewed", {
+            step: index + 1,
+            total_steps: slides.length,
+          });
+        }}
         activeDotStyle={styles.activeDot}
         dotStyle={styles.dot}
       />

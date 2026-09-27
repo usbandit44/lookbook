@@ -22,6 +22,7 @@ import { useSnackbar } from "@/hooks/useSnackBar";
 
 import { AppIcon } from "@/components/ui/AppIcon";
 import ColorSelector from "@/features/add-item/components/ColorSelector";
+import { useRepo } from "@/hooks/RepoProvider";
 import {
   addItemTag,
   addItemTagToFront,
@@ -41,14 +42,17 @@ import {
   setItemName,
   setItemType,
 } from "@/redux/slices/itemSlice";
-import { addNewItem, setItemPosition } from "@/redux/slices/outfitSlice";
-import AppItemRepo from "@/repo/item_repo/AppItemRepo";
-import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
-import AppUserRepo from "@/repo/user_repo/AppUserRepo";
+import {
+  addToTypes,
+  clearPresetState,
+  setBuildingFromItem,
+} from "@/redux/slices/presetSlice";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
+import { syncAnalyticsProperties } from "@/config/posthog";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -66,6 +70,7 @@ type FormValues = {
 };
 
 const AddItemForm = () => {
+  const posthog = usePostHog();
   const { theme } = useTheme();
   const drizzleDb = useDrizzle();
   const { data: liveUserData } = useLiveQuery(drizzleDb.select().from(user));
@@ -82,9 +87,8 @@ const AddItemForm = () => {
   const { setSettings, showSnackbar, hideSnackbar, settings } =
     snackbarSettingsContext;
 
-  const itemRepo = new AppItemRepo();
-  const outfitRepo = new AppOutfitRepo();
-  const userRepo = new AppUserRepo();
+  const repos = useRepo();
+  const { itemRepo, outfitRepo, userRepo } = repos;
 
   const currentItemId = useAppSelector(selectCurrentItem);
   const itemsIndex = useAppSelector(selectIndex);
@@ -174,9 +178,23 @@ const AddItemForm = () => {
   const insertItem = async (item: NewItemType) => {
     try {
       await itemRepo.addItem(item);
+      return true;
     } catch (err) {
       console.log(err);
+      return false;
     }
+  };
+
+  const canCreate = () => {
+    if (
+      item.imgUrl === "" ||
+      item.type == "" ||
+      item.color == "" ||
+      item.tags.length < 3
+    ) {
+      return false;
+    }
+    return true;
   };
 
   const createItem = async () => {
@@ -204,7 +222,17 @@ const AddItemForm = () => {
           backgroundRemoved: true,
         }),
       );
-      await insertItem(item);
+      const created = await insertItem(item);
+      if (!created) return false;
+      const itemCount = await itemRepo.countNumberOfItem();
+      posthog.capture("item_created", {
+        item_type: item.type,
+        item_color: item.color,
+        tag_count: item.tags.length,
+        is_first: itemCount === 1,
+        wardrobe_item_count: itemCount,
+      });
+      syncAnalyticsProperties(repos);
       if (itemsIndex + 1 != itemsList.length) {
         console.log("hello");
         dispatch(increaseIndex());
@@ -248,6 +276,11 @@ const AddItemForm = () => {
         };
         console.log("test: " + JSON.stringify(newItem, null, 2));
         await itemRepo.updateItem(newItem);
+        posthog.capture("item_updated", {
+          item_type: newItem.type,
+          item_color: newItem.color,
+          tag_count: newItem.tags.length,
+        });
         //setUpdateVisablity(!updateVisablity);
         dispatch(clearItems());
         dispatch(clearCurrentItemId());
@@ -287,6 +320,12 @@ const AddItemForm = () => {
       <View style={styles.header}>
         <AppButton
           onPress={() => {
+            if (currentItemId == -1) {
+              posthog.capture("item_review_abandoned", {
+                pending_count: itemsList.length - itemsIndex,
+                total_count: itemsList.length,
+              });
+            }
             router.navigate("/pages");
             dispatch(clearCurrentItemId());
             dispatch(clearItems());
@@ -311,9 +350,11 @@ const AddItemForm = () => {
           <AppButton
             type="icon"
             onPress={async () => {
+              await itemRepo.deleteItem(currentItemId);
+              await outfitRepo.removeItemFromAllOutfits(currentItemId);
+              posthog.capture("item_deleted", { item_type: item.type });
+              syncAnalyticsProperties(repos);
               router.navigate("/pages");
-              itemRepo.deleteItem(currentItemId);
-              outfitRepo.removeItemFromAllOutfits(currentItemId);
               dispatch(clearCurrentItemId());
               dispatch(clearItems());
               showSnackbar("Item Deleted", "success");
@@ -372,6 +413,10 @@ const AddItemForm = () => {
               onPress={() => {
                 if (currentItemId != -1) {
                   itemRepo.updateFavorited(currentItemId, !item.favorited);
+                  posthog.capture("favorite_toggled", {
+                    target: "item",
+                    favorited: !item.favorited,
+                  });
                 }
                 dispatch(
                   setItemFavorited({
@@ -559,9 +604,14 @@ const AddItemForm = () => {
                           );
                           dispatch(clearItemColor({ index: itemsIndex }));
                         } else {
-                          // if (item.color != "") {
-                          //   return;
-                          // }
+                          if (item.color != "") {
+                            dispatch(
+                              removeItemTag({
+                                index: itemsIndex,
+                                tag: item.color || "",
+                              }),
+                            );
+                          }
                           dispatch(
                             addItemTag({ index: itemsIndex, tag: color }),
                           );
@@ -664,6 +714,7 @@ const AddItemForm = () => {
           <AppButton
             type="secondary"
             onPress={() => {
+              posthog.capture("item_discarded", { item_type: item.type });
               if (itemsIndex + 1 != itemsList.length) {
                 dispatch(increaseIndex());
               } else {
@@ -675,10 +726,27 @@ const AddItemForm = () => {
           ></AppButton>
         ) : (
           <AppButton
-            type={updatable() ? "secondary" : "ghostSecondary"}
+            type={updatable() && canCreate() ? "secondary" : "ghostSecondary"}
             onPress={async () => {
-              const ok = await updateItem();
-              if (ok) router.navigate("/pages");
+              console.log(canCreate());
+              if (updatable() && canCreate()) {
+                const ok = await updateItem();
+                if (ok) router.navigate("/pages");
+              } else {
+                if (item.imgUrl === "") {
+                  showSnackbar("Need to add Image", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else if (item.type == "") {
+                  showSnackbar("Need to select a Type", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else if (item.color == "") {
+                  showSnackbar("Need to select a color", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else if (item.tags.length < 3) {
+                  showSnackbar("Need a type, subtype, and color", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                }
+              }
             }}
             label="Update"
           ></AppButton>
@@ -687,23 +755,60 @@ const AddItemForm = () => {
         {currentItemId != -1 ? (
           <AppButton
             onPress={async () => {
-              dispatch(addNewItem(currentItemId));
-              dispatch(
-                setItemPosition({
-                  id: currentItemId,
-                  position: { x: 0, y: 0, scale: 1 },
-                }),
-              );
-              router.navigate("/outfit/create-outfit");
+              const found = itemSubTypes
+                .filter(
+                  (s) => s.key === item.type && item.tags.includes(s.value),
+                )
+                .map((s) => s.value);
+              if (found.length <= 0) {
+                showSnackbar("Add a subtype to build an outfit.", "error");
+                setTimeout(() => hideSnackbar(), 3000);
+              } else {
+                dispatch(clearPresetState());
+                dispatch(
+                  setBuildingFromItem({
+                    id: currentItemId,
+                    type: item.type,
+                    subtype: found[0],
+                  }),
+                );
+                dispatch(addToTypes({ key: item.type, value: found[0] }));
+
+                // dispatch(addNewItem(currentItemId));
+                // dispatch(
+                //   setItemPosition({
+                //     id: currentItemId,
+                //     position: { x: 0, y: 0, scale: 1 },
+                //   }),
+                // );
+                router.navigate("/presets/create-preset");
+              }
             }}
             label="BUILD FROM ITEM"
           ></AppButton>
         ) : (
           <AppButton
             onPress={async () => {
-              const completed = await createItem();
+              if (canCreate()) {
+                const completed = await createItem();
+              } else {
+                if (item.imgUrl === "") {
+                  showSnackbar("Need to add Image", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else if (item.type == "") {
+                  showSnackbar("Need to select a Type", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else if (item.color == "") {
+                  showSnackbar("Need to select a color", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else if (item.tags.length < 3) {
+                  showSnackbar("Need a type, subtype, and color", "error");
+                  setTimeout(() => hideSnackbar(), 3000);
+                }
+              }
             }}
             label="Done"
+            type={canCreate() ? "primary" : "ghostPrimary"}
           ></AppButton>
         )}
       </View>

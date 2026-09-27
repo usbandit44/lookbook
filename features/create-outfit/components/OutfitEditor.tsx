@@ -1,6 +1,7 @@
 import AppButton from "@/components/ui/AppButton";
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
+import { OutfitPositions } from "@/constants/constants";
 import { Theme } from "@/constants/themes";
 import { ItemsType } from "@/db/schemas/items";
 import {
@@ -8,6 +9,7 @@ import {
   normalizeImageUri,
 } from "@/functions/imageHandling";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useAppModal } from "@/hooks/useAppModal";
 import { useSnackbar } from "@/hooks/useSnackBar";
@@ -25,10 +27,11 @@ import {
   setOutfitItems,
 } from "@/redux/slices/outfitSlice";
 import { clearPresetState } from "@/redux/slices/presetSlice";
-import AppItemRepo from "@/repo/item_repo/AppItemRepo";
-import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { usePostHog } from "posthog-react-native";
+import { syncAnalyticsProperties } from "@/config/posthog";
+import { consumeGeneratedOutfitSource } from "@/hooks/useGenerateOutfit";
 import React, { useEffect, useRef, useState } from "react";
 import {
   InteractionManager,
@@ -48,7 +51,35 @@ function arraysEqualUnordered(arr1: number[], arr2: number[]) {
   return JSON.stringify(sorted1) === JSON.stringify(sorted2);
 }
 
+function areItemPositionsEqual(
+  a: OutfitPositions | string | null | undefined,
+  b: OutfitPositions | string | null | undefined,
+): boolean {
+  const parse = (v: typeof a): OutfitPositions =>
+    typeof v === "string" ? JSON.parse(v) : (v ?? {});
+
+  const pa = parse(a);
+  const pb = parse(b);
+
+  const aKeys = Object.keys(pa);
+  if (aKeys.length !== Object.keys(pb).length) return false;
+
+  const EPS = 0.5; // ignore sub-pixel drift
+  const close = (x = 0, y = 0) => Math.abs(x - y) < EPS;
+
+  return aKeys.every((key) => {
+    const p1 = pa[Number(key)];
+    const p2 = pb[Number(key)];
+    return (
+      p2 !== undefined &&
+      close(p1.x, p2.x) &&
+      close(p1.y, p2.y) &&
+      Math.abs((p1.scale ?? 1) - (p2.scale ?? 1)) < 0.01
+    );
+  });
+}
 const OutfitEditor: React.FC = () => {
+  const posthog = usePostHog();
   const { theme } = useTheme();
   const t = theme;
   const styles = s(t);
@@ -64,9 +95,9 @@ const OutfitEditor: React.FC = () => {
   const viewRef = useRef<View>(null);
   const moreButtonRef = useRef<View>(null);
 
-  const outfitRepo = new AppOutfitRepo();
+  const repos = useRepo();
+  const { outfitRepo, itemRepo } = repos;
 
-  const repo = new AppItemRepo();
   const items = useAppSelector(selectOutfit);
   const currentOutfit = useAppSelector(selectCurrentOutfitId);
   const itemsPositions = useAppSelector(getItemsPositions);
@@ -115,6 +146,10 @@ const OutfitEditor: React.FC = () => {
             hide();
             console.log(favorited);
             outfitRepo.updateOutfitFavorited(currentOutfit.id, !favorited);
+            posthog.capture("favorite_toggled", {
+              target: "outfit",
+              favorited: !favorited,
+            });
             dispatch(setFavorited(!favorited));
           }}
         >
@@ -125,29 +160,11 @@ const OutfitEditor: React.FC = () => {
             style={{ fontSize: 15 }}
           ></AppText>
         </Pressable>
-
         <Pressable
           style={styles.modalRow}
-          onPress={() => {
+          onPress={async () => {
             hide();
-            updateOutfit();
-            showSnackbar("Cover Image Updated`", "success");
-            setTimeout(() => hideSnackbar(), 3000);
-          }}
-        >
-          <AppIcon name={"image"}></AppIcon>
-          <AppText
-            text={"Update Cover Image"}
-            type={"p3"}
-            style={{ fontSize: 15 }}
-          ></AppText>
-        </Pressable>
-
-        <Pressable
-          style={styles.modalRow}
-          onPress={() => {
-            hide();
-            deleteOutfit();
+            await deleteOutfit();
             showSnackbar("Outfit Deleted", "success");
             setTimeout(() => hideSnackbar(), 3000);
           }}
@@ -214,6 +231,16 @@ const OutfitEditor: React.FC = () => {
       console.log("4 - created outfit:", createdOutfitId);
 
       setSavedOutfitId(createdOutfitId);
+      const outfitCount = await outfitRepo.countNumberOfOutfit();
+      const { source, edited } = consumeGeneratedOutfitSource(items);
+      posthog.capture("outfit_created", {
+        item_count: items.length,
+        source,
+        edited_after_generation: edited,
+        is_first: outfitCount === 1,
+        outfit_count: outfitCount,
+      });
+      syncAnalyticsProperties(repos);
     } catch (err) {
       console.error("❌ SAVE FAILED:", err);
     }
@@ -232,11 +259,14 @@ const OutfitEditor: React.FC = () => {
       positions: itemsPositions,
       favorited: favorited,
     };
-    outfitRepo.updateOutfit(newOutfit);
+    await outfitRepo.updateOutfit(newOutfit);
+    posthog.capture("outfit_updated", { item_count: items.length });
   };
 
-  const deleteOutfit = () => {
-    outfitRepo.deleteOutfit(currentOutfit.id);
+  const deleteOutfit = async () => {
+    await outfitRepo.deleteOutfit(currentOutfit.id);
+    posthog.capture("outfit_deleted", { item_count: items.length });
+    syncAnalyticsProperties(repos);
     router.navigate("/pages/outfits");
   };
 
@@ -318,7 +348,9 @@ const OutfitEditor: React.FC = () => {
     console.log(itemsPositions);
     console.log(items);
     async function setup() {
-      const results = await Promise.all(items.map((id) => repo.getItem(id)));
+      const results = await Promise.all(
+        items.map((id) => itemRepo.getItem(id)),
+      );
       setOutfit(results);
       if (currentOutfit.id != -1) {
         console.log(itemsPositions);
@@ -328,7 +360,8 @@ const OutfitEditor: React.FC = () => {
 
         if (
           !arraysEqualUnordered(pastOutfit.items, items) ||
-          outfitName != pastOutfit.name
+          outfitName != pastOutfit.name ||
+          !areItemPositionsEqual(pastOutfit.positions, itemsPositions)
         ) {
           setEditing(true);
         } else {
@@ -345,7 +378,7 @@ const OutfitEditor: React.FC = () => {
       }
     }
     setup();
-  }, [items, settings, outfitName]);
+  }, [items, settings, outfitName, itemsPositions]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -390,6 +423,7 @@ const OutfitEditor: React.FC = () => {
                   dispatch(removeItemPosition({ id: item.id }));
                 }}
                 isCapturing={isCapturing}
+                modalName={item.color + " / " + item.type}
               >
                 <Image
                   source={{ uri: normalizeImageUri(item.imgUrl ?? "") }}
@@ -417,98 +451,6 @@ const OutfitEditor: React.FC = () => {
           }}
         ></AppButton>
       </View>
-      {/* <View style={styles.footerContainer}>
-        <View style={styles.navButtonContainer}>
-          <Pressable
-            onPress={() => router.navigate("/outfit/add-item")}
-            style={styles.navButton}
-          >
-            <Icon name="shirt-outline" type="ionicon" size={35} />
-          </Pressable>
-          <AppText type="p3SemiBold">Add Item</AppText>
-        </View>
-        <View style={styles.navButtonContainer}>
-          <Pressable
-            onPress={() => router.navigate("/outfit/generate-outfit")}
-            style={styles.navButton}
-          >
-            <Image
-              source={icons.generateOutfitIcon}
-              style={{ width: 45, height: 45, resizeMode: "contain" }}
-            />
-          </Pressable>
-          <AppText type="p3SemiBold">Generate Outfit</AppText>
-        </View>
-      </View> */}
-
-      {/* Tap-outside catcher — invisible, fills screen, only active while menu is open
-      <Pressable
-        style={styles.optionsScreen}
-        onPress={() => toggleMenu(false)}
-        pointerEvents={menuVisible ? "auto" : "none"}
-      >
-        <Animated.View
-          style={[
-            styles.optionsMenu,
-            menuStyle,
-            {
-              position: "absolute",
-              top: menuPosition.top,
-              right: menuPosition.right,
-              transformOrigin: "top right",
-            },
-          ]}
-        >
-          <AppButton
-            type="text"
-            onPress={async () => {
-              toggleMenu(false);
-              await updateOutfit();
-              showSnackbar("Cover photo updated!", "success");
-              setTimeout(() => hideSnackbar(), 3000);
-            }}
-          >
-            <AppText style={{ fontSize: 16 }}>Update Cover Photo</AppText>
-          </AppButton>
-          <AppButton
-            type="text"
-            onPress={() => {
-              toggleMenu(false);
-              setDeleteModalVisible(true);
-            }}
-          >
-            <AppText style={{ color: Colors.light.destructive, fontSize: 16 }}>
-              Delete
-            </AppText>
-          </AppButton>
-        </Animated.View>
-      </Pressable>
-
-      <AppModal
-        modalVisible={deleteModalVisible}
-        setModalVisible={setDeleteModalVisible}
-      >
-        <AppText>Do you want to delete this outfit?</AppText>
-        <AppButton
-          fullWidth={true}
-          onPress={async () => {
-            deleteOutfit();
-            setDeleteModalVisible(!deleteModalVisible);
-            dispatch(clearAllItems());
-            dispatch(clearCurrentOutfit());
-            dispatch(clearOutfitPosition());
-            router.navigate("/pages/outfits");
-          }}
-        >
-          <AppText style={{ color: "white" }}>Yes</AppText>
-        </AppButton>
-        <AppButton
-          fullWidth={true}
-          onPress={() => setDeleteModalVisible(!deleteModalVisible)}
-        >
-          <AppText style={{ color: "white" }}>Cancel</AppText>
-        </AppButton>
-      </AppModal> */}
     </View>
   );
 };

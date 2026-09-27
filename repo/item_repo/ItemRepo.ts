@@ -19,6 +19,14 @@ abstract class ItemRepo {
   abstract getAllBeltIds(): Promise<number[]>;
 
   abstract getIdsByTags(tags: string[]): Promise<number[]>;
+  abstract getIdsByTagsMatchSome(
+    mandatoryTags: string[],
+    optionalTags: string[],
+  ): Promise<number[]>;
+
+  abstract getSubtypesMissingFromCloset(
+    subtypesToCheck: string[],
+  ): Promise<string[]>;
 
   abstract updateItem(item: ItemsType): Promise<number>;
   abstract updateTags(id: number, tags: string[]): Promise<number>;

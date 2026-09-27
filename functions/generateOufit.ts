@@ -1,5 +1,5 @@
 import { PresetTypesType } from "@/constants/constants";
-import AppItemRepo from "@/repo/item_repo/AppItemRepo";
+import { useRepo } from "@/hooks/RepoProvider";
 // export enum itemTypes {
 //   Tops = "Tops",
 //   Bottoms = "Bottoms",
@@ -17,11 +17,11 @@ const getRandomInt = (max: number) => {
 async function GenerateOutfit(presetTypes: PresetTypesType): Promise<number[]> {
   console.log("GenerateOutfit called");
   try {
-    const repo = new AppItemRepo();
+    const { itemRepo } = useRepo();
     console.log("repo created", JSON.stringify(presetTypes, null, 2));
     const items: number[] = [];
     for (const key of Object.keys(presetTypes)) {
-      const list = await repo.getIdsByTags(presetTypes[key]);
+      const list = await itemRepo.getIdsByTags(presetTypes[key]);
       if (!list.length) continue;
       const randomIndex = getRandomInt(list.length);
       items.push(list[randomIndex]);

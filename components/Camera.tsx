@@ -24,6 +24,7 @@ import {
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import * as Linking from "expo-linking";
 import { useRootNavigationState, useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -47,6 +48,7 @@ const MAX_MENU_HEIGHT = 500;
 export function Camera() {
   const rootState = useRootNavigationState();
   const { theme } = useTheme();
+  const posthog = usePostHog();
   const t = theme;
   const styles = s(t);
 
@@ -94,6 +96,7 @@ export function Camera() {
     setStatusText("Removing backgrounds and identifying items...");
 
     let completed = 0;
+    let processedItemCount = 0;
     for (const img of imgs) {
       const color = await classifyClothing(img);
       const resultUri = await process(img);
@@ -110,9 +113,20 @@ export function Camera() {
           backgroundRemoved: true,
         };
         dispatch(addItem(item));
+        processedItemCount += 1;
       }
       completed += 1;
       setProgress(completed);
+    }
+    if (imgs.length > 0) {
+      const cameraCount = imgs.filter((img) => photos.includes(img)).length;
+      posthog.capture("wardrobe_images_processed", {
+        item_count: processedItemCount,
+        attempted_count: imgs.length,
+        failed_count: imgs.length - processedItemCount,
+        camera_count: cameraCount,
+        library_count: imgs.length - cameraCount,
+      });
     }
     setProcessingImages(false);
     router.navigate("/add-item");

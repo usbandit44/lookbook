@@ -1,5 +1,7 @@
+import { posthog } from "@/config/posthog";
 import Snackbar from "@/components/ui/Snackbar";
 import { DrizzleProvider } from "@/hooks/DrizzleContext";
+import { RepoProvider } from "@/hooks/RepoProvider";
 import { ThemeProvider, useTheme } from "@/hooks/ThemeProvider";
 import { AppModalProvider } from "@/hooks/useAppModal";
 import SnackbarProvider, { useSnackbar } from "@/hooks/useSnackBar";
@@ -17,9 +19,11 @@ import {
 } from "@expo-google-fonts/ibm-plex-mono";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Slot, usePathname } from "expo-router";
+import { PostHogProvider } from "posthog-react-native";
 import { SQLiteProvider } from "expo-sqlite";
+import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
-import { Suspense } from "react";
+import { type ReactNode, Suspense, useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -33,11 +37,40 @@ export const DATABASE_NAME = "lookbook";
 
 /* ------------------ INNER APP ------------------ */
 
+function PostHogRoot({ children }: { children: ReactNode }) {
+  return posthog ? (
+    <PostHogProvider client={posthog}>{children}</PostHogProvider>
+  ) : (
+    children
+  );
+}
+
 function AppShell() {
   const { theme } = useTheme();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const snackbarSettingsContext = useSnackbar();
+
+  // expo-router screens aren't auto-tracked, so report each route change.
+  useEffect(() => {
+    posthog?.screen(pathname);
+  }, [pathname]);
+
+  // Measures whether the weekly reminders bring people back into the app.
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const trigger = response.notification.request.trigger as {
+          weekday?: number;
+        } | null;
+        posthog?.capture("notification_opened", {
+          title: response.notification.request.content.title,
+          weekday: trigger?.weekday ?? null,
+        });
+      },
+    );
+    return () => subscription.remove();
+  }, []);
 
   const isCamera = pathname.includes("/camera-screen");
   const backgroundColor = isCamera ? theme.inkAlt : theme.surface;
@@ -117,17 +150,21 @@ export default function RootLayout() {
           useSuspense
         >
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider>
-              <AppModalProvider>
-                <SnackbarProvider>
-                  <DrizzleProvider>
-                    <Provider store={store}>
-                      <AppShell />
-                    </Provider>
-                  </DrizzleProvider>
-                </SnackbarProvider>
-              </AppModalProvider>
-            </ThemeProvider>
+            <RepoProvider>
+              <ThemeProvider>
+                <AppModalProvider>
+                  <SnackbarProvider>
+                    <DrizzleProvider>
+                      <PostHogRoot>
+                        <Provider store={store}>
+                          <AppShell />
+                        </Provider>
+                      </PostHogRoot>
+                    </DrizzleProvider>
+                  </SnackbarProvider>
+                </AppModalProvider>
+              </ThemeProvider>
+            </RepoProvider>
           </QueryClientProvider>
         </SQLiteProvider>
       </Suspense>

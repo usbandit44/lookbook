@@ -1,189 +1,18 @@
-// import AppButton from "@/components/ui/AppButton";
-// import { AppIcon } from "@/components/ui/AppIcon";
-// import AppText from "@/components/ui/AppText";
-// import { Theme } from "@/constants/themes";
-// import { useAppDispatch } from "@/hooks/redux-hooks";
-// import { useTheme } from "@/hooks/ThemeProvider";
-// import { useAppModal } from "@/hooks/useAppModal";
-// import { setPresetId } from "@/redux/slices/presetSlice";
-// import AppPresetsRepo from "@/repo/presets_repo/AppPresetsRepo";
-// import { useRouter } from "expo-router";
-// import React, { useState } from "react";
-// import { Pressable, StyleSheet, View } from "react-native";
-
-// const PresetPreview: React.FC<{
-//   id: number;
-//   name: string;
-//   types: string[];
-//   favorited: boolean;
-//   //   style?: object;
-// }> = (props) => {
-//   const presetRepo = new AppPresetsRepo();
-//   const { theme } = useTheme();
-//   const t = theme;
-//   const styles = s(t);
-
-//   const { show, hide } = useAppModal();
-//   const [isPressed, setIsPressed] = useState(false);
-//   const dispatch = useAppDispatch();
-//   const router = useRouter();
-
-//   const modalContent = () => {
-//     return (
-//       <View>
-//         <View style={styles.modalTitleRow}>
-//           <AppText
-//             text={props.name}
-//             type={"m22"}
-//             style={{ fontSize: 12 }}
-//           ></AppText>
-//         </View>
-//         <Pressable
-//           style={styles.modalRow}
-//           onPress={() => {
-//             hide();
-//           }}
-//         >
-//           <AppIcon name={"regenerate"}></AppIcon>
-//           <AppText
-//             text={"Generate Outfit"}
-//             type={"p3"}
-//             style={{ fontSize: 15 }}
-//           ></AppText>
-//         </Pressable>
-//         <Pressable
-//           style={styles.modalRow}
-//           onPress={() => {
-//             hide();
-//             dispatch(setPresetId({ id: props.id }));
-//             router.navigate("/presets/create-preset");
-//           }}
-//         >
-//           <AppIcon name={"edit"}></AppIcon>
-//           <AppText
-//             text={"Edit Preset"}
-//             type={"p3"}
-//             style={{ fontSize: 15 }}
-//           ></AppText>
-//         </Pressable>
-//         <Pressable
-//           style={styles.modalRow}
-//           onPress={() => {
-//             hide();
-//             presetRepo.updateFavorited(props.id, !props.favorited);
-//           }}
-//         >
-//           <AppIcon name={props.favorited ? "star" : "starOutline"}></AppIcon>
-//           <AppText
-//             text={
-//               props.favorited ? "Remove from Favorites" : "Add to Favorites"
-//             }
-//             type={"p3"}
-//             style={{ fontSize: 15 }}
-//           ></AppText>
-//         </Pressable>
-//         <Pressable
-//           style={styles.modalRow}
-//           onPress={() => {
-//             hide();
-//             presetRepo.deletePreset(props.id);
-//           }}
-//         >
-//           <AppIcon name="trash" color={theme.danger}></AppIcon>
-//           <AppText
-//             text={"Delete"}
-//             type={"p3"}
-//             style={{ fontSize: 15, color: theme.danger }}
-//           ></AppText>
-//         </Pressable>
-//       </View>
-//     );
-//   };
-//   return (
-//     <Pressable
-//       style={styles.container}
-//       onPressIn={() => setIsPressed(true)}
-//       onPressOut={() => setIsPressed(false)}
-//       onLongPress={() => {
-//         setIsPressed(false);
-//         show(modalContent());
-//       }}
-//     >
-//       <View style={styles.textSection}>
-//         {isPressed && <View style={styles.pressOverlay} pointerEvents="none" />}
-//         <AppText
-//           text={props.name}
-//           type={"p2"}
-//           style={{ fontSize: 15 }}
-//         ></AppText>
-//         <AppText text={props.types.join(" / ")} type={"m11"}></AppText>
-//       </View>
-//       {props.favorited ? <AppIcon name={"star"}></AppIcon> : null}
-
-//       <AppButton
-//         type="icon"
-//         icon={<AppIcon name={"more"}></AppIcon>}
-//         onPress={() => {
-//           show(modalContent());
-//         }}
-//       ></AppButton>
-//     </Pressable>
-//   );
-// };
-
-// export default PresetPreview;
-
-// const s = (t: Theme) =>
-//   StyleSheet.create({
-//     container: {
-//       flexDirection: "row",
-//       alignItems: "center",
-//       padding: 15,
-//       backgroundColor: t.surface,
-//       gap: 8,
-//     },
-//     textSection: {
-//       flexDirection: "column",
-//       gap: 8,
-//       flex: 1,
-//     },
-//     pressOverlay: {
-//       ...StyleSheet.absoluteFillObject,
-//       backgroundColor: t.inkA[20],
-//       margin: -15,
-//     },
-//     modalTitleRow: {
-//       paddingHorizontal: 20,
-//       paddingTop: 15,
-//       paddingBottom: 13,
-//       borderBottomWidth: 1,
-//       borderBottomColor: t.inkA[10],
-//     },
-//     modalRow: {
-//       flexDirection: "row",
-//       alignItems: "center",
-//       gap: 13,
-//       paddingHorizontal: 20,
-//       paddingVertical: 16,
-//       borderBottomWidth: 1,
-//       borderBottomColor: t.inkA[8], // last row: borderBottomWidth 0
-//     },
-//   });
-
 import AppButton from "@/components/ui/AppButton";
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import { PresetTypesType } from "@/constants/constants";
 import { Theme } from "@/constants/themes";
 import { useAppDispatch } from "@/hooks/redux-hooks";
+import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useAppModal } from "@/hooks/useAppModal";
 import { useGenerateOutfit } from "@/hooks/useGenerateOutfit";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import { setOutfitItems } from "@/redux/slices/outfitSlice";
 import { setPresetId } from "@/redux/slices/presetSlice";
-import AppPresetsRepo from "@/repo/presets_repo/AppPresetsRepo";
 import { useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -205,7 +34,7 @@ const PresetPreview: React.FC<{
   types: PresetTypesType;
   favorited: boolean;
 }> = (props) => {
-  const presetRepo = new AppPresetsRepo();
+  const { presetsRepo } = useRepo();
 
   const { theme } = useTheme();
   const t = theme;
@@ -216,6 +45,7 @@ const PresetPreview: React.FC<{
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { generate } = useGenerateOutfit();
+  const posthog = usePostHog();
 
   const snackbarSettingsContext = useSnackbar();
   if (!snackbarSettingsContext) {
@@ -227,12 +57,19 @@ const PresetPreview: React.FC<{
   const translateX = useSharedValue(0);
 
   const handleFavorite = () => {
-    presetRepo.updateFavorited(props.id, !props.favorited);
+    presetsRepo.updateFavorited(props.id, !props.favorited);
+    posthog.capture("favorite_toggled", {
+      target: "preset",
+      favorited: !props.favorited,
+    });
   };
 
   const handleDelete = async () => {
     try {
-      await presetRepo.deletePreset(props.id);
+      await presetsRepo.deletePreset(props.id);
+      posthog.capture("preset_deleted", {
+        category_count: Object.keys(props.types).length,
+      });
       showSnackbar("Preset Deleted", "success");
       setTimeout(() => hideSnackbar(), 3000);
     } catch (error) {
@@ -304,7 +141,7 @@ const PresetPreview: React.FC<{
           style={styles.modalRow}
           onPress={() => {
             hide();
-            handleGenerate();
+            handleGenerate("menu");
           }}
         >
           <AppIcon name={"regenerate"}></AppIcon>
@@ -363,11 +200,21 @@ const PresetPreview: React.FC<{
     );
   };
 
-  async function handleGenerate() {
-    const items = await generate(props.types);
-    console.log(items);
-    dispatch(setOutfitItems({ items }));
-    router.navigate("/outfit/create-outfit");
+  async function handleGenerate(trigger: "tap" | "menu") {
+    console.log(props.types);
+    posthog.capture("preset_used", {
+      trigger,
+      category_count: Object.keys(props.types).length,
+      favorited: props.favorited,
+    });
+    const result = await generate(props.types);
+    if (result.ok) {
+      dispatch(setOutfitItems({ items: result.items }));
+      router.navigate("/outfit/create-outfit");
+    } else {
+      showSnackbar(`No ${result.missing[0]} in your closet yet.`, "error");
+      setTimeout(() => hideSnackbar(), 3000);
+    }
   }
 
   return (
@@ -397,7 +244,7 @@ const PresetPreview: React.FC<{
               show(modalContent());
             }}
             onPress={() => {
-              handleGenerate();
+              handleGenerate("tap");
             }}
           >
             {isPressed && (
@@ -436,6 +283,7 @@ const s = (t: Theme) =>
   StyleSheet.create({
     rowWrapper: {
       position: "relative",
+      overflow: "hidden",
     },
     actionLeft: {
       position: "absolute",

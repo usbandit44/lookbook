@@ -179,10 +179,63 @@ class SqliteItemRepo extends ItemRepo {
       }
 
       const filtered = result.filter((item) =>
-        item.tags.some((tag) => tags.includes(tag)),
+        tags.every((tag) => item.tags.includes(tag)),
       );
 
       return filtered.map((item) => item.id);
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
+  }
+
+  async getIdsByTagsMatchSome(
+    mandstoryTags: string[],
+    optionalTags: string[],
+  ): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb.select().from(items);
+
+      if (result == null) {
+        throw new Error("No items found");
+      }
+
+      const mandstoryfiltered = result.filter((item) =>
+        mandstoryTags.every((tag) => item.tags.includes(tag)),
+      );
+      const optionalFiltered = mandstoryfiltered.filter((item) =>
+        item.tags.some((tag) => optionalTags.includes(tag)),
+      );
+
+      return optionalFiltered.map((item) => item.id);
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
+  }
+
+  async getSubtypesMissingFromCloset(
+    subtypesToCheck: string[],
+  ): Promise<string[]> {
+    try {
+      const noMatchArray: string[] = [];
+      const result = await this.drizzleDb.select().from(items);
+
+      if (result == null) {
+        throw new Error("No items found");
+      }
+      for (const subtype in subtypesToCheck) {
+        const match = result.some((item) => {
+          return item.tags.some((tag) => {
+            return tag == subtypesToCheck[subtype];
+          });
+        });
+        if (!match) {
+          noMatchArray.push(subtypesToCheck[subtype]);
+        }
+      }
+
+      return noMatchArray;
     } catch (error) {
       console.error("Failed to get item:", error);
       throw error;

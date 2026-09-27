@@ -2,12 +2,15 @@ import { PresetType } from "@/db/schemas/presets";
 import { RootState } from "@/redux/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type PresetSlice = PresetType;
+type PresetSlice = PresetType & {
+  buildingFromItem: { id: number; type: string; subtype: string };
+};
 const initialState: PresetSlice = {
   id: -1,
   name: "",
   types: {},
   favorited: false,
+  buildingFromItem: { id: -1, type: "", subtype: "" },
 };
 
 const presetSlice = createSlice({
@@ -25,6 +28,7 @@ const presetSlice = createSlice({
       state.id = -1;
       state.name = "";
       state.types = {};
+      state.buildingFromItem = { id: -1, type: "", subtype: "" };
     },
     addToTypes(state, action: PayloadAction<{ key: string; value: string }>) {
       (state.types[action.payload.key] ??= []).push(action.payload.value);
@@ -49,6 +53,15 @@ const presetSlice = createSlice({
     setPresetId(state, action: PayloadAction<{ id: number }>) {
       state.id = action.payload.id;
     },
+    setBuildingFromItem(
+      state,
+      action: PayloadAction<{ id: number; type: string; subtype: string }>,
+    ) {
+      state.buildingFromItem = action.payload;
+    },
+    clearBuildingFromItem(state) {
+      state.buildingFromItem = { id: -1, type: "", subtype: "" };
+    },
   },
 });
 
@@ -64,6 +77,8 @@ export const {
   setPresetName,
   clearPresetTypes,
   setPresetId,
+  setBuildingFromItem,
+  clearBuildingFromItem,
 } = presetSlice.actions;
 
 export default presetSlice.reducer;

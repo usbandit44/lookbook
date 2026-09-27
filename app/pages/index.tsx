@@ -13,6 +13,7 @@ import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { clearCurrentItemId } from "@/redux/slices/itemSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { usePostHog } from "posthog-react-native";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
@@ -29,6 +30,7 @@ import {
 
 const Home = () => {
   const { theme } = useTheme();
+  const posthog = usePostHog();
 
   const notifications = [
     {
@@ -72,6 +74,12 @@ const Home = () => {
       });
 
       await AsyncStorage.setItem("notifications_scheduled", "true");
+
+      const { status } = await Notifications.getPermissionsAsync();
+      posthog.capture("notifications_scheduled", {
+        count: notifications.length,
+        permission_status: status,
+      });
     }
 
     initNotifications();
@@ -161,6 +169,17 @@ const Home = () => {
     return formattedData;
   }, [debouncedSearch, liveItems, filter]);
 
+  // Only counts are sent — never the raw search text.
+  useEffect(() => {
+    const termCount = debouncedSearch.split(" ").filter((t) => t !== "").length;
+    if (termCount === 0) return;
+    posthog.capture("search_performed", {
+      surface: "wardrobe",
+      term_count: termCount,
+      result_count: filteredData.filter((item) => item.id !== -1).length,
+    });
+  }, [debouncedSearch]);
+
   const dispatch = useAppDispatch();
   const router = useRouter();
   const filterScrollRef = useRef<ScrollView>(null);
@@ -215,7 +234,7 @@ const Home = () => {
             }}
           >
             <AppIcon
-              name={"shirt"}
+              name={"hanger"}
               size={44}
               strokeWidth={0.8}
               color={theme.inkA[40]}
@@ -268,6 +287,10 @@ const Home = () => {
                   onPress={() => {
                     if (!selected) {
                       setFilter(filt);
+                      posthog.capture("filter_selected", {
+                        surface: "wardrobe",
+                        filter: filt,
+                      });
                     }
                   }}
                   type={selected ? "primary" : "secondary"}
@@ -325,6 +348,7 @@ const Home = () => {
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
           columnWrapperStyle={styles.row}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <ItemPreview
               imgUri={item.imgUrl ?? ""}
@@ -349,12 +373,13 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 15,
   },
   list: {
     flex: 1,
   },
   listContent: {
-    paddingBottom: 90,
+    paddingBottom: 100,
   },
   header: {
     // paddingHorizontal: 15,

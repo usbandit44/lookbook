@@ -4,6 +4,7 @@ import Swatch from "@/components/ui/Swatch";
 import { Theme } from "@/constants/themes";
 import { normalizeImageUri } from "@/functions/imageHandling";
 import { useAppDispatch } from "@/hooks/redux-hooks";
+import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useAppModal } from "@/hooks/useAppModal";
 import { addItem, setCurrentItemId } from "@/redux/slices/itemSlice";
@@ -12,69 +13,13 @@ import {
   setOutfitItems,
   setOutfitPosition,
 } from "@/redux/slices/outfitSlice";
-import AppItemRepo from "@/repo/item_repo/AppItemRepo";
-import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { usePostHog } from "posthog-react-native";
+import { syncAnalyticsProperties } from "@/config/posthog";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { AppIcon } from "./ui/AppIcon";
-
-// const ItemPreview: React.FC<{
-//   imgUri: string;
-//   name: string;
-//   color: string;
-//   id: number;
-//   type: "outfit" | "item";
-// }> = (props) => {
-//   const { width, height } = useWindowDimensions();
-
-//   const itemWidth = width * 0.45;
-//   const itemHeight = props.type === "outfit" ? height * 0.35 : itemWidth * 1.2;
-
-//   const dispatch = useAppDispatch();
-//   const outfitRepo = new AppOutfitRepo();
-//   const itemRepo = new AppItemRepo();
-//   const imageUri = normalizeImageUri(props.imgUri);
-
-//   return (
-//     <Pressable
-//       style={[styles.container, { width: itemWidth }]}
-//       onPress={async () => {
-//         if (props.id == -1) return;
-//         if (props.type == "outfit") {
-//           const outfit = await outfitRepo.getOutfit(props.id);
-//           dispatch(setCurrentOutfit({ id: outfit.id, name: outfit.name }));
-//           dispatch(setItems(outfit.items));
-//           router.navigate("/outfit/create-outfit");
-//         }
-//         if (props.type == "item") {
-//           const queriedItem = await itemRepo.getItem(props.id);
-
-//           dispatch(setCurrentItemId(props.id));
-//           dispatch(
-//             addItem({
-//               name: queriedItem.name,
-//               type: queriedItem.type,
-//               color: queriedItem.color ?? "",
-//               tags: queriedItem.tags,
-//               imgUrl: queriedItem.imgUrl,
-//               backgroundRemoved: queriedItem.backgroundRemoved,
-//             }),
-//           );
-
-//           router.navigate("/add-item");
-//         }
-//       }}
-//     >
-//       <Image
-//         source={{ uri: imageUri }}
-//         contentFit={props.type == "outfit" ? "cover" : "contain"}
-//         style={[styles.img, { height: itemHeight }]}
-//       />
-//     </Pressable>
-//   );
-// };
 
 const ItemPreview: React.FC<{
   imgUri: string;
@@ -95,8 +40,9 @@ const ItemPreview: React.FC<{
   const itemHeight = props.type === "outfit" ? height * 0.35 : itemWidth * 1.2;
 
   const dispatch = useAppDispatch();
-  const outfitRepo = new AppOutfitRepo();
-  const itemRepo = new AppItemRepo();
+  const repos = useRepo();
+  const { itemRepo, outfitRepo } = repos;
+  const posthog = usePostHog();
   const imageUri = normalizeImageUri(props.imgUri);
   const { show, hide } = useAppModal();
 
@@ -121,6 +67,10 @@ const ItemPreview: React.FC<{
           onPress={() => {
             hide();
             itemRepo.updateFavorited(props.id, !props.favourite);
+            posthog.capture("favorite_toggled", {
+              target: "item",
+              favorited: !props.favourite,
+            });
           }}
         >
           <AppIcon name={props.favourite ? "star" : "starOutline"}></AppIcon>
@@ -136,7 +86,10 @@ const ItemPreview: React.FC<{
           style={styles.modalRow}
           onPress={() => {
             hide();
-            itemRepo.deleteItem(props.id);
+            itemRepo
+              .deleteItem(props.id)
+              .then(() => syncAnalyticsProperties(repos));
+            posthog.capture("item_deleted", { item_type: props.itemType });
           }}
         >
           <AppIcon name="trash" color={theme.danger}></AppIcon>
@@ -162,6 +115,10 @@ const ItemPreview: React.FC<{
             hide();
             console.log(props.favourite);
             outfitRepo.updateOutfitFavorited(props.id, !props.favourite);
+            posthog.capture("favorite_toggled", {
+              target: "outfit",
+              favorited: !props.favourite,
+            });
           }}
         >
           <AppIcon name={props.favourite ? "star" : "starOutline"}></AppIcon>
@@ -177,7 +134,10 @@ const ItemPreview: React.FC<{
           style={styles.modalRow}
           onPress={() => {
             hide();
-            outfitRepo.deleteOutfit(props.id);
+            outfitRepo
+              .deleteOutfit(props.id)
+              .then(() => syncAnalyticsProperties(repos));
+            posthog.capture("outfit_deleted", {});
           }}
         >
           <AppIcon name="trash" color={theme.danger}></AppIcon>

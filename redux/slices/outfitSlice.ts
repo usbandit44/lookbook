@@ -78,6 +78,34 @@ const outfitSlice = createSlice({
     setFavorited(state, action: PayloadAction<boolean>) {
       state.favorited = action.payload;
     },
+    moveItemUp(state, action: PayloadAction<number>) {
+      const i = state.items.indexOf(action.payload);
+      if (i === -1 || i === state.items.length - 1) return;
+      [state.items[i], state.items[i + 1]] = [
+        state.items[i + 1],
+        state.items[i],
+      ];
+    },
+    moveItemDown(state, action: PayloadAction<number>) {
+      const i = state.items.indexOf(action.payload);
+      if (i <= 0) return;
+      [state.items[i - 1], state.items[i]] = [
+        state.items[i],
+        state.items[i - 1],
+      ];
+    },
+    moveItemToFront(state, action: PayloadAction<number>) {
+      const i = state.items.indexOf(action.payload);
+      if (i === -1 || i === state.items.length - 1) return;
+      state.items.splice(i, 1);
+      state.items.push(action.payload);
+    },
+    moveItemToBack(state, action: PayloadAction<number>) {
+      const i = state.items.indexOf(action.payload);
+      if (i <= 0) return;
+      state.items.splice(i, 1);
+      state.items.unshift(action.payload);
+    },
   },
 });
 
@@ -112,6 +140,10 @@ export const {
   removeItemPosition,
   clearOutfitPosition,
   setFavorited,
+  moveItemUp,
+  moveItemDown,
+  moveItemToFront,
+  moveItemToBack,
 } = outfitSlice.actions;
 
 export default outfitSlice.reducer;

@@ -102,6 +102,33 @@ class AppItemRepo extends ItemRepo {
     }
   }
 
+  async getIdsByTagsMatchSome(
+    mandatoryTags: string[],
+    optionalTags: string[],
+  ): Promise<number[]> {
+    try {
+      const result = await this.sqliteRepo.getIdsByTagsMatchSome(
+        mandatoryTags,
+        optionalTags,
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSubtypesMissingFromCloset(
+    subtypesToCheck: string[],
+  ): Promise<string[]> {
+    try {
+      const result =
+        await this.sqliteRepo.getSubtypesMissingFromCloset(subtypesToCheck);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async updateItem(item: ItemsType): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateItem(item);

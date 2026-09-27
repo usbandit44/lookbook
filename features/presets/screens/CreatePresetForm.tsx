@@ -9,9 +9,11 @@ import {
 import { Theme } from "@/constants/themes";
 import { PresetType } from "@/db/schemas/presets";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useGenerateOutfit } from "@/hooks/useGenerateOutfit";
 import { useSnackbar } from "@/hooks/useSnackBar";
+import { clearCurrentItemId } from "@/redux/slices/itemSlice";
 import { clearAllItems, setOutfitItems } from "@/redux/slices/outfitSlice";
 import {
   addToTypes,
@@ -22,17 +24,18 @@ import {
   selectCurrentPreset,
   setPresetState,
 } from "@/redux/slices/presetSlice";
-import AppPresetsRepo from "@/repo/presets_repo/AppPresetsRepo";
 import { useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 const CreatePresetForm = () => {
+  const posthog = usePostHog();
   const { theme } = useTheme();
   const t = theme;
   const styles = s(t);
-  const presetRepo = new AppPresetsRepo();
+  const { presetsRepo } = useRepo();
   const dispatch = useAppDispatch();
   const preset = useAppSelector(selectCurrentPreset);
   const [currentPreset, setCurrentPreset] = useState<PresetType>({
@@ -61,13 +64,13 @@ const CreatePresetForm = () => {
   useEffect(() => {
     if (preset.id == -1) {
       async function getPlaceholder() {
-        const count = await presetRepo.getTotalPresets();
+        const count = await presetsRepo.getTotalPresets();
         setPlaceholder("Preset #" + (count + 1));
       }
       getPlaceholder();
     } else {
       async function setupCurrentPreset() {
-        const current = await presetRepo.getPreset(preset.id);
+        const current = await presetsRepo.getPreset(preset.id);
         dispatch(setPresetState(current));
         setCurrentPreset(current);
         setName(current.name);
@@ -76,13 +79,6 @@ const CreatePresetForm = () => {
     }
   }, []);
 
-  async function handleGenerate() {
-    dispatch(clearAllItems());
-    const items = await generate(preset.types);
-    console.log(items);
-    dispatch(setOutfitItems({ items }));
-    router.navigate("/outfit/create-outfit");
-  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -91,7 +87,7 @@ const CreatePresetForm = () => {
           icon={<AppIcon name="arrowLeft" size={24} />}
           onPress={() => {
             dispatch(clearPresetState());
-            router.navigate("/presets");
+            router.back();
           }}
         ></AppButton>
         <AppButton
@@ -194,8 +190,24 @@ const CreatePresetForm = () => {
           }
           disabled={Object.keys(preset.types).length === 0 ? true : false}
           label="Only Generate"
-          onPress={() => {
-            handleGenerate();
+          onPress={async () => {
+            dispatch(clearAllItems());
+            const result =
+              preset.buildingFromItem.id != -1
+                ? await generate(preset.types, preset.buildingFromItem)
+                : await generate(preset.types);
+
+            if (result.ok) {
+              dispatch(setOutfitItems({ items: result.items }));
+              dispatch(clearCurrentItemId());
+              router.navigate("/outfit/create-outfit");
+            } else {
+              showSnackbar(
+                `No ${result.missing[0]} in your closet yet.`,
+                "error",
+              );
+              setTimeout(() => hideSnackbar(), 3000);
+            }
           }}
         ></AppButton>
         <AppButton
@@ -218,30 +230,49 @@ const CreatePresetForm = () => {
                 ? true
                 : false
           }
-          onPress={() => {
+          onPress={async () => {
             if (preset.types && Object.keys(preset.types).length > 0) {
-              if (preset.id == -1) {
-                const nameToSave =
-                  preset.name === "" ? placeholder : preset.name;
-                presetRepo.addPreset({
-                  name: nameToSave,
-                  types: preset.types,
-                  favorited: preset.favorited,
+              dispatch(clearAllItems());
+              const result =
+                preset.buildingFromItem.id != -1
+                  ? await generate(preset.types, preset.buildingFromItem)
+                  : await generate(preset.types);
+              if (result.ok) {
+                dispatch(clearCurrentItemId());
+                if (preset.id == -1) {
+                  const nameToSave =
+                    preset.name === "" ? placeholder : preset.name;
+                  await presetsRepo.addPreset({
+                    name: nameToSave,
+                    types: preset.types,
+                    favorited: preset.favorited,
+                  });
+                  showSnackbar("Preset Saved", "success");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else {
+                  const nameToSave = name === "" ? preset.name : name;
+                  await presetsRepo.updatePreset({
+                    id: preset.id,
+                    name: nameToSave,
+                    types: preset.types,
+                    favorited: preset.favorited,
+                  });
+                  showSnackbar("Preset Updated", "success");
+                  setTimeout(() => hideSnackbar(), 3000);
+                }
+                posthog.capture("preset_saved", {
+                  action: preset.id == -1 ? "created" : "updated",
+                  category_count: Object.keys(preset.types).length,
                 });
-                showSnackbar("Preset Saved", "success");
-                setTimeout(() => hideSnackbar(), 3000);
+                dispatch(setOutfitItems({ items: result.items }));
+                router.navigate("/outfit/create-outfit");
               } else {
-                const nameToSave = name === "" ? preset.name : name;
-                presetRepo.updatePreset({
-                  id: preset.id,
-                  name: nameToSave,
-                  types: preset.types,
-                  favorited: preset.favorited,
-                });
-                showSnackbar("Preset Updated", "success");
+                showSnackbar(
+                  `No ${result.missing[0]} in your closet yet.`,
+                  "error",
+                );
                 setTimeout(() => hideSnackbar(), 3000);
               }
-              handleGenerate();
             }
           }}
         ></AppButton>

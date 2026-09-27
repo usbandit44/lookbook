@@ -1,6 +1,5 @@
 import AppText from "@/components/ui/AppText";
 import { useTheme } from "@/hooks/ThemeProvider";
-import AppUserRepo from "@/repo/user_repo/AppUserRepo";
 import Fuse from "fuse.js";
 import { useRef, useState } from "react";
 import {
@@ -32,7 +31,6 @@ const SearchableDropdown: React.FC<{
   onClearItem,
 }) => {
   const { theme } = useTheme();
-  const userRepo = new AppUserRepo();
   const [open, setOpen] = useState(false);
 
   const fuse = new Fuse(options, { threshold: 0.4 });

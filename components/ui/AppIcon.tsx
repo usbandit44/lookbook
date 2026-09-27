@@ -25,7 +25,12 @@ export type IconName =
   | "generate"
   | "library"
   | "edit"
-  | "regenerate";
+  | "regenerate"
+  | "regenerate"
+  | "layerUp"
+  | "layerDown"
+  | "layerTop"
+  | "layerBottom";
 
 type Glyph = (p: { color: string; sw: number }) => React.ReactNode;
 
@@ -320,6 +325,62 @@ const GLYPHS: Record<IconName, { draw: Glyph }> = {
         <Path d="M20 12a8 8 0 0 1-13.7 5.6" stroke={color} strokeWidth={sw} />
         <Polyline
           points="5.5,21 5.5,17 9.5,17"
+          stroke={color}
+          strokeWidth={sw}
+        />
+      </>
+    ),
+  },
+  layerUp: {
+    draw: ({ color, sw }) => (
+      <>
+        <Line x1={12} y1={19} x2={12} y2={5} stroke={color} strokeWidth={sw} />
+        <Polyline points="6,11 12,5 18,11" stroke={color} strokeWidth={sw} />
+      </>
+    ),
+  },
+  layerDown: {
+    draw: ({ color, sw }) => (
+      <>
+        <Line x1={12} y1={5} x2={12} y2={19} stroke={color} strokeWidth={sw} />
+        <Polyline points="6,13 12,19 18,13" stroke={color} strokeWidth={sw} />
+      </>
+    ),
+  },
+  layerTop: {
+    draw: ({ color, sw }) => (
+      <>
+        <Line x1={5} y1={4} x2={19} y2={4} stroke={color} strokeWidth={sw} />
+        <Line
+          x1={12}
+          y1={20}
+          x2={12}
+          y2={8.5}
+          stroke={color}
+          strokeWidth={sw}
+        />
+        <Polyline
+          points="7,13.5 12,8.5 17,13.5"
+          stroke={color}
+          strokeWidth={sw}
+        />
+      </>
+    ),
+  },
+  layerBottom: {
+    draw: ({ color, sw }) => (
+      <>
+        <Line x1={5} y1={20} x2={19} y2={20} stroke={color} strokeWidth={sw} />
+        <Line
+          x1={12}
+          y1={4}
+          x2={12}
+          y2={15.5}
+          stroke={color}
+          strokeWidth={sw}
+        />
+        <Polyline
+          points="7,10.5 12,15.5 17,10.5"
           stroke={color}
           strokeWidth={sw}
         />

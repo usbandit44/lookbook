@@ -8,7 +8,7 @@ import { useTheme } from "@/hooks/ThemeProvider";
 import { clearCurrentItemId } from "@/redux/slices/itemSlice";
 import { BlurView } from "expo-blur";
 import { usePathname, useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Pressable,
@@ -27,6 +27,7 @@ export type NavTab = "items" | "outfits";
 const BottomNav = () => {
   const pathname = usePathname();
 
+  const page: NavTab = pathname.includes("outfits") ? "outfits" : "items";
   const isOutfits = pathname.includes("outfits");
 
   const { theme } = useTheme();
@@ -40,49 +41,76 @@ const BottomNav = () => {
   const navTranslate = useRef(new Animated.Value(ADD_MENU_HEIGHT)).current;
   const insets = useSafeAreaInsets();
   const GLASS = 0.46;
-  const [page, setPage] = useState<NavTab>(isOutfits ? "outfits" : "items");
-  const renderTab = useCallback(
-    (key: NavTab, label: string, on: boolean) => (
-      <Pressable
-        accessibilityRole="tab"
-        accessibilityState={{ selected: on }}
-        accessibilityLabel={label}
-        onPress={
-          key == "items"
-            ? () => {
-                if (page === "items") {
-                  emitScrollToTop("items");
-                } else {
-                  router.navigate("/pages");
-                  setPage("items");
-                }
-              }
-            : () => {
-                if (page === "outfits") {
-                  emitScrollToTop("outfits");
-                } else {
-                  router.navigate("/pages/outfits");
-                  setPage("outfits");
-                }
-              }
+  // const [page, setPage] = useState<NavTab>(isOutfits ? "outfits" : "items");
+  // const renderTab = useCallback(
+  //   (key: NavTab, label: string, on: boolean) => (
+  //     <Pressable
+  //       accessibilityRole="tab"
+  //       accessibilityState={{ selected: on }}
+  //       accessibilityLabel={label}
+  //       onPress={
+  //         key == "items"
+  //           ? () => {
+  //               if (page === "items") {
+  //                 emitScrollToTop("items");
+  //               } else {
+  //                 router.navigate("/pages");
+  //                 setPage("items");
+  //               }
+  //             }
+  //           : () => {
+  //               if (page === "outfits") {
+  //                 emitScrollToTop("outfits");
+  //               } else {
+  //                 router.navigate("/pages/outfits");
+  //                 setPage("outfits");
+  //               }
+  //             }
+  //       }
+  //       style={({ pressed }) => [
+  //         styles.tab,
+  //         on && styles.tabActive,
+  //         pressed && !on && styles.tabPressed,
+  //       ]}
+  //     >
+  //       {key === "items" ? (
+  //         <AppIcon color={on ? t.ink : t.inkA[45]} name={"shirt"} />
+  //       ) : (
+  //         <AppIcon color={on ? t.ink : t.inkA[45]} name={"hanger"} />
+  //       )}
+  //       <Text style={[styles.tabLabel, on && styles.tabLabelActive]}>
+  //         {label}
+  //       </Text>
+  //     </Pressable>
+  //   ),
+  //   [styles, t],
+  // );
+  const renderTab = (key: NavTab, label: string, on: boolean) => (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: on }}
+      accessibilityLabel={label}
+      onPress={() => {
+        if (page === key) {
+          emitScrollToTop(key);
+        } else {
+          router.navigate(key === "items" ? "/pages" : "/pages/outfits");
         }
-        style={({ pressed }) => [
-          styles.tab,
-          on && styles.tabActive,
-          pressed && !on && styles.tabPressed,
-        ]}
-      >
-        {key === "items" ? (
-          <AppIcon color={on ? t.ink : t.inkA[45]} name={"shirt"} />
-        ) : (
-          <AppIcon color={on ? t.ink : t.inkA[45]} name={"hanger"} />
-        )}
-        <Text style={[styles.tabLabel, on && styles.tabLabelActive]}>
-          {label}
-        </Text>
-      </Pressable>
-    ),
-    [styles, t],
+      }}
+      style={({ pressed }) => [
+        styles.tab,
+        on && styles.tabActive,
+        pressed && !on && styles.tabPressed,
+      ]}
+    >
+      <AppIcon
+        color={on ? t.ink : t.inkA[45]}
+        name={key === "items" ? "shirt" : "hanger"}
+      />
+      <Text style={[styles.tabLabel, on && styles.tabLabelActive]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 
   useEffect(() => {

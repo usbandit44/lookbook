@@ -1,8 +1,12 @@
 import { Colors } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
 import { useDrizzle } from "@/hooks/DrizzleContext";
-import AppItemRepo from "@/repo/item_repo/AppItemRepo";
-import AppUserRepo from "@/repo/user_repo/AppUserRepo";
+import { useRepo } from "@/hooks/RepoProvider";
+import {
+  posthog,
+  posthogLogger,
+  syncAnalyticsProperties,
+} from "@/config/posthog";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -11,8 +15,8 @@ import { ActivityIndicator, View } from "react-native";
 export function LoginPage() {
   const drizzleDb = useDrizzle();
 
-  const itemRepo = new AppItemRepo();
-  const userRepo = new AppUserRepo();
+  const repos = useRepo();
+  const { itemRepo, userRepo } = repos;
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -21,16 +25,30 @@ export function LoginPage() {
     async function checkUser() {
       if (await userRepo.checkUserExist()) {
         if (await userRepo.checkTutorialStatus()) {
+          posthogLogger?.info("startup_route_resolved", {
+            destination: "pages",
+          });
           router.navigate("/pages");
         } else {
+          posthogLogger?.info("startup_route_resolved", {
+            destination: "tutorial",
+          });
           router.navigate("/tutorial");
         }
       } else {
         await userRepo.createUser();
+        posthog?.setPersonProperties(
+          undefined,
+          { first_open_date: new Date().toISOString() },
+          false,
+        );
+        posthogLogger?.info("startup_route_resolved", {
+          destination: "tutorial",
+        });
         router.navigate("/tutorial");
       }
     }
-    checkUser();
+    checkUser().then(() => syncAnalyticsProperties(repos));
   }, []);
 
   useEffect(() => {
