@@ -85,6 +85,7 @@ export const itemSubTypes: SubType[] = [
   { key: "Bottoms", value: "Sweatpants" },
   { key: "Bottoms", value: "Cargo Pants" },
   { key: "Bottoms", value: "Leggings" },
+  { key: "Bottoms", value: "Pants" },
   { key: "Bottoms", value: "Shorts" },
   { key: "Bottoms", value: "Denim Shorts" },
   { key: "Bottoms", value: "Skirt" },
@@ -101,6 +102,7 @@ export const itemSubTypes: SubType[] = [
   { key: "Outerwear", value: "Blazer" },
   { key: "Outerwear", value: "Bomber Jacket" },
   { key: "Outerwear", value: "Denim Jacket" },
+  { key: "Outerwear", value: "Jacket" },
   { key: "Outerwear", value: "Raincoat" },
   { key: "Outerwear", value: "Fleece" },
   { key: "Outerwear", value: "Windbreaker" },
@@ -196,6 +198,131 @@ export const COLOR_NAMES_MAP = new Map([
   ["FFFF00", "Yellow"],
   ["FFFFFF", "White"],
 ]);
+
+export const DEFAULT_PRESETS: NewPresetType[] = [
+  {
+    name: "Everyday Casual",
+    types: {
+      Tops: ["T-Shirt", "Long Sleeve Tee", "Polo"],
+      Bottoms: ["Jeans", "Cargo Pants", "Shorts"],
+      Shoes: ["Sneakers", "Sandals"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Smart Casual",
+    types: {
+      Tops: ["Button-Down", "Polo", "Sweater"],
+      Bottoms: ["Jeans", "Dress Pants"],
+      Shoes: ["Loafers", "Sneakers", "Boots"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Office Ready",
+    types: {
+      Tops: ["Dress Shirt", "Button-Down", "Blouse", "Polo"],
+      Bottoms: ["Dress Pants", "Midi Skirt"],
+      Outerwear: ["Blazer"],
+      Shoes: ["Dress Shoes", "Loafers", "Heels", "Flats"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Summer Day",
+    types: {
+      Tops: ["T-Shirt", "Tank Top"],
+      Bottoms: ["Shorts", "Denim Shorts", "Mini Skirt", "Midi Skirt"],
+      Shoes: ["Sandals", "Slides", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Easy Dress",
+    types: {
+      Dresses: ["Dresses"],
+      Shoes: ["Sandals", "Flats", "Sneakers", "Mules"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Night Out",
+    types: {
+      Tops: ["Blouse", "Button-Down", "Tank Top"],
+      Bottoms: ["Jeans", "Mini Skirt", "Dress Pants"],
+      Shoes: ["Boots", "Heels", "Loafers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Athleisure",
+    types: {
+      Tops: ["T-Shirt", "Tank Top", "Long Sleeve Tee"],
+      Bottoms: ["Leggings", "Sweatpants", "Shorts"],
+      Outerwear: ["Hoodie", "Zip-Up Jacket", "Windbreaker"],
+      Shoes: ["Running Shoes", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Cold Weather",
+    types: {
+      Tops: ["Sweater", "Long Sleeve Tee"],
+      Bottoms: ["Jeans", "Cargo Pants", "Dress Pants"],
+      Outerwear: ["Coat", "Puffer Jacket", "Trench Coat"],
+      Shoes: ["Boots"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Date Night (Guys)",
+    types: {
+      Tops: ["Button-Down", "Dress Shirt", "Sweater", "Polo"],
+      Bottoms: ["Jeans", "Dress Pants"],
+      Outerwear: ["Blazer", "Bomber Jacket", "Denim Jacket"],
+      Shoes: ["Loafers", "Boots", "Dress Shoes", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Date Night (Girls)",
+    types: {
+      Dresses: [
+        "Mini Dress",
+        "Midi Dress",
+        "Slip Dress",
+        "Wrap Dress",
+        "Bodycon Dress",
+      ],
+      Shoes: ["Heels", "Mules", "Flats", "Boots"],
+    },
+    favorited: false,
+  },
+];
+
+export const NOTIFICATIONS = [
+  {
+    weekday: 2,
+    hour: 8,
+    minute: 0,
+    title: "Start Your Week Right!",
+    body: "Kick off your week strong! Open the app to plan your outfit.",
+  },
+  {
+    weekday: 6,
+    hour: 20,
+    minute: 0,
+    title: "Friday Night! 🎉",
+    body: "Friday night’s here! Make sure you outfit is as good as your plans.",
+  },
+  {
+    weekday: 7,
+    hour: 9,
+    minute: 0,
+    title: "Weekend Vibes 🌴",
+    body: "Your weekend starts now! Check Lookbook for outfit ideas.",
+  },
+];
 
 export type NewItemType = Omit<ItemsType, "id" | "size">;
 export type NewOutfitType = Omit<OutfitType, "id">;

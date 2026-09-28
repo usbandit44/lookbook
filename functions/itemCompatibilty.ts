@@ -95,6 +95,11 @@ const META_INPUT: Record<
     tags: ["classic", "preppy", "minimalist", "formal"],
     versatile: true,
   },
+  Pants: {
+    formality: 2,
+    tags: ["classic", "minimalist"],
+    versatile: true,
+  },
   Sweatpants: {
     formality: 1,
     tags: ["casual", "streetwear", "athletic", "minimalist"],
@@ -141,6 +146,11 @@ const META_INPUT: Record<
   Coat: {
     formality: 4,
     tags: ["classic", "elegant", "preppy", "formal"],
+  },
+  Jacket: {
+    formality: 2,
+    tags: ["classic", "minimalist"],
+    versatile: true,
   },
   "Puffer Jacket": { formality: 2, tags: ["casual", "outdoor", "streetwear"] },
   Blazer: { formality: 5, tags: ["formal", "classic", "preppy"] },

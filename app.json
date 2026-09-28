@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lookbook",
     "slug": "lookbook",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/logo.png",
     "scheme": "lookbook",
@@ -59,9 +59,7 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos so you can add images of you wardrobe.",
           "isAccessMediaLocationEnabled": true,
-          "granularPermissions": [
-            "photo"
-          ]
+          "granularPermissions": ["photo"]
         }
       ],
       "expo-router",

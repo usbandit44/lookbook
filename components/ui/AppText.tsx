@@ -9,11 +9,19 @@ const AppText: React.FC<{
   text: string;
   type: TextToken;
   style?: {};
+  numberOfLines?: number;
+  ellipsizeMode?: "clip" | "head" | "middle" | "tail" | undefined;
 }> = ({ ...props }) => {
   const { theme } = useTheme();
 
   return (
-    <Text style={[theme.text[props.type], props.style]}>{props.text}</Text>
+    <Text
+      style={[theme.text[props.type], props.style]}
+      numberOfLines={props.numberOfLines}
+      ellipsizeMode={props.ellipsizeMode}
+    >
+      {props.text}
+    </Text>
   );
 };
 

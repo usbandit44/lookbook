@@ -1,5 +1,4 @@
 import AppButton from "@/components/ui/AppButton";
-import AppText from "@/components/ui/AppText";
 import images from "@/constants/images";
 import { useRepo } from "@/hooks/RepoProvider";
 import { LinearGradient } from "expo-linear-gradient";
@@ -74,11 +73,8 @@ const TutorialPage = () => {
       type="text"
       style={{ paddingHorizontal: 22, paddingVertical: 10 }}
       onPress={goNext}
-    >
-      <AppText style={{ color: "black", fontSize: 15 }} type="p2">
-        Next
-      </AppText>
-    </AppButton>
+      label="Next"
+    ></AppButton>
   );
 
   const renderDoneButton = () => (
@@ -90,11 +86,8 @@ const TutorialPage = () => {
         posthog.capture("tutorial_completed", { completion_method: "done" });
         router.navigate("/pages");
       }}
-    >
-      <AppText style={{ color: "black", fontSize: 15 }} type="p2">
-        Done
-      </AppText>
-    </AppButton>
+      label="Done"
+    ></AppButton>
   );
 
   const renderPrevButton = () => (
@@ -102,12 +95,8 @@ const TutorialPage = () => {
       type="text"
       style={{ paddingHorizontal: 22, paddingVertical: 10 }}
       onPress={goBack}
-    >
-      {/* <Icon name="done" type="material" size={26}></Icon> */}
-      <AppText style={{ color: "black", fontSize: 15 }} type="p2">
-        Back
-      </AppText>
-    </AppButton>
+      label="Back"
+    ></AppButton>
   );
 
   const renderSkipButton = () => (
@@ -122,11 +111,8 @@ const TutorialPage = () => {
         });
         router.navigate("/pages");
       }}
-    >
-      <AppText style={{ color: "black", fontSize: 15 }} type="p2">
-        Skip
-      </AppText>
-    </AppButton>
+      label="Skip"
+    ></AppButton>
   );
 
   return (

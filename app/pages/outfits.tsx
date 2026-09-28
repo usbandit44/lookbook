@@ -8,10 +8,10 @@ import { useScrollToTopListener } from "@/features/navigation/hooks/scrollEvents
 import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useTheme } from "@/hooks/ThemeProvider";
-import { usePostHog } from "posthog-react-native";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
+import { usePostHog } from "posthog-react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
@@ -207,7 +207,7 @@ const OutfitsPage = () => {
               style={{ textAlign: "center" }}
             ></AppText>
             <AppButton
-              label="Add First Piece"
+              label="Create First Outfit"
               type="primary"
               style={{ flex: 0, alignSelf: "center" }}
               onPress={() => {

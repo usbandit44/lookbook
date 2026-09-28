@@ -11,6 +11,10 @@ import { PresetType } from "@/db/schemas/presets";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
+import {
+  diffPresetTypes,
+  getPresetOrigin,
+} from "@/functions/presetAnalytics";
 import { useGenerateOutfit } from "@/hooks/useGenerateOutfit";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import { clearCurrentItemId } from "@/redux/slices/itemSlice";
@@ -196,6 +200,20 @@ const CreatePresetForm = () => {
               preset.buildingFromItem.id != -1
                 ? await generate(preset.types, preset.buildingFromItem)
                 : await generate(preset.types);
+            if (preset.id != -1) {
+              posthog.capture("preset_used", {
+                trigger: "editor",
+                preset_id: preset.id,
+                ...(await getPresetOrigin(preset.id, currentPreset.name)),
+                category_count: Object.keys(preset.types).length,
+                modified_before_generating: !presetsEqual(
+                  preset,
+                  currentPreset,
+                ),
+                succeeded: result.ok,
+                missing_subtypes: result.ok ? [] : result.missing,
+              });
+            }
 
             if (result.ok) {
               dispatch(setOutfitItems({ items: result.items }));
@@ -242,6 +260,12 @@ const CreatePresetForm = () => {
                 if (preset.id == -1) {
                   const nameToSave =
                     preset.name === "" ? placeholder : preset.name;
+                  posthog.capture("preset_saved", {
+                    action: "created",
+                    category_count: Object.keys(preset.types).length,
+                    categories: Object.keys(preset.types),
+                    used_default_name: preset.name === "",
+                  });
                   await presetsRepo.addPreset({
                     name: nameToSave,
                     types: preset.types,
@@ -251,6 +275,15 @@ const CreatePresetForm = () => {
                   setTimeout(() => hideSnackbar(), 3000);
                 } else {
                   const nameToSave = name === "" ? preset.name : name;
+                  posthog.capture("preset_saved", {
+                    action: "updated",
+                    preset_id: preset.id,
+                    ...(await getPresetOrigin(preset.id, currentPreset.name)),
+                    ...diffPresetTypes(currentPreset, {
+                      name: nameToSave,
+                      types: preset.types,
+                    }),
+                  });
                   await presetsRepo.updatePreset({
                     id: preset.id,
                     name: nameToSave,
@@ -260,10 +293,6 @@ const CreatePresetForm = () => {
                   showSnackbar("Preset Updated", "success");
                   setTimeout(() => hideSnackbar(), 3000);
                 }
-                posthog.capture("preset_saved", {
-                  action: preset.id == -1 ? "created" : "updated",
-                  category_count: Object.keys(preset.types).length,
-                });
                 dispatch(setOutfitItems({ items: result.items }));
                 router.navigate("/outfit/create-outfit");
               } else {

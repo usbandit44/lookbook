@@ -1,6 +1,7 @@
 import AppText from "@/components/ui/AppText";
 import Skeleton from "@/components/ui/Skeleton";
 import Swatch from "@/components/ui/Swatch";
+import { syncAnalyticsProperties } from "@/config/posthog";
 import { Theme } from "@/constants/themes";
 import { normalizeImageUri } from "@/functions/imageHandling";
 import { useAppDispatch } from "@/hooks/redux-hooks";
@@ -16,7 +17,6 @@ import {
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
-import { syncAnalyticsProperties } from "@/config/posthog";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { AppIcon } from "./ui/AppIcon";
@@ -89,7 +89,9 @@ const ItemPreview: React.FC<{
             itemRepo
               .deleteItem(props.id)
               .then(() => syncAnalyticsProperties(repos));
-            posthog.capture("item_deleted", { item_type: props.itemType });
+            posthog.capture("item_deleted", {
+              item_type: props.itemType ?? "unknown",
+            });
           }}
         >
           <AppIcon name="trash" color={theme.danger}></AppIcon>

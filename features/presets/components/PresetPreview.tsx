@@ -3,6 +3,7 @@ import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import { PresetTypesType } from "@/constants/constants";
 import { Theme } from "@/constants/themes";
+import { getPresetOrigin } from "@/functions/presetAnalytics";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
@@ -56,20 +57,25 @@ const PresetPreview: React.FC<{
 
   const translateX = useSharedValue(0);
 
-  const handleFavorite = () => {
+  const presetProperties = async () => ({
+    preset_id: props.id,
+    ...(await getPresetOrigin(props.id, props.name)),
+    category_count: Object.keys(props.types).length,
+  });
+
+  const handleFavorite = async () => {
     presetsRepo.updateFavorited(props.id, !props.favorited);
     posthog.capture("favorite_toggled", {
       target: "preset",
       favorited: !props.favorited,
+      ...(await presetProperties()),
     });
   };
 
   const handleDelete = async () => {
     try {
       await presetsRepo.deletePreset(props.id);
-      posthog.capture("preset_deleted", {
-        category_count: Object.keys(props.types).length,
-      });
+      posthog.capture("preset_deleted", await presetProperties());
       showSnackbar("Preset Deleted", "success");
       setTimeout(() => hideSnackbar(), 3000);
     } catch (error) {
@@ -155,6 +161,9 @@ const PresetPreview: React.FC<{
           style={styles.modalRow}
           onPress={() => {
             hide();
+            presetProperties().then((properties) =>
+              posthog.capture("preset_edit_opened", properties),
+            );
             dispatch(setPresetId({ id: props.id }));
             router.navigate("/presets/create-preset");
           }}
@@ -202,12 +211,14 @@ const PresetPreview: React.FC<{
 
   async function handleGenerate(trigger: "tap" | "menu") {
     console.log(props.types);
+    const result = await generate(props.types);
     posthog.capture("preset_used", {
       trigger,
-      category_count: Object.keys(props.types).length,
       favorited: props.favorited,
+      succeeded: result.ok,
+      missing_subtypes: result.ok ? [] : result.missing,
+      ...(await presetProperties()),
     });
-    const result = await generate(props.types);
     if (result.ok) {
       dispatch(setOutfitItems({ items: result.items }));
       router.navigate("/outfit/create-outfit");
@@ -259,7 +270,9 @@ const PresetPreview: React.FC<{
               <AppText
                 text={Object.values(props.types).flat().join(" / ")}
                 type={"m11"}
-              ></AppText>
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              />
             </View>
             {props.favorited ? <AppIcon name={"star"}></AppIcon> : null}
 

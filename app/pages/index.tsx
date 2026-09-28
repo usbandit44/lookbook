@@ -7,17 +7,14 @@ import { itemTypesArray } from "@/constants/constants";
 import { items } from "@/db/schemas/items";
 import { useScrollToTopListener } from "@/features/navigation/hooks/scrollEvents";
 import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
-import { scheduleNotification } from "@/functions/notifications";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { clearCurrentItemId } from "@/redux/slices/itemSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { usePostHog } from "posthog-react-native";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
+import { usePostHog } from "posthog-react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
@@ -31,59 +28,6 @@ import {
 const Home = () => {
   const { theme } = useTheme();
   const posthog = usePostHog();
-
-  const notifications = [
-    {
-      weekday: 2,
-      hour: 8,
-      minute: 0,
-      title: "Start Your Week Right!",
-      body: "Kick off your week strong! Open the app to plan your outfit.",
-    },
-    {
-      weekday: 6,
-      hour: 20,
-      minute: 0,
-      title: "Friday Night! 🎉",
-      body: "Friday night’s here! Make sure you outfit is as good as your plans.",
-    },
-    {
-      weekday: 7,
-      hour: 9,
-      minute: 0,
-      title: "Weekend Vibes 🌴",
-      body: "Your weekend starts now! Check Lookbook for outfit ideas.",
-    },
-  ];
-
-  useEffect(() => {
-    async function initNotifications() {
-      const alreadyScheduled = await AsyncStorage.getItem(
-        "notifications_scheduled",
-      );
-      if (alreadyScheduled) return;
-
-      notifications.forEach((n) => {
-        scheduleNotification(n.title, n.body, {
-          type: "weekly",
-          weekday: n.weekday,
-          hour: n.hour,
-          minute: n.minute,
-          repeats: true,
-        } as Notifications.WeeklyTriggerInput);
-      });
-
-      await AsyncStorage.setItem("notifications_scheduled", "true");
-
-      const { status } = await Notifications.getPermissionsAsync();
-      posthog.capture("notifications_scheduled", {
-        count: notifications.length,
-        permission_status: status,
-      });
-    }
-
-    initNotifications();
-  }, []);
 
   const drizzleDb = useDrizzle();
 

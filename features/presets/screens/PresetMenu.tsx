@@ -94,7 +94,10 @@ const PresetMenu = () => {
           }}
         ></AppButton>
       </View>
-      <ScrollView style={styles.body}>
+      <ScrollView
+        style={styles.body}
+        contentContainerStyle={styles.bodyContent}
+      >
         <AppText
           text={
             "Start from a preset, build a new one, or pick pieces yourself."
@@ -158,7 +161,15 @@ const s = (t: Theme) =>
       flexDirection: "row",
       justifyContent: "space-between",
     },
-    body: { flex: 1, width: "100%", paddingHorizontal: 15, paddingTop: 10 },
+    body: {
+      flex: 1,
+      width: "100%",
+    },
+    bodyContent: {
+      paddingHorizontal: 15,
+      paddingTop: 10,
+      paddingBottom: 30,
+    },
     presetList: {
       borderWidth: 1,
       borderColor: t.inkA[12],
