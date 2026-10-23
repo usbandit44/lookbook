@@ -10,7 +10,7 @@ import {
   moveItemToBack,
   moveItemToFront,
   moveItemUp,
-  setItemPosition,
+  updateItemPosition,
 } from "@/redux/slices/outfitSlice";
 import React, { useEffect } from "react";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
@@ -27,7 +27,7 @@ const isIpad = Platform.OS === "ios" && Platform.isPad;
 
 const BASE_SIZE = isIpad ? 250 : 100;
 const MIN_SCALE = 0.5;
-const MAX_SCALE = 3;
+const MAX_SCALE = 5;
 
 export interface MovableProps {
   id: number;
@@ -85,7 +85,7 @@ const Movable: React.FC<MovableProps> = ({
   const positions = useAppSelector(getItemsPositions);
 
   const dispatchPosition = (x: number, y: number, scale: number) => {
-    dispatch(setItemPosition({ id: id, position: { x, y, scale } }));
+    dispatch(updateItemPosition({ id: id, position: { x, y, scale } }));
   };
 
   const modalContent = () => {

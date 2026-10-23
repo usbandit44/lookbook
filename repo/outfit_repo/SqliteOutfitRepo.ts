@@ -1,13 +1,11 @@
 import { OutfitPositions } from "@/constants/constants";
+import { drizzleDb } from "@/db/db";
 import { outfits } from "@/db/schemas/outfits";
 import OutfitRepo from "@/repo/outfit_repo/OutfitRepo";
 import { eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
 
 class SqliteOutfitRepo extends OutfitRepo {
-  private db = useSQLiteContext();
-  private drizzleDb = drizzle(this.db);
+  private drizzleDb = drizzleDb;
 
   async addOutfit(outfit: {
     items: number[];

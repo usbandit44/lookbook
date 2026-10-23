@@ -216,14 +216,14 @@ const PresetPreview: React.FC<{
       trigger,
       favorited: props.favorited,
       succeeded: result.ok,
-      missing_subtypes: result.ok ? [] : result.missing,
+      missing_category: result.ok ? null : result.missing,
       ...(await presetProperties()),
     });
     if (result.ok) {
-      dispatch(setOutfitItems({ items: result.items }));
+      dispatch(setOutfitItems(result.items));
       router.navigate("/outfit/create-outfit");
     } else {
-      showSnackbar(`No ${result.missing[0]} in your closet yet.`, "error");
+      showSnackbar(`Not in closet: Selected ${result.missing}`, "error");
       setTimeout(() => hideSnackbar(), 3000);
     }
   }

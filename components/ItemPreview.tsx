@@ -8,11 +8,12 @@ import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useAppModal } from "@/hooks/useAppModal";
+import { useSnackbar } from "@/hooks/useSnackBar";
 import { addItem, setCurrentItemId } from "@/redux/slices/itemSlice";
 import {
   setCurrentOutfit,
   setOutfitItems,
-  setOutfitPosition,
+  setOutfitItemsWithPositions,
 } from "@/redux/slices/outfitSlice";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -45,6 +46,13 @@ const ItemPreview: React.FC<{
   const posthog = usePostHog();
   const imageUri = normalizeImageUri(props.imgUri);
   const { show, hide } = useAppModal();
+  const snackbarSettingsContext = useSnackbar();
+  if (!snackbarSettingsContext) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+
+  const { setSettings, showSnackbar, hideSnackbar, settings } =
+    snackbarSettingsContext;
 
   const [isPressed, setIsPressed] = useState(false);
 
@@ -92,6 +100,8 @@ const ItemPreview: React.FC<{
             posthog.capture("item_deleted", {
               item_type: props.itemType ?? "unknown",
             });
+            showSnackbar("Item deleted", "success");
+            setTimeout(() => hideSnackbar(), 3000);
           }}
         >
           <AppIcon name="trash" color={theme.danger}></AppIcon>
@@ -140,6 +150,8 @@ const ItemPreview: React.FC<{
               .deleteOutfit(props.id)
               .then(() => syncAnalyticsProperties(repos));
             posthog.capture("outfit_deleted", {});
+            showSnackbar("Outfit deleted", "success");
+            setTimeout(() => hideSnackbar(), 3000);
           }}
         >
           <AppIcon name="trash" color={theme.danger}></AppIcon>
@@ -170,10 +182,17 @@ const ItemPreview: React.FC<{
         if (props.type == "outfit") {
           const outfit = await outfitRepo.getOutfit(props.id);
           dispatch(setCurrentOutfit({ id: outfit.id, name: outfit.name }));
-          dispatch(setOutfitItems({ items: outfit.items }));
+
           if (Object.keys(outfit.positions).length != 0) {
             console.log(outfit.positions);
-            dispatch(setOutfitPosition({ positions: outfit.positions }));
+            dispatch(
+              setOutfitItemsWithPositions({
+                items: outfit.items,
+                positions: outfit.positions,
+              }),
+            );
+          } else {
+            dispatch(setOutfitItems(outfit.items));
           }
 
           router.navigate("/outfit/create-outfit");

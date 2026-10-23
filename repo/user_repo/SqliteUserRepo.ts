@@ -1,11 +1,9 @@
+import { drizzleDb } from "@/db/db";
 import { user } from "@/db/schemas/user";
 import UserRepo from "@/repo/user_repo/UserRepo";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
 
 class SqliteUserRepo extends UserRepo {
-  private db = useSQLiteContext();
-  private drizzleDb = drizzle(this.db);
+  private drizzleDb = drizzleDb;
 
   async checkUserExist(): Promise<boolean> {
     try {

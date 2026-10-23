@@ -7,7 +7,7 @@ import {
   clearAllItems,
   getItemsPositions,
   selectOutfit,
-  setOutfitItems,
+  setOutfitItemsWithPositions,
 } from "@/redux/slices/outfitSlice";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -31,7 +31,12 @@ const AddItemHeader = () => {
       <AppButton
         onPress={() => {
           dispatch(clearAllItems());
-          dispatch(setOutfitItems({ items: oldItems, positions: oldPosition }));
+          dispatch(
+            setOutfitItemsWithPositions({
+              items: oldItems,
+              positions: oldPosition,
+            }),
+          );
           router.back();
         }}
         type="icon"
@@ -43,7 +48,10 @@ const AddItemHeader = () => {
           if (items != oldItems) {
             dispatch(clearAllItems());
             dispatch(
-              setOutfitItems({ items: oldItems, positions: oldPosition }),
+              setOutfitItemsWithPositions({
+                items: oldItems,
+                positions: oldPosition,
+              }),
             );
           }
         }}

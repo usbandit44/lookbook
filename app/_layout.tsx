@@ -1,5 +1,6 @@
-import { posthog } from "@/config/posthog";
 import Snackbar from "@/components/ui/Snackbar";
+import { posthog } from "@/config/posthog";
+import { DATABASE_NAME } from "@/db/db";
 import { DrizzleProvider } from "@/hooks/DrizzleContext";
 import { RepoProvider } from "@/hooks/RepoProvider";
 import { ThemeProvider, useTheme } from "@/hooks/ThemeProvider";
@@ -18,11 +19,11 @@ import {
   IBMPlexMono_600SemiBold,
 } from "@expo-google-fonts/ibm-plex-mono";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Slot, usePathname } from "expo-router";
-import { PostHogProvider } from "posthog-react-native";
-import { SQLiteProvider } from "expo-sqlite";
 import * as Notifications from "expo-notifications";
+import { Slot, usePathname } from "expo-router";
+import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
+import { PostHogProvider } from "posthog-react-native";
 import { type ReactNode, Suspense, useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -32,8 +33,6 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
-
-export const DATABASE_NAME = "lookbook";
 
 /* ------------------ INNER APP ------------------ */
 

@@ -1,3 +1,4 @@
+import { posthog, posthogLogger } from "@/config/posthog";
 import {
   itemColors,
   itemSubTypes,
@@ -7,7 +8,6 @@ import {
 import { generateColorCombo, HarmonyType } from "@/functions/colorTheory";
 import { compatabilityOrder } from "@/functions/itemCompatibilty";
 import { useRepo } from "@/hooks/RepoProvider";
-import { posthog, posthogLogger } from "@/config/posthog";
 
 // Remembers the last generated outfit so saves can be attributed to generation.
 let lastGeneratedItems: number[] = [];
@@ -26,7 +26,7 @@ export function consumeGeneratedOutfitSource(savedItems: number[]) {
 
 type GenerateResult =
   | { ok: true; items: number[] }
-  | { ok: false; missing: string[] };
+  | { ok: false; missing: string };
 
 export function useGenerateOutfit() {
   const { itemRepo } = useRepo();
@@ -58,14 +58,12 @@ export function useGenerateOutfit() {
     return item.tags.find((tag) => COLOR_NAMES.has(tag));
   }
 
-  const checkMissingSubtypes = async (
-    presetTypes: PresetTypesType,
+  const removeMissingSubtypes = async (
+    sutypes: string[],
   ): Promise<string[]> => {
-    const avaliableSubtypes = Object.values(presetTypes).flat();
-    const subtypesNotInCloset = await itemRepo.getSubtypesMissingFromCloset(
-      Object.values(presetTypes).flat(),
-    );
-    return subtypesNotInCloset;
+    const subtypesNotInCloset =
+      await itemRepo.getSubtypesMissingFromCloset(sutypes);
+    return sutypes.filter((subtype) => !subtypesNotInCloset.includes(subtype));
   };
 
   const generate = async (
@@ -73,16 +71,29 @@ export function useGenerateOutfit() {
     startingItem?: { id: number; type: string; subtype: string },
   ): Promise<GenerateResult> => {
     try {
-      const missingSubtypes = await checkMissingSubtypes(presetTypes);
-      if (missingSubtypes.length > 0) {
-        posthog?.capture("outfit_generation_failed", {
-          reason: "missing_items",
-          missing_subtypes: missingSubtypes,
-          missing_count: missingSubtypes.length,
-          starts_from_item: startingItem != null,
-        });
-        return { ok: false, missing: missingSubtypes };
+      // Selected subtypes the user doesn't own; they're skipped, not fatal.
+      const unavailableSubtypes: string[] = [];
+      for (const key of Object.keys(presetTypes)) {
+        const availableSubtypes = await removeMissingSubtypes(presetTypes[key]);
+        unavailableSubtypes.push(
+          ...presetTypes[key]
+            .filter((subtype) => !availableSubtypes.includes(subtype))
+            .map((subtype) => `${key}: ${subtype}`),
+        );
+        if (availableSubtypes.length == 0) {
+          posthog?.capture("outfit_generation_failed", {
+            reason: "missing_items",
+            missing_category: key,
+            missing_subtypes: presetTypes[key],
+            category_count: Object.keys(presetTypes).length,
+            starts_from_item: startingItem != null,
+          });
+          return { ok: false, missing: key };
+        } else {
+          presetTypes[key] = availableSubtypes;
+        }
       }
+
       const items: number[] = [];
       const subtypes: string[] = [];
       let baseColor: string = "";
@@ -180,6 +191,8 @@ export function useGenerateOutfit() {
       console.log(items);
       posthog?.capture("outfit_generated", {
         item_count: items.length,
+        unavailable_subtypes: unavailableSubtypes,
+        unavailable_subtype_count: unavailableSubtypes.length,
         category_count: Object.keys(presetTypes).length,
         starts_from_item: startingItem != null,
       });

@@ -10,9 +10,8 @@ import {
   addNewItem,
   itemInOutfit,
   removeItem,
-  removeItemPosition,
-  setItemPosition,
 } from "@/redux/slices/outfitSlice";
+import { store } from "@/redux/store";
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
@@ -46,15 +45,26 @@ const SelectableItem: React.FC<{
       onPress={() => {
         if (selected) {
           dispatch(removeItem(props.id));
-          dispatch(removeItemPosition({ id: props.id }));
+          // dispatch(removeItemPosition({ id: props.id }));
         } else {
-          dispatch(addNewItem(props.id));
-          dispatch(
-            setItemPosition({
-              id: props.id,
-              position: { x: 0, y: 0, scale: 1 },
-            }),
-          );
+          // dispatch(addNewItem(props.id));
+
+          dispatch(addNewItem(props.id))
+            .unwrap()
+            .then((res) => {
+              console.log("addNewItem ok", res);
+              console.log(
+                "outfit state",
+                JSON.stringify(store.getState().outfit),
+              );
+            })
+            .catch((err) => console.error("addNewItem failed", err));
+          // dispatch(
+          //   setItemPosition({
+          //     id: props.id,
+          //     position: { x: 0, y: 0, scale: 1 },
+          //   }),
+          // );
         }
         setSelected(!selected);
       }}

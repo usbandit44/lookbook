@@ -1,13 +1,11 @@
 import { NewPresetType } from "@/constants/constants";
+import { drizzleDb } from "@/db/db";
 import { presets, PresetType } from "@/db/schemas/presets";
 import PresetsRepo from "@/repo/presets_repo/PresetsRepo";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
 
 class SqlitePresetsRepo extends PresetsRepo {
-  private db = useSQLiteContext();
-  private drizzleDb = drizzle(this.db);
+  private drizzleDb = drizzleDb;
 
   async addPreset(preset: NewPresetType): Promise<number> {
     try {

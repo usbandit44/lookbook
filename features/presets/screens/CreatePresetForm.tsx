@@ -8,13 +8,10 @@ import {
 } from "@/constants/constants";
 import { Theme } from "@/constants/themes";
 import { PresetType } from "@/db/schemas/presets";
+import { diffPresetTypes, getPresetOrigin } from "@/functions/presetAnalytics";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
-import {
-  diffPresetTypes,
-  getPresetOrigin,
-} from "@/functions/presetAnalytics";
 import { useGenerateOutfit } from "@/hooks/useGenerateOutfit";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import { clearCurrentItemId } from "@/redux/slices/itemSlice";
@@ -211,17 +208,17 @@ const CreatePresetForm = () => {
                   currentPreset,
                 ),
                 succeeded: result.ok,
-                missing_subtypes: result.ok ? [] : result.missing,
+                missing_category: result.ok ? null : result.missing,
               });
             }
 
             if (result.ok) {
-              dispatch(setOutfitItems({ items: result.items }));
+              dispatch(setOutfitItems(result.items));
               dispatch(clearCurrentItemId());
               router.navigate("/outfit/create-outfit");
             } else {
               showSnackbar(
-                `No ${result.missing[0]} in your closet yet.`,
+                `Not in closet: Selected ${result.missing}`,
                 "error",
               );
               setTimeout(() => hideSnackbar(), 3000);
@@ -293,11 +290,11 @@ const CreatePresetForm = () => {
                   showSnackbar("Preset Updated", "success");
                   setTimeout(() => hideSnackbar(), 3000);
                 }
-                dispatch(setOutfitItems({ items: result.items }));
+                dispatch(setOutfitItems(result.items));
                 router.navigate("/outfit/create-outfit");
               } else {
                 showSnackbar(
-                  `No ${result.missing[0]} in your closet yet.`,
+                  `Not in closet: Selected ${result.missing}`,
                   "error",
                 );
                 setTimeout(() => hideSnackbar(), 3000);

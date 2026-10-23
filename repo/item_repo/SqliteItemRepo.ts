@@ -1,13 +1,11 @@
 import { NewItemType } from "@/constants/constants";
+import { drizzleDb } from "@/db/db";
 import { items, ItemsType } from "@/db/schemas/items";
 import ItemRepo from "@/repo/item_repo/ItemRepo";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
 
 class SqliteItemRepo extends ItemRepo {
-  private db = useSQLiteContext();
-  private drizzleDb = drizzle(this.db);
+  private drizzleDb = drizzleDb;
 
   async addItem(item: NewItemType): Promise<number> {
     try {

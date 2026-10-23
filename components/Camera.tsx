@@ -10,6 +10,7 @@ import { getClassification } from "@/functions/getClassification";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
+import { useSnackbar } from "@/hooks/useSnackBar";
 import { useWardrobeImagePicker } from "@/hooks/useWardrobeImagePicker";
 import {
   addItem,
@@ -44,6 +45,7 @@ import { AppIcon } from "./ui/AppIcon";
 import AppText from "./ui/AppText";
 
 const MAX_MENU_HEIGHT = 500;
+const CAMERA_ASPECT = 4 / 5; // width / height
 
 export function Camera() {
   const rootState = useRootNavigationState();
@@ -51,6 +53,21 @@ export function Camera() {
   const posthog = usePostHog();
   const t = theme;
   const styles = s(t);
+
+  const snackbarSettingsContext = useSnackbar();
+  if (!snackbarSettingsContext) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+  const { showSnackbar, hideSnackbar } = snackbarSettingsContext;
+
+  const showError = (message: string) => {
+    showSnackbar(message, "error");
+    setTimeout(() => hideSnackbar(), 3000);
+  };
+
+  // Successful results from earlier runs, keyed by source uri,
+  // so retrying after a failure doesn't re-process good photos.
+  const processedRef = useRef(new Map<string, NewItemType>());
 
   const [active, setActive] = useState(false);
   const navTranslate = useRef(new Animated.Value(MAX_MENU_HEIGHT)).current;
@@ -70,6 +87,16 @@ export function Camera() {
   const tileSize =
     (screenWidth - GRID_PADDING * 2 - GRID_GAP * (GRID_COLUMNS - 1)) /
     GRID_COLUMNS;
+
+  // Space actually available to the camera preview (measured via onLayout).
+  // On phones this is the full natural 4:5 height; on iPad the slot shrinks
+  // so the shutter row stays on screen, and the preview fits inside it.
+  const [cameraSlot, setCameraSlot] = useState({ width: 0, height: 0 });
+  const cameraWidth = Math.min(
+    cameraSlot.width,
+    cameraSlot.height * CAMERA_ASPECT,
+  );
+  const cameraHeight = cameraWidth / CAMERA_ASPECT;
 
   const getPreviousRouteName = () => {
     if (!rootState?.routes) return null;
@@ -92,42 +119,71 @@ export function Camera() {
   const [statusText, setStatusText] = useState("Processing your photos...");
 
   async function processImages(imgs: string[]) {
+    setProgress(0);
     setProgressTotal(imgs.length);
     setStatusText("Removing backgrounds and identifying items...");
 
+    const failed: string[] = [];
     let completed = 0;
-    let processedItemCount = 0;
-    for (const img of imgs) {
-      const color = await classifyClothing(img);
-      const resultUri = await process(img);
 
-      if (resultUri?.resultUri) {
-        const [type, subtype] = await getClassification(resultUri.resultUri);
-        const item: NewItemType = {
-          name: "",
-          type: type,
-          color: color.label,
-          tags: [type, subtype, color.label],
-          favorited: false,
-          imgUrl: resultUri.resultUri,
-          backgroundRemoved: true,
-        };
-        dispatch(addItem(item));
-        processedItemCount += 1;
+    for (const img of imgs) {
+      if (!processedRef.current.has(img)) {
+        try {
+          const color = await classifyClothing(img);
+          const result = await process(img);
+
+          if (result?.resultUri) {
+            const [type, subtype] = await getClassification(result.resultUri);
+            processedRef.current.set(img, {
+              name: "",
+              type,
+              color: color.label,
+              tags: [type, subtype, color.label],
+              favorited: false,
+              imgUrl: result.resultUri,
+              backgroundRemoved: true,
+            });
+          } else {
+            failed.push(img);
+          }
+        } catch (e) {
+          console.error("[camera] processing failed for", img, e);
+          failed.push(img);
+        }
       }
       completed += 1;
       setProgress(completed);
     }
+
     if (imgs.length > 0) {
       const cameraCount = imgs.filter((img) => photos.includes(img)).length;
       posthog.capture("wardrobe_images_processed", {
-        item_count: processedItemCount,
+        item_count: imgs.length - failed.length,
         attempted_count: imgs.length,
-        failed_count: imgs.length - processedItemCount,
+        failed_count: failed.length,
         camera_count: cameraCount,
         library_count: imgs.length - cameraCount,
       });
     }
+
+    if (failed.length > 0) {
+      // Stay on the camera; keep the good photos (including library picks) in the list
+      setPhotos(imgs.filter((img) => !failed.includes(img)));
+      setProcessingImages(false);
+      showError(
+        failed.length === 1
+          ? "No item detected. Photo removed."
+          : `No item detected in ${failed.length} photos.`,
+      );
+      return;
+    }
+
+    // All succeeded: dispatch in order and move on
+    for (const img of imgs) {
+      const newItem = processedRef.current.get(img);
+      if (newItem) dispatch(addItem(newItem));
+    }
+    processedRef.current.clear();
     setProcessingImages(false);
     router.navigate("/add-item");
   }
@@ -137,32 +193,38 @@ export function Camera() {
     setProgressTotal(1);
     setStatusText("Updating your item...");
 
-    const color = await classifyClothing(img);
-    const resultUri = await process(img);
-    if (resultUri?.resultUri) {
-      dispatch(setItemImgUrl({ index: itemsIndex, url: resultUri.resultUri }));
+    try {
+      const color = await classifyClothing(img);
+      const result = await process(img);
+
+      if (!result?.resultUri) {
+        setPhotos([]);
+        setProcessingImages(false);
+        showError(
+          "Couldn't find a clothing item in that photo. Try retaking it.",
+        );
+        return;
+      }
+
+      dispatch(setItemImgUrl({ index: itemsIndex, url: result.resultUri }));
       for (const type of itemTypesArray) {
         if (item.tags.includes(type)) {
           dispatch(removeItemTag({ index: itemsIndex, tag: type }));
-          const subTypes = itemSubTypes.filter((item) => item.key === type);
-          for (const subType of subTypes) {
+          for (const subType of itemSubTypes.filter((s) => s.key === type)) {
             if (item.tags.includes(subType.value)) {
               dispatch(
-                removeItemTag({
-                  index: itemsIndex,
-                  tag: subType.value,
-                }),
+                removeItemTag({ index: itemsIndex, tag: subType.value }),
               );
             }
           }
         }
       }
-      for (const color of itemColors) {
-        if (item.tags.includes(color)) {
-          dispatch(removeItemTag({ index: itemsIndex, tag: color }));
+      for (const c of itemColors) {
+        if (item.tags.includes(c)) {
+          dispatch(removeItemTag({ index: itemsIndex, tag: c }));
         }
       }
-      const [type, subtype] = await getClassification(resultUri.resultUri);
+      const [type, subtype] = await getClassification(result.resultUri);
       dispatch(setItemType({ index: itemsIndex, type }));
       dispatch(addItemTagToFront({ index: itemsIndex, tag: color.label }));
       dispatch(addItemTagToFront({ index: itemsIndex, tag: subtype }));
@@ -170,6 +232,11 @@ export function Camera() {
       setProgress(1);
       setProcessingImages(false);
       router.navigate("/add-item");
+    } catch (e) {
+      console.error("[camera] update processing failed", e);
+      setPhotos([]);
+      setProcessingImages(false);
+      showError("Something went wrong processing that photo. Try again.");
     }
   }
 
@@ -265,25 +332,46 @@ export function Camera() {
     setFacing((prev) => (prev === "back" ? "front" : "back"));
   };
 
+  const startProcessing = () => {
+    setProcessingImages(true);
+    requestAnimationFrame(() => {
+      if (retakeRef.current) {
+        processUpdatedImage(photos[0]);
+      } else {
+        processImages(photos);
+      }
+    });
+  };
+
   const renderCamera = () => {
     return (
-      <View style={{ gap: 70 }}>
-        <CameraView
-          style={styles.camera}
-          ref={ref}
-          mode={"picture"}
-          facing={facing}
-          mute={false}
-          responsiveOrientationWhenOrientationLocked={false}
-        ></CameraView>
+      <View style={styles.cameraSection}>
+        <View
+          style={[styles.cameraSlot, { height: screenWidth / CAMERA_ASPECT }]}
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            setCameraSlot((prev) =>
+              prev.width === width && prev.height === height
+                ? prev
+                : { width, height },
+            );
+          }}
+        >
+          {cameraWidth > 0 && (
+            <CameraView
+              style={{ width: cameraWidth, height: cameraHeight }}
+              ref={ref}
+              mode={"picture"}
+              facing={facing}
+              mute={false}
+              responsiveOrientationWhenOrientationLocked={false}
+            />
+          )}
+        </View>
         <View style={styles.shutterContainer}>
           {photos.length == 0 ? (
             <View style={{ width: 55 }} />
           ) : (
-            // <Image
-            //   source={{ uri: photos[photos.length - 1] }}
-            //   style={styles.thumb}
-            // />
             <Pressable
               onPress={() => setActive(true)}
               hitSlop={10}
@@ -375,6 +463,7 @@ export function Camera() {
           <View style={styles.nav}>
             <AppButton
               onPress={() => {
+                processedRef.current.clear();
                 if (retakeRef.current) {
                   router.navigate("/add-item");
                 } else {
@@ -401,19 +490,7 @@ export function Camera() {
               <View style={{ width: 24 }} />
             ) : (
               <AppButton
-                onPress={async () => {
-                  if (retakeRef.current) {
-                    setProcessingImages(true);
-                    requestAnimationFrame(() => {
-                      processUpdatedImage(photos[0]);
-                    });
-                  } else {
-                    setProcessingImages(true);
-                    requestAnimationFrame(() => {
-                      processImages(photos);
-                    });
-                  }
-                }}
+                onPress={startProcessing}
                 type="icon"
                 icon={
                   <AppIcon
@@ -477,6 +554,7 @@ export function Camera() {
                 style={styles.removeTile}
                 onPress={() => {
                   const lastPhoto = photos.length == 1;
+                  processedRef.current.delete(photo);
                   setPhotos((prev) => prev.filter((_, i) => i !== index));
                   if (lastPhoto) {
                     setActive(false);
@@ -505,18 +583,8 @@ export function Camera() {
             type="secondary"
             label="Continue"
             style={{ borderWidth: 1, borderColor: t.whiteA[16] }}
-            onPress={async () => {
-              if (retakeRef.current) {
-                setProcessingImages(true);
-                requestAnimationFrame(() => {
-                  processUpdatedImage(photos[0]);
-                });
-              } else {
-                setProcessingImages(true);
-                requestAnimationFrame(() => {
-                  processImages(photos);
-                });
-              }
+            onPress={() => {
+              startProcessing();
               setActive(false);
             }}
           ></AppButton>
@@ -534,9 +602,17 @@ const s = (t: Theme) =>
       alignItems: "center",
       gap: 40,
     },
-    camera: {
+    cameraSection: {
+      flex: 1,
       width: "100%",
-      aspectRatio: 4 / 5,
+      gap: 70,
+      paddingBottom: 30,
+    },
+    cameraSlot: {
+      width: "100%",
+      flexShrink: 1, // shrinks below its natural 4:5 height when space runs out (iPad)
+      minHeight: 0,
+      alignItems: "center",
     },
     shutterContainer: {
       width: "100%",
@@ -560,24 +636,6 @@ const s = (t: Theme) =>
       height: 65,
       borderRadius: 50,
     },
-    // stack: {
-    //   position: "absolute",
-    //   bottom: 0,
-    //   left: 0,
-    //   marginHorizontal: 50,
-    //   width: 120,
-    //   height: 120,
-    //   justifyContent: "center",
-    //   alignItems: "center",
-    // },
-    // thumb: {
-    //   width: 55,
-    //   height: 55,
-    //   borderRadius: 50,
-    //   borderWidth: 0.5,
-    //   borderColor: "white",
-    //   backgroundColor: "#ddd",
-    // },
     nav: {
       padding: 15,
       flexDirection: "row",
@@ -634,7 +692,6 @@ const s = (t: Theme) =>
       elevation: 50, // Android needs elevation as well as zIndex
     },
     menuHeader: {
-      // "ADD TO LOOKBOOK" / "CLOSE"
       width: "100%",
       flexDirection: "row",
       justifyContent: "space-between",

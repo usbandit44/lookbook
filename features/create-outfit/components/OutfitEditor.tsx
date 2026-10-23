@@ -1,6 +1,7 @@
 import AppButton from "@/components/ui/AppButton";
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
+import { syncAnalyticsProperties } from "@/config/posthog";
 import { OutfitPositions } from "@/constants/constants";
 import { Theme } from "@/constants/themes";
 import { ItemsType } from "@/db/schemas/items";
@@ -12,26 +13,24 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useAppModal } from "@/hooks/useAppModal";
+import { consumeGeneratedOutfitSource } from "@/hooks/useGenerateOutfit";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import {
   clearAllItems,
   clearCurrentOutfit,
-  clearOutfitPosition,
   getFavorited,
   getItemsPositions,
   removeItem,
-  removeItemPosition,
+  // removeItemPosition,
   selectCurrentOutfitId,
   selectOutfit,
   setFavorited,
-  setOutfitItems,
+  setOutfitItemsWithPositions,
 } from "@/redux/slices/outfitSlice";
 import { clearPresetState } from "@/redux/slices/presetSlice";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
-import { syncAnalyticsProperties } from "@/config/posthog";
-import { consumeGeneratedOutfitSource } from "@/hooks/useGenerateOutfit";
 import React, { useEffect, useRef, useState } from "react";
 import {
   InteractionManager,
@@ -274,7 +273,7 @@ const OutfitEditor: React.FC = () => {
     const oldOutfit = await outfitRepo.getOutfit(currentOutfit.id);
     setOutfitName(oldOutfit.name);
     dispatch(
-      setOutfitItems({
+      setOutfitItemsWithPositions({
         items: oldOutfit.items,
         positions: oldOutfit.positions,
       }),
@@ -297,7 +296,7 @@ const OutfitEditor: React.FC = () => {
         onPress={async () => {
           dispatch(clearAllItems());
           dispatch(clearCurrentOutfit());
-          dispatch(clearOutfitPosition());
+          // dispatch(clearOutfitPosition());
           router.navigate("/pages/outfits");
         }}
       ></AppButton>
@@ -334,7 +333,7 @@ const OutfitEditor: React.FC = () => {
             await saveOutfit();
             dispatch(clearAllItems());
             dispatch(clearCurrentOutfit());
-            dispatch(clearOutfitPosition());
+            // dispatch(clearOutfitPosition());
             setTimeout(() => router.navigate("/pages/outfits"), 300);
             showSnackbar("Outfit created", "success");
             setTimeout(() => hideSnackbar(), 3000);
@@ -420,7 +419,7 @@ const OutfitEditor: React.FC = () => {
                 initialScale={pos.scale}
                 onClear={() => {
                   dispatch(removeItem(item.id));
-                  dispatch(removeItemPosition({ id: item.id }));
+                  // dispatch(removeItemPosition({ id: item.id }));
                 }}
                 isCapturing={isCapturing}
                 modalName={item.color + " / " + item.type}

@@ -21,6 +21,7 @@ import { useTheme } from "@/hooks/ThemeProvider";
 import { useSnackbar } from "@/hooks/useSnackBar";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { syncAnalyticsProperties } from "@/config/posthog";
 import ColorSelector from "@/features/add-item/components/ColorSelector";
 import { useRepo } from "@/hooks/RepoProvider";
 import {
@@ -52,7 +53,6 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { usePostHog } from "posthog-react-native";
-import { syncAnalyticsProperties } from "@/config/posthog";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -214,6 +214,7 @@ const AddItemForm = () => {
         tags: item.tags,
         imgUrl: persistedUri,
         backgroundRemoved: true,
+        favorited: false,
       };
       dispatch(setItemImgUrl({ index: itemsIndex, url: persistedUri }));
       dispatch(
@@ -222,7 +223,7 @@ const AddItemForm = () => {
           backgroundRemoved: true,
         }),
       );
-      const created = await insertItem(item);
+      const created = await insertItem(newItem);
       if (!created) return false;
       const itemCount = await itemRepo.countNumberOfItem();
       posthog.capture("item_created", {
@@ -263,7 +264,12 @@ const AddItemForm = () => {
     if (updatable()) {
       try {
         console.log("hello");
-        const persistedUri = await ensurePersistedItemImageUri(item.imgUrl);
+        const imageChanged =
+          getFilename(currentItem?.imgUrl) !== getFilename(item.imgUrl);
+
+        const persistedUri = imageChanged
+          ? await ensurePersistedItemImageUri(item.imgUrl)
+          : currentItem!.imgUrl;
         const newItem: ItemsType = {
           id: currentItemId,
           name: item.name,
@@ -291,6 +297,7 @@ const AddItemForm = () => {
       } catch (e) {
         console.error("Failed to persist item image:", e);
         showSnackbar("Could not save image. Try again.", "error");
+        setTimeout(() => hideSnackbar(), 3000);
         return false;
       }
     }
@@ -385,7 +392,7 @@ const AddItemForm = () => {
           <View style={[styles.imageBlock]}>
             <Image
               source={{ uri: item.imgUrl }}
-              contentFit="cover"
+              contentFit="contain"
               style={[
                 styles.imageWrapper,
                 {
@@ -773,14 +780,6 @@ const AddItemForm = () => {
                   }),
                 );
                 dispatch(addToTypes({ key: item.type, value: found[0] }));
-
-                // dispatch(addNewItem(currentItemId));
-                // dispatch(
-                //   setItemPosition({
-                //     id: currentItemId,
-                //     position: { x: 0, y: 0, scale: 1 },
-                //   }),
-                // );
                 router.navigate("/presets/create-preset");
               }
             }}

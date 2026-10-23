@@ -71,7 +71,7 @@ export const itemSubTypes: SubType[] = [
   // Tops
   { key: "Tops", value: "T-Shirt" },
   { key: "Tops", value: "Long Sleeve Tee" },
-  { key: "Tops", value: "Button-Down" },
+  { key: "Tops", value: "Button Down" },
   { key: "Tops", value: "Blouse" },
   { key: "Tops", value: "Sweater" },
   { key: "Tops", value: "Tank Top" },
@@ -212,7 +212,7 @@ export const DEFAULT_PRESETS: NewPresetType[] = [
   {
     name: "Smart Casual",
     types: {
-      Tops: ["Button-Down", "Polo", "Sweater"],
+      Tops: ["Button Down", "Polo", "Sweater"],
       Bottoms: ["Jeans", "Dress Pants"],
       Shoes: ["Loafers", "Sneakers", "Boots"],
     },
@@ -221,9 +221,8 @@ export const DEFAULT_PRESETS: NewPresetType[] = [
   {
     name: "Office Ready",
     types: {
-      Tops: ["Dress Shirt", "Button-Down", "Blouse", "Polo"],
+      Tops: ["Dress Shirt", "Button Down", "Blouse", "Polo"],
       Bottoms: ["Dress Pants", "Midi Skirt"],
-      Outerwear: ["Blazer"],
       Shoes: ["Dress Shoes", "Loafers", "Heels", "Flats"],
     },
     favorited: false,
@@ -241,14 +240,14 @@ export const DEFAULT_PRESETS: NewPresetType[] = [
     name: "Easy Dress",
     types: {
       Dresses: ["Dresses"],
-      Shoes: ["Sandals", "Flats", "Sneakers", "Mules"],
+      Shoes: ["Sandals", "Flats", "Heels", "Mules"],
     },
     favorited: false,
   },
   {
     name: "Night Out",
     types: {
-      Tops: ["Blouse", "Button-Down", "Tank Top"],
+      Tops: ["Blouse", "Button Down"],
       Bottoms: ["Jeans", "Mini Skirt", "Dress Pants"],
       Shoes: ["Boots", "Heels", "Loafers"],
     },
@@ -259,7 +258,6 @@ export const DEFAULT_PRESETS: NewPresetType[] = [
     types: {
       Tops: ["T-Shirt", "Tank Top", "Long Sleeve Tee"],
       Bottoms: ["Leggings", "Sweatpants", "Shorts"],
-      Outerwear: ["Hoodie", "Zip-Up Jacket", "Windbreaker"],
       Shoes: ["Running Shoes", "Sneakers"],
     },
     favorited: false,
@@ -270,14 +268,14 @@ export const DEFAULT_PRESETS: NewPresetType[] = [
       Tops: ["Sweater", "Long Sleeve Tee"],
       Bottoms: ["Jeans", "Cargo Pants", "Dress Pants"],
       Outerwear: ["Coat", "Puffer Jacket", "Trench Coat"],
-      Shoes: ["Boots"],
+      Shoes: ["Boots", "Sneakers"],
     },
     favorited: false,
   },
   {
     name: "Date Night (Guys)",
     types: {
-      Tops: ["Button-Down", "Dress Shirt", "Sweater", "Polo"],
+      Tops: ["Button Down", "Dress Shirt", "Sweater", "Polo"],
       Bottoms: ["Jeans", "Dress Pants"],
       Outerwear: ["Blazer", "Bomber Jacket", "Denim Jacket"],
       Shoes: ["Loafers", "Boots", "Dress Shoes", "Sneakers"],

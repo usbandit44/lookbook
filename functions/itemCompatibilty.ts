@@ -53,7 +53,7 @@ const META_INPUT: Record<
     ],
     versatile: true,
   },
-  "Button-Down": {
+  "Button Down": {
     formality: 3,
     tags: ["classic", "preppy"],
   },
