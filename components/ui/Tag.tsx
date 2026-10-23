@@ -1,19 +1,22 @@
+import { useTheme } from "@/hooks/ThemeProvider";
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { Icon } from "react-native-elements";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import AppText from "./AppText";
 
 const Tag: React.FC<{
-  children: string;
+  label: string;
   onClear?: () => void;
-  style?: {};
 }> = (props) => {
+  const { theme } = useTheme();
+  const backgroundColor = theme.ink;
+  const labelColor = theme.onInk;
+  const clearColor = theme.whiteA[65];
   return (
-    <View style={[styles.container, props.style]}>
-      <AppText style={styles.text}>{props.children}</AppText>
+    <View style={[styles.container, { backgroundColor }]}>
+      <AppText type="m3" text={props.label}></AppText>
       {props.onClear ? (
         <Pressable onPress={props.onClear} hitSlop={20}>
-          <Icon name="clear" type="material" color="white" size={15} />
+          <Text style={[styles.clear, { color: clearColor }]}>✕</Text>
         </Pressable>
       ) : null}
     </View>
@@ -25,16 +28,18 @@ export default Tag;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#090a0a",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
-    paddingLeft: 20,
-    paddingRight: 20,
-    paddingTop: 0,
     flexDirection: "row",
+    alignItems: "center",
     gap: 8,
-    height: 40,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingLeft: 12,
+    paddingRight: 10, // tighter on the ✕ side
+    borderRadius: 0,
   },
-  text: { fontSize: 14, color: "white" },
+
+  clear: {
+    fontFamily: "Archivo-SemiBold",
+    fontSize: 10,
+  },
 });

@@ -1,28 +1,76 @@
 import AppButton from "@/components/ui/AppButton";
+import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import Searchbar from "@/components/ui/SearchBar";
+import { itemTypesArray } from "@/constants/constants";
+import { Theme } from "@/constants/themes";
 import { items } from "@/db/schemas/items";
 import AddItemHeader from "@/features/create-outfit/components/AddItemHeader";
 import SelectableItem from "@/features/create-outfit/components/SelectableItem";
 import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
 import { useDrizzle } from "@/hooks/DrizzleContext";
+import { useAppSelector } from "@/hooks/redux-hooks";
+import { useTheme } from "@/hooks/ThemeProvider";
+import { selectOutfit } from "@/redux/slices/outfitSlice";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, FlatList, StyleSheet, View } from "react-native";
-import { Icon } from "react-native-elements";
+import {
+  FlatList,
+  LayoutAnimation,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 
 const AddItem = () => {
+  const { theme } = useTheme();
+  const t = theme;
+  const styles = s(t);
   const router = useRouter();
   const drizzleDb = useDrizzle();
-  //const [itemsData, setItemsData] = useState<ItemsType[]>([]);
 
   const { data: liveItems } = useLiveQuery(drizzleDb.select().from(items));
 
   const [search, setSearch] = useState<string>("");
+  const [filter, setFilter] = useState<string>("All");
 
+  const flatListRef = useRef<FlatList<any>>(null);
+
+  const [showSearch, setShowSearch] = useState(true);
+
+  const itemList = useAppSelector(selectOutfit);
+
+  const [oldItems, setOldItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    setOldItems(itemList);
+  }, []);
+  function outfitChanged(old: number[], current: number[]) {
+    if (old.length !== current.length) return true;
+
+    const oldSorted = [...old].sort((a, b) => a - b);
+    const currentSorted = [...current].sort((a, b) => a - b);
+
+    return oldSorted.some((id, i) => id !== currentSorted[i]);
+  }
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: any[] }) => {
+      const topRowsVisible = viewableItems.some(
+        (vi) => vi.index !== null && vi.index < 1,
+      );
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setShowSearch(topRowsVisible);
+    },
+  ).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
   const isFirstRender = useRef(true);
+
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   useEffect(() => {
@@ -46,7 +94,15 @@ const AddItem = () => {
     }
 
     const tagFilters = debouncedSearch.split(" ").filter((t) => t !== "");
+
     let filtered = liveItems;
+    if (filter != "All") {
+      if (filter == "Favorites") {
+        filtered = filtered.filter((item) => item.favorited == true);
+      } else {
+        filtered = filtered.filter((item) => item.tags.includes(filter));
+      }
+    }
 
     if (tagFilters.length > 0) {
       filtered = liveItems.filter((item) => {
@@ -57,191 +113,157 @@ const AddItem = () => {
         });
       });
     }
+    const sorted = [...filtered].sort(
+      (a, b) => Number(b.favorited) - Number(a.favorited),
+    );
 
     const formattedData =
-      filtered.length % 2 === 1
-        ? [...filtered, { id: -1, name: "", type: "", color: null, imgUrl: "" }]
-        : filtered;
+      sorted.length % 2 === 1
+        ? [...sorted, { id: -1, name: "", type: "", color: null, imgUrl: "" }]
+        : sorted;
 
-    //setFilteredData(formattedData);
     return formattedData;
-  }, [debouncedSearch, liveItems]);
-
-  const [showScroolButton, setShowScrollButton] = useState(false);
-  const scrollButtonOpacity = useRef(new Animated.Value(0)).current;
-
-  const flatListRef = useRef<FlatList<any>>(null);
-
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: any[] }) => {
-      const topRowsVisible = viewableItems.some(
-        (vi) => vi.index !== null && vi.index < 4, // 2 rows × 2 columns
-      );
-
-      setShowScrollButton(!topRowsVisible);
-    },
-  ).current;
-
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 50,
-  }).current;
-
-  useEffect(() => {
-    Animated.timing(scrollButtonOpacity, {
-      toValue: showScroolButton ? 1 : 0,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  }, [showScroolButton]);
-
-  const scrollToTop = () => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
-    }
-  };
+  }, [debouncedSearch, liveItems, filter]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <AddItemHeader />
 
+      {showSearch ? (
+        <View style={[styles.header, { backgroundColor: theme.surface }]}>
+          <Searchbar
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search by tag, color, type"
+          ></Searchbar>
+          <ScrollView
+            bounces={true}
+            horizontal={true}
+            style={{ width: "100%", gap: 50 }}
+            contentContainerStyle={{ gap: 8 }}
+            showsHorizontalScrollIndicator={false}
+          >
+            {["All", "Favorites", ...itemTypesArray].map((filt, index) => {
+              const selected = filter == filt;
+
+              return (
+                <AppButton
+                  onPress={() => {
+                    if (!selected) {
+                      setFilter(filt);
+                    }
+                  }}
+                  type={selected ? "primary" : "secondary"}
+                  key={index}
+                  style={{ flex: 0, height: "auto" }}
+                  label={filt}
+                ></AppButton>
+              );
+            })}
+          </ScrollView>
+        </View>
+      ) : (
+        <View style={[styles.header, { backgroundColor: theme.surface }]}>
+          <Pressable
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              backgroundColor: theme.surfaceSunken,
+              borderWidth: 1,
+              borderColor: theme.inkA[12],
+              height: 42,
+              paddingHorizontal: 10,
+            }}
+            onPress={() => {
+              flatListRef.current?.scrollToOffset({
+                animated: true,
+                offset: 0,
+              });
+            }}
+          >
+            <AppIcon name="search" />
+
+            <AppText
+              text={"Search and Filter"}
+              type={"p4"}
+              style={{ flex: 1, color: theme.inkA[38] }}
+            />
+            <AppIcon name="chevronDown" size={15} />
+          </Pressable>
+        </View>
+      )}
       <FlatList
-        initialNumToRender={6} // render first 3 rows only
-        maxToRenderPerBatch={6} // render 3 more rows per batch
-        windowSize={10}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={21}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         ref={flatListRef}
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        columnWrapperStyle={styles.itemsGrid}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Searchbar
-              value={search}
-              onChangeText={setSearch}
-              placeholder="Search your clothes"
-            ></Searchbar>
-          </View>
-        }
+        columnWrapperStyle={styles.row}
         renderItem={({ item }) => (
           <SelectableItem
             id={item.id}
             imgUri={item.imgUrl ?? ""}
-            name={item.name ?? ""}
-            size={item.size ?? ""}
+            type={item.type}
+            color={item.color}
           />
         )}
       />
       <View style={styles.footerContainer}>
         <AppButton
-          fullWidth={true}
-          onPress={() => router.navigate("/outfit/create-outfit")}
-        >
-          <AppText style={{ color: "white" }}>Save</AppText>
-        </AppButton>
-      </View>
-
-      <Animated.View
-        style={{
-          opacity: scrollButtonOpacity,
-          position: "absolute",
-          bottom: 110,
-          alignSelf: "flex-end",
-          paddingRight: 15,
-        }}
-        pointerEvents={showScroolButton ? "auto" : "none"}
-      >
-        <AppButton
-          onPress={scrollToTop}
-          style={{
-            borderRadius: 100,
-            aspectRatio: 1,
-            padding: 10,
-            backgroundColor: "black",
+          onPress={() => {
+            router.navigate("/outfit/create-outfit");
           }}
-          type={"custom"}
-        >
-          <Icon
-            name="keyboard-arrow-up"
-            type="material"
-            size={24}
-            color={"white"}
-          />
-        </AppButton>
-      </Animated.View>
+          label="Done"
+          disabled={!outfitChanged(oldItems, itemList)}
+          type={outfitChanged(oldItems, itemList) ? "primary" : "ghostPrimary"}
+        ></AppButton>
+      </View>
     </View>
   );
 };
 
 export default AddItem;
 
-const styles = StyleSheet.create({
-  itemsGrid: {
-    justifyContent: "space-between",
-    paddingLeft: 15,
-    paddingRight: 15,
-    paddingTop: 15,
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalView: {
-    margin: 50,
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 35,
-    alignItems: "center",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const s = (t: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    height: 500,
-    gap: 15,
-  },
-  filterButton: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
+    list: {
+      flex: 1,
+      paddingHorizontal: 15,
+    },
+    listContent: {
+      paddingBottom: 90,
+    },
+    header: {
+      paddingHorizontal: 15,
+      paddingTop: 15,
+      alignSelf: "flex-start",
+      width: "100%",
+      gap: 15,
+    },
+    row: {
+      justifyContent: "space-between",
+      // paddingHorizontal: 15,
+      paddingTop: 15,
+    },
 
-  option: {
-    width: "100%",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    borderTopWidth: 0.5,
-    borderColor: "#979C9E",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-  },
-
-  optionSelected: {
-    backgroundColor: "#f2f2f2", // 👈 subtle highlight
-  },
-
-  checkboxContainer: {
-    padding: 0,
-    margin: 0,
-  },
-  footerContainer: {
-    width: "100%",
-
-    padding: 25,
-    borderTopColor: "black",
-    borderWidth: 0.5,
-  },
-  header: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    alignSelf: "flex-start",
-    width: "100%",
-  },
-});
+    footerContainer: {
+      width: "100%",
+      flexDirection: "row",
+      gap: 15,
+      padding: 15,
+      paddingBottom: 40,
+      borderTopWidth: 1,
+      borderTopColor: t.inkA[10],
+    },
+  });

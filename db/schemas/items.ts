@@ -1,6 +1,11 @@
 import { itemTypes } from "@/constants/constants";
 import { sql } from "drizzle-orm";
-import { customType, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  customType,
+  integer,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 /** Stored as JSON text; avoids Drizzle `mode: "json"` throwing on legacy/corrupt cells. */
 const stringArrayJson = customType<{ data: string[]; driverData: string }>({
@@ -33,6 +38,7 @@ export const items = sqliteTable("items", {
   tags: stringArrayJson("tags")
     .notNull()
     .default(sql`(json_array())`),
+  favorited: integer("favorited", { mode: "boolean" }).default(false),
   imgUrl: text().notNull(),
   backgroundRemoved: integer("updateImgUrl", { mode: "boolean" })
     .notNull()

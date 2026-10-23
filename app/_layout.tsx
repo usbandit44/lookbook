@@ -1,15 +1,30 @@
 import Snackbar from "@/components/ui/Snackbar";
-import { Colors } from "@/constants/constants";
+import { posthog } from "@/config/posthog";
+import { DATABASE_NAME } from "@/db/db";
 import { DrizzleProvider } from "@/hooks/DrizzleContext";
+import { RepoProvider } from "@/hooks/RepoProvider";
+import { ThemeProvider, useTheme } from "@/hooks/ThemeProvider";
+import { AppModalProvider } from "@/hooks/useAppModal";
 import SnackbarProvider, { useSnackbar } from "@/hooks/useSnackBar";
 import { store } from "@/redux/store";
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import {
+  Archivo_400Regular,
+  Archivo_500Medium,
+  Archivo_600SemiBold,
+  Archivo_700Bold,
+  useFonts,
+} from "@expo-google-fonts/archivo";
+import {
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+} from "@expo-google-fonts/ibm-plex-mono";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useFonts } from "expo-font";
+import * as Notifications from "expo-notifications";
 import { Slot, usePathname } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
-import { Suspense } from "react";
+import { PostHogProvider } from "posthog-react-native";
+import { type ReactNode, Suspense, useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -19,17 +34,45 @@ import {
 } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 
-export const DATABASE_NAME = "lookbook";
-
 /* ------------------ INNER APP ------------------ */
 
+function PostHogRoot({ children }: { children: ReactNode }) {
+  return posthog ? (
+    <PostHogProvider client={posthog}>{children}</PostHogProvider>
+  ) : (
+    children
+  );
+}
+
 function AppShell() {
+  const { theme } = useTheme();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const snackbarSettingsContext = useSnackbar();
 
+  // expo-router screens aren't auto-tracked, so report each route change.
+  useEffect(() => {
+    posthog?.screen(pathname);
+  }, [pathname]);
+
+  // Measures whether the weekly reminders bring people back into the app.
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const trigger = response.notification.request.trigger as {
+          weekday?: number;
+        } | null;
+        posthog?.capture("notification_opened", {
+          title: response.notification.request.content.title,
+          weekday: trigger?.weekday ?? null,
+        });
+      },
+    );
+    return () => subscription.remove();
+  }, []);
+
   const isCamera = pathname.includes("/camera-screen");
-  const backgroundColor = isCamera ? "black" : Colors.light.background;
+  const backgroundColor = isCamera ? theme.inkAlt : theme.surface;
 
   // ← merge both useFonts into one call
   const [fontsLoaded] = useFonts({
@@ -52,6 +95,12 @@ function AppShell() {
     "Lora-VariableFont_wght": require("@/assets/fonts/Lora-VariableFont_wght.ttf"),
     "SpaceMono-Regular": require("@/assets/fonts/SpaceMono-Regular.ttf"),
     "Nunito-VariableFont_wght": require("@/assets/fonts/Nunito-VariableFont_wght.ttf"),
+    Archivo_400Regular,
+    Archivo_500Medium,
+    Archivo_600SemiBold,
+    Archivo_700Bold,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_600SemiBold,
   });
 
   // ← early returns AFTER all hooks
@@ -64,7 +113,7 @@ function AppShell() {
   const { settings, hideSnackbar } = snackbarSettingsContext;
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+    <View style={{ flex: 1, backgroundColor }}>
       <GestureHandlerRootView style={{ flex: 1, backgroundColor }}>
         {/* Status bar fill */}
         <View style={{ height: insets.top, backgroundColor }} />
@@ -100,15 +149,21 @@ export default function RootLayout() {
           useSuspense
         >
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider value={DefaultTheme}>
-              <SnackbarProvider>
-                <DrizzleProvider>
-                  <Provider store={store}>
-                    <AppShell />
-                  </Provider>
-                </DrizzleProvider>
-              </SnackbarProvider>
-            </ThemeProvider>
+            <RepoProvider>
+              <ThemeProvider>
+                <AppModalProvider>
+                  <SnackbarProvider>
+                    <DrizzleProvider>
+                      <PostHogRoot>
+                        <Provider store={store}>
+                          <AppShell />
+                        </Provider>
+                      </PostHogRoot>
+                    </DrizzleProvider>
+                  </SnackbarProvider>
+                </AppModalProvider>
+              </ThemeProvider>
+            </RepoProvider>
           </QueryClientProvider>
         </SQLiteProvider>
       </Suspense>

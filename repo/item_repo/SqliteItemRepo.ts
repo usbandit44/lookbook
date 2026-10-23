@@ -1,21 +1,13 @@
+import { NewItemType } from "@/constants/constants";
+import { drizzleDb } from "@/db/db";
 import { items, ItemsType } from "@/db/schemas/items";
 import ItemRepo from "@/repo/item_repo/ItemRepo";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
 
 class SqliteItemRepo extends ItemRepo {
-  private db = useSQLiteContext();
-  private drizzleDb = drizzle(this.db);
+  private drizzleDb = drizzleDb;
 
-  async addItem(item: {
-    name: string;
-    type: string;
-    color: string;
-    imgUrl: string;
-    tags: string[];
-    backgroundRemoved: boolean;
-  }): Promise<number> {
+  async addItem(item: NewItemType): Promise<number> {
     try {
       const result = await this.drizzleDb
         .insert(items)
@@ -185,10 +177,63 @@ class SqliteItemRepo extends ItemRepo {
       }
 
       const filtered = result.filter((item) =>
-        item.tags.some((tag) => tags.includes(tag)),
+        tags.every((tag) => item.tags.includes(tag)),
       );
 
       return filtered.map((item) => item.id);
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
+  }
+
+  async getIdsByTagsMatchSome(
+    mandstoryTags: string[],
+    optionalTags: string[],
+  ): Promise<number[]> {
+    try {
+      const result = await this.drizzleDb.select().from(items);
+
+      if (result == null) {
+        throw new Error("No items found");
+      }
+
+      const mandstoryfiltered = result.filter((item) =>
+        mandstoryTags.every((tag) => item.tags.includes(tag)),
+      );
+      const optionalFiltered = mandstoryfiltered.filter((item) =>
+        item.tags.some((tag) => optionalTags.includes(tag)),
+      );
+
+      return optionalFiltered.map((item) => item.id);
+    } catch (error) {
+      console.error("Failed to get item:", error);
+      throw error;
+    }
+  }
+
+  async getSubtypesMissingFromCloset(
+    subtypesToCheck: string[],
+  ): Promise<string[]> {
+    try {
+      const noMatchArray: string[] = [];
+      const result = await this.drizzleDb.select().from(items);
+
+      if (result == null) {
+        throw new Error("No items found");
+      }
+      for (const subtype in subtypesToCheck) {
+        const match = result.some((item) => {
+          return item.tags.some((tag) => {
+            return tag == subtypesToCheck[subtype];
+          });
+        });
+        if (!match) {
+          noMatchArray.push(subtypesToCheck[subtype]);
+        }
+      }
+
+      return noMatchArray;
     } catch (error) {
       console.error("Failed to get item:", error);
       throw error;
@@ -205,6 +250,7 @@ class SqliteItemRepo extends ItemRepo {
           color: item.color,
           type: item.type,
           tags: item.tags,
+          favorited: item.favorited,
         })
         .where(eq(items.id, item.id))
         .returning();
@@ -224,6 +270,25 @@ class SqliteItemRepo extends ItemRepo {
         .update(items)
         .set({
           tags: tags,
+        })
+        .where(eq(items.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Item doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      throw error;
+    }
+  }
+
+  async updateFavorited(id: number, favorited: boolean): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(items)
+        .set({
+          favorited: favorited,
         })
         .where(eq(items.id, id))
         .returning();

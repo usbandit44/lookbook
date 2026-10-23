@@ -1,19 +1,18 @@
 import { OutfitPositions } from "@/constants/constants";
+import { drizzleDb } from "@/db/db";
 import { outfits } from "@/db/schemas/outfits";
 import OutfitRepo from "@/repo/outfit_repo/OutfitRepo";
 import { eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
 
 class SqliteOutfitRepo extends OutfitRepo {
-  private db = useSQLiteContext();
-  private drizzleDb = drizzle(this.db);
+  private drizzleDb = drizzleDb;
 
   async addOutfit(outfit: {
     items: number[];
     name: string;
     imgUrl: string;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -45,6 +44,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     imgUrl: string;
     updateImgUrl: boolean;
     positions: OutfitPositions;
+    favorited: boolean;
   }> {
     try {
       const result = await this.drizzleDb
@@ -64,6 +64,7 @@ class SqliteOutfitRepo extends OutfitRepo {
         imgUrl: result[0].imgUrl ?? "",
         updateImgUrl: result[0].updateImgUrl,
         positions,
+        favorited: result[0].favorited ?? false,
       };
       return returningOutfit;
     } catch (error) {
@@ -99,6 +100,7 @@ class SqliteOutfitRepo extends OutfitRepo {
     items: number[];
     updateImgUrl: boolean;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number> {
     try {
       const itemsString = outfit.items.map((item) => {
@@ -227,6 +229,23 @@ class SqliteOutfitRepo extends OutfitRepo {
       const result = await this.drizzleDb
         .update(outfits)
         .set({ updateImgUrl: updateImgUrl })
+        .where(eq(outfits.id, id))
+        .returning();
+      if (result == null) {
+        throw new Error("Outfit doesn't exist");
+      }
+      return result[0].id;
+    } catch (error) {
+      console.error("Failed to update outfit:", error);
+      throw error;
+    }
+  }
+
+  async updateOutfitFavorited(id: number, favorited: boolean): Promise<number> {
+    try {
+      const result = await this.drizzleDb
+        .update(outfits)
+        .set({ favorited: favorited })
         .where(eq(outfits.id, id))
         .returning();
       if (result == null) {

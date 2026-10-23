@@ -1,15 +1,10 @@
+import { NewItemType } from "@/constants/constants";
 import { ItemsType } from "@/db/schemas/items";
 
 abstract class ItemRepo {
   constructor() {}
 
-  abstract addItem(item: {
-    name: string;
-    type: string;
-    color: string;
-    imgUrl: string;
-    backgroundRemoved: boolean;
-  }): Promise<number>;
+  abstract addItem(item: NewItemType): Promise<number>;
 
   abstract getItem(id: number): Promise<ItemsType>;
 
@@ -24,9 +19,18 @@ abstract class ItemRepo {
   abstract getAllBeltIds(): Promise<number[]>;
 
   abstract getIdsByTags(tags: string[]): Promise<number[]>;
+  abstract getIdsByTagsMatchSome(
+    mandatoryTags: string[],
+    optionalTags: string[],
+  ): Promise<number[]>;
+
+  abstract getSubtypesMissingFromCloset(
+    subtypesToCheck: string[],
+  ): Promise<string[]>;
 
   abstract updateItem(item: ItemsType): Promise<number>;
   abstract updateTags(id: number, tags: string[]): Promise<number>;
+  abstract updateFavorited(id: number, favorited: boolean): Promise<number>;
 
   abstract deleteItem(id: number): Promise<void>;
 }

@@ -10,6 +10,7 @@ class AppOutfitRepo extends OutfitRepo {
     name: string;
     imgUrl: string;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.addOutfit(outfit);
@@ -26,6 +27,7 @@ class AppOutfitRepo extends OutfitRepo {
     imgUrl: string;
     updateImgUrl: boolean;
     positions: OutfitPositions;
+    favorited: boolean;
   }> {
     try {
       const result = await this.sqliteRepo.getOutfit(id);
@@ -50,6 +52,7 @@ class AppOutfitRepo extends OutfitRepo {
     items: number[];
     updateImgUrl: boolean;
     positions: OutfitPositions;
+    favorited: boolean;
   }): Promise<number> {
     try {
       const result = await this.sqliteRepo.updateOutfit(outfit);
@@ -113,6 +116,15 @@ class AppOutfitRepo extends OutfitRepo {
         id,
         updateImgUrl,
       );
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateOutfitFavorited(id: number, favorited: boolean): Promise<number> {
+    try {
+      const result = await this.sqliteRepo.updateOutfitFavorited(id, favorited);
       return result;
     } catch (err) {
       throw err;

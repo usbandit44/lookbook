@@ -1,4 +1,4 @@
-import AddItemForm from "@/features/add-item/components/AddItemForm";
+import AddItemForm from "@/features/add-item/screen/AddItemForm";
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet } from "react-native";

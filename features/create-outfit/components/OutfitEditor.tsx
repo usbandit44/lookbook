@@ -1,39 +1,44 @@
 import AppButton from "@/components/ui/AppButton";
-import AppModal from "@/components/ui/AppModal";
+import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
-import { Colors } from "@/constants/constants";
-import icons from "@/constants/icons";
+import { syncAnalyticsProperties } from "@/config/posthog";
+import { OutfitPositions } from "@/constants/constants";
+import { Theme } from "@/constants/themes";
 import { ItemsType } from "@/db/schemas/items";
 import {
   ensurePersistedItemImageUri,
   normalizeImageUri,
 } from "@/functions/imageHandling";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { useRepo } from "@/hooks/RepoProvider";
+import { useTheme } from "@/hooks/ThemeProvider";
+import { useAppModal } from "@/hooks/useAppModal";
+import { consumeGeneratedOutfitSource } from "@/hooks/useGenerateOutfit";
 import { useSnackbar } from "@/hooks/useSnackBar";
 import {
   clearAllItems,
   clearCurrentOutfit,
-  clearOutfitPosition,
+  getFavorited,
   getItemsPositions,
   removeItem,
-  removeItemPosition,
+  // removeItemPosition,
   selectCurrentOutfitId,
   selectOutfit,
-  setItems,
+  setFavorited,
+  setOutfitItemsWithPositions,
 } from "@/redux/slices/outfitSlice";
-import AppItemRepo from "@/repo/item_repo/AppItemRepo";
-import AppOutfitRepo from "@/repo/outfit_repo/AppOutfitRepo";
+import { clearPresetState } from "@/redux/slices/presetSlice";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { InteractionManager, Pressable, StyleSheet, View } from "react-native";
-import { Icon } from "react-native-elements";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import {
+  InteractionManager,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { captureRef } from "react-native-view-shot";
 import Movable from "./Movable";
 
@@ -45,7 +50,39 @@ function arraysEqualUnordered(arr1: number[], arr2: number[]) {
   return JSON.stringify(sorted1) === JSON.stringify(sorted2);
 }
 
+function areItemPositionsEqual(
+  a: OutfitPositions | string | null | undefined,
+  b: OutfitPositions | string | null | undefined,
+): boolean {
+  const parse = (v: typeof a): OutfitPositions =>
+    typeof v === "string" ? JSON.parse(v) : (v ?? {});
+
+  const pa = parse(a);
+  const pb = parse(b);
+
+  const aKeys = Object.keys(pa);
+  if (aKeys.length !== Object.keys(pb).length) return false;
+
+  const EPS = 0.5; // ignore sub-pixel drift
+  const close = (x = 0, y = 0) => Math.abs(x - y) < EPS;
+
+  return aKeys.every((key) => {
+    const p1 = pa[Number(key)];
+    const p2 = pb[Number(key)];
+    return (
+      p2 !== undefined &&
+      close(p1.x, p2.x) &&
+      close(p1.y, p2.y) &&
+      Math.abs((p1.scale ?? 1) - (p2.scale ?? 1)) < 0.01
+    );
+  });
+}
 const OutfitEditor: React.FC = () => {
+  const posthog = usePostHog();
+  const { theme } = useTheme();
+  const t = theme;
+  const styles = s(t);
+
   const snackbarSettingsContext = useSnackbar();
   if (!snackbarSettingsContext) {
     throw new Error("useSnackbar must be used within a SnackbarProvider");
@@ -57,17 +94,13 @@ const OutfitEditor: React.FC = () => {
   const viewRef = useRef<View>(null);
   const moreButtonRef = useRef<View>(null);
 
-  const outfitRepo = new AppOutfitRepo();
-  const [saved, setSaved] = useState(false);
-  const [outfitName, setOutfitName] = useState("");
-  const [defaultName, setDefaultName] = useState("");
-  const [isCapturing, setIsCapturing] = useState(false);
+  const repos = useRepo();
+  const { outfitRepo, itemRepo } = repos;
 
-  const repo = new AppItemRepo();
   const items = useAppSelector(selectOutfit);
   const currentOutfit = useAppSelector(selectCurrentOutfitId);
   const itemsPositions = useAppSelector(getItemsPositions);
-
+  const favorited = useAppSelector(getFavorited);
   const [outfit, setOutfit] = useState<ItemsType[]>([]);
   const [parentSize, setParentSize] = useState({ width: 0, height: 0 });
   const [savedOutfitId, setSavedOutfitId] = useState<number>(-1);
@@ -75,6 +108,10 @@ const OutfitEditor: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const [editing, setEditing] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [outfitName, setOutfitName] = useState(currentOutfit.name);
+  const [defaultName, setDefaultName] = useState("");
+  const [isCapturing, setIsCapturing] = useState(false);
 
   const [oldOutfit, setOldOutfit] = useState<{
     id: number;
@@ -90,30 +127,57 @@ const OutfitEditor: React.FC = () => {
     updateImgUrl: false,
   });
 
-  // ── Dropdown menu state/animation ─────────────────────────────────────────
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
-  const scale = useSharedValue(0.8);
-  const opacity = useSharedValue(0);
+  const { show, hide } = useAppModal();
 
-  const toggleMenu = (show: boolean) => {
-    setMenuVisible(show);
-    scale.value = withSpring(show ? 1 : 0.8, { damping: 15, stiffness: 250 });
-    opacity.value = withTiming(show ? 1 : 0, { duration: 150 });
+  const modalContent = () => {
+    return (
+      <View>
+        <View style={styles.modalTitleRow}>
+          <AppText
+            text={currentOutfit.name}
+            type={"m22"}
+            style={{ fontSize: 12 }}
+          ></AppText>
+        </View>
+        <Pressable
+          style={styles.modalRow}
+          onPress={() => {
+            hide();
+            console.log(favorited);
+            outfitRepo.updateOutfitFavorited(currentOutfit.id, !favorited);
+            posthog.capture("favorite_toggled", {
+              target: "outfit",
+              favorited: !favorited,
+            });
+            dispatch(setFavorited(!favorited));
+          }}
+        >
+          <AppIcon name={favorited ? "star" : "starOutline"}></AppIcon>
+          <AppText
+            text={favorited ? "Remove from Favorites" : "Add to Favorites"}
+            type={"p3"}
+            style={{ fontSize: 15 }}
+          ></AppText>
+        </Pressable>
+        <Pressable
+          style={styles.modalRow}
+          onPress={async () => {
+            hide();
+            await deleteOutfit();
+            showSnackbar("Outfit Deleted", "success");
+            setTimeout(() => hideSnackbar(), 3000);
+          }}
+        >
+          <AppIcon name="trash" color={theme.danger}></AppIcon>
+          <AppText
+            text={"Delete"}
+            type={"p3"}
+            style={{ fontSize: 15, color: theme.danger }}
+          ></AppText>
+        </Pressable>
+      </View>
+    );
   };
-
-  const openMenu = () => {
-    moreButtonRef.current?.measureInWindow((x, y, width, height) => {
-      setMenuPosition({ top: 45, right: 15 });
-      toggleMenu(true);
-    });
-  };
-
-  const menuStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-  // ───────────────────────────────────────────────────────────────────────────
 
   const captureOutfit = async (): Promise<string> => {
     const view = viewRef.current;
@@ -160,11 +224,22 @@ const OutfitEditor: React.FC = () => {
         name: finalName,
         imgUrl: persistedUri,
         positions: itemsPositions,
+        favorited: favorited,
       });
 
       console.log("4 - created outfit:", createdOutfitId);
 
       setSavedOutfitId(createdOutfitId);
+      const outfitCount = await outfitRepo.countNumberOfOutfit();
+      const { source, edited } = consumeGeneratedOutfitSource(items);
+      posthog.capture("outfit_created", {
+        item_count: items.length,
+        source,
+        edited_after_generation: edited,
+        is_first: outfitCount === 1,
+        outfit_count: outfitCount,
+      });
+      syncAnalyticsProperties(repos);
     } catch (err) {
       console.error("❌ SAVE FAILED:", err);
     }
@@ -181,101 +256,89 @@ const OutfitEditor: React.FC = () => {
       items: items,
       updateImgUrl: false,
       positions: itemsPositions,
+      favorited: favorited,
     };
-    outfitRepo.updateOutfit(newOutfit);
+    await outfitRepo.updateOutfit(newOutfit);
+    posthog.capture("outfit_updated", { item_count: items.length });
   };
 
-  const deleteOutfit = () => {
-    outfitRepo.deleteOutfit(currentOutfit.id);
+  const deleteOutfit = async () => {
+    await outfitRepo.deleteOutfit(currentOutfit.id);
+    posthog.capture("outfit_deleted", { item_count: items.length });
+    syncAnalyticsProperties(repos);
+    router.navigate("/pages/outfits");
   };
 
   const undoOutfitChanges = async () => {
     const oldOutfit = await outfitRepo.getOutfit(currentOutfit.id);
     setOutfitName(oldOutfit.name);
-    dispatch(setItems(oldOutfit.items));
+    dispatch(
+      setOutfitItemsWithPositions({
+        items: oldOutfit.items,
+        positions: oldOutfit.positions,
+      }),
+    );
   };
 
   const leftButton = () => {
     return editing ? (
       <AppButton
         type="icon"
+        icon={<AppIcon name="close" size={24} />}
         onPress={() => {
           undoOutfitChanges();
         }}
-      >
-        <Icon name="close" type="material" size={24} />
-      </AppButton>
+      ></AppButton>
     ) : (
       <AppButton
         type="icon"
+        icon={<AppIcon name="arrowLeft" size={24} />}
         onPress={async () => {
-          if (currentOutfit.id != -1) {
-            if (
-              !arraysEqualUnordered(oldOutfit.items, items) ||
-              oldOutfit.name != outfitName
-            ) {
-              setModalVisible(!modalVisible);
-            } else {
-              if (oldOutfit.updateImgUrl) {
-                await updateOutfit();
-              }
-              dispatch(clearAllItems());
-              dispatch(clearCurrentOutfit());
-              dispatch(clearOutfitPosition());
-              router.navigate("/pages/outfits");
-            }
-          } else {
-            dispatch(clearAllItems());
-            dispatch(clearCurrentOutfit());
-            dispatch(clearOutfitPosition());
-            router.navigate("/pages/outfits");
-          }
+          dispatch(clearAllItems());
+          dispatch(clearCurrentOutfit());
+          // dispatch(clearOutfitPosition());
+          router.navigate("/pages/outfits");
         }}
-      >
-        <Icon name="arrow-back-ios" type="material" size={24} />
-      </AppButton>
+      ></AppButton>
     );
   };
 
   const rightButton = () => {
     if (currentOutfit.id != -1) {
       return editing ? (
-        <AppButton type="icon">
-          <Icon
-            name="check"
-            type="material"
-            size={24}
-            onPress={async () => {
-              await updateOutfit();
-              showSnackbar("Outfit saved!", "success");
-              setTimeout(() => hideSnackbar(), 3000);
-            }}
-          />
-        </AppButton>
+        <AppButton
+          type="icon"
+          icon={<AppIcon name="check" size={24} />}
+          onPress={async () => {
+            await updateOutfit();
+            showSnackbar("Outfit saved!", "success");
+            setTimeout(() => hideSnackbar(), 3000);
+          }}
+        ></AppButton>
       ) : (
-        <AppButton type="icon" onPress={openMenu}>
-          <View ref={moreButtonRef} collapsable={false}>
-            <Icon name="more-vert" type="material" size={24} />
-          </View>
-        </AppButton>
+        <AppButton
+          type="icon"
+          onPress={() => {
+            show(modalContent());
+          }}
+          icon={<AppIcon name="more" size={24} />}
+        ></AppButton>
       );
     } else {
       return (
         <AppButton
           type="text"
+          label="Save"
           onPress={async () => {
             await saveOutfit();
             dispatch(clearAllItems());
             dispatch(clearCurrentOutfit());
-            dispatch(clearOutfitPosition());
-            showSnackbar("Outfit added!", "success");
-
+            // dispatch(clearOutfitPosition());
             setTimeout(() => router.navigate("/pages/outfits"), 300);
+            showSnackbar("Outfit created", "success");
             setTimeout(() => hideSnackbar(), 3000);
           }}
-        >
-          <AppText>Save</AppText>
-        </AppButton>
+        ></AppButton>
       );
     }
   };
@@ -284,15 +347,21 @@ const OutfitEditor: React.FC = () => {
     console.log(itemsPositions);
     console.log(items);
     async function setup() {
-      const results = await Promise.all(items.map((id) => repo.getItem(id)));
+      const results = await Promise.all(
+        items.map((id) => itemRepo.getItem(id)),
+      );
       setOutfit(results);
       if (currentOutfit.id != -1) {
         console.log(itemsPositions);
-        setOutfitName(currentOutfit.name);
+        // setOutfitName(currentOutfit.name);
 
         const pastOutfit = await outfitRepo.getOutfit(currentOutfit.id);
 
-        if (!arraysEqualUnordered(pastOutfit.items, items)) {
+        if (
+          !arraysEqualUnordered(pastOutfit.items, items) ||
+          outfitName != pastOutfit.name ||
+          !areItemPositionsEqual(pastOutfit.positions, itemsPositions)
+        ) {
           setEditing(true);
         } else {
           setEditing(false);
@@ -308,15 +377,23 @@ const OutfitEditor: React.FC = () => {
       }
     }
     setup();
-  }, [items, settings]);
+  }, [items, settings, outfitName, itemsPositions]);
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.headerContainer}>
-        {leftButton()}
-        {rightButton()}
+      <View style={styles.header}>
+        <View style={styles.headerAction}>
+          {leftButton()}
+          {rightButton()}
+        </View>
+        <TextInput
+          value={outfitName}
+          onChangeText={(value: string) => setOutfitName(value)}
+          placeholder={defaultName}
+          placeholderTextColor={theme.inkA[38]}
+          style={[theme.text.p2, styles.headerTitle]}
+        ></TextInput>
       </View>
-
       <View
         style={styles.editor}
         onLayout={(e) =>
@@ -331,7 +408,6 @@ const OutfitEditor: React.FC = () => {
           parentSize.height > 0 &&
           outfit.map((item) => {
             const pos = itemsPositions[item.id] ?? { x: 0, y: 0, scale: 1 };
-            console.log("Pos: " + pos);
             return (
               <Movable
                 key={item.id}
@@ -343,9 +419,10 @@ const OutfitEditor: React.FC = () => {
                 initialScale={pos.scale}
                 onClear={() => {
                   dispatch(removeItem(item.id));
-                  dispatch(removeItemPosition({ id: item.id }));
+                  // dispatch(removeItemPosition({ id: item.id }));
                 }}
                 isCapturing={isCapturing}
+                modalName={item.color + " / " + item.type}
               >
                 <Image
                   source={{ uri: normalizeImageUri(item.imgUrl ?? "") }}
@@ -356,168 +433,94 @@ const OutfitEditor: React.FC = () => {
             );
           })}
       </View>
-
-      <View style={styles.footerContainer}>
-        <View style={styles.navButtonContainer}>
-          <Pressable
-            onPress={() => router.navigate("/outfit/add-item")}
-            style={styles.navButton}
-          >
-            <Icon name="shirt-outline" type="ionicon" size={35} />
-          </Pressable>
-          <AppText type="p3SemiBold">Add Item</AppText>
-        </View>
-        <View style={styles.navButtonContainer}>
-          <Pressable
-            onPress={() => router.navigate("/outfit/generate-outfit")}
-            style={styles.navButton}
-          >
-            <Image
-              source={icons.generateOutfitIcon}
-              style={{ width: 45, height: 45, resizeMode: "contain" }}
-            />
-          </Pressable>
-          <AppText type="p3SemiBold">Generate Outfit</AppText>
-        </View>
-      </View>
-
-      {/* Tap-outside catcher — invisible, fills screen, only active while menu is open */}
-      <Pressable
-        style={styles.optionsScreen}
-        onPress={() => toggleMenu(false)}
-        pointerEvents={menuVisible ? "auto" : "none"}
-      >
-        <Animated.View
-          style={[
-            styles.optionsMenu,
-            menuStyle,
-            {
-              position: "absolute",
-              top: menuPosition.top,
-              right: menuPosition.right,
-              transformOrigin: "top right",
-            },
-          ]}
-        >
-          <AppButton
-            type="text"
-            onPress={async () => {
-              toggleMenu(false);
-              await updateOutfit();
-              showSnackbar("Cover photo updated!", "success");
-              setTimeout(() => hideSnackbar(), 3000);
-            }}
-          >
-            <AppText style={{ fontSize: 16 }}>Update Cover Photo</AppText>
-          </AppButton>
-          <AppButton
-            type="text"
-            onPress={() => {
-              toggleMenu(false);
-              setDeleteModalVisible(true);
-            }}
-          >
-            <AppText style={{ color: Colors.light.destructive, fontSize: 16 }}>
-              Delete
-            </AppText>
-          </AppButton>
-        </Animated.View>
-      </Pressable>
-
-      <AppModal
-        modalVisible={deleteModalVisible}
-        setModalVisible={setDeleteModalVisible}
-      >
-        <AppText>Do you want to delete this outfit?</AppText>
+      <View style={styles.footer}>
         <AppButton
-          fullWidth={true}
-          onPress={async () => {
-            deleteOutfit();
-            setDeleteModalVisible(!deleteModalVisible);
-            dispatch(clearAllItems());
-            dispatch(clearCurrentOutfit());
-            dispatch(clearOutfitPosition());
-            router.navigate("/pages/outfits");
+          type="secondary"
+          label="Add Item"
+          onPress={() => {
+            router.navigate("/outfit/add-item");
           }}
-        >
-          <AppText style={{ color: "white" }}>Yes</AppText>
-        </AppButton>
+        ></AppButton>
         <AppButton
-          fullWidth={true}
-          onPress={() => setDeleteModalVisible(!deleteModalVisible)}
-        >
-          <AppText style={{ color: "white" }}>Cancel</AppText>
-        </AppButton>
-      </AppModal>
+          type="secondary"
+          label="Generate"
+          onPress={() => {
+            dispatch(clearPresetState());
+            router.navigate("/presets/create-preset");
+          }}
+        ></AppButton>
+      </View>
     </View>
   );
 };
 
 export default OutfitEditor;
 
-const styles = StyleSheet.create({
-  editor: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  headerContainer: {
-    width: "100%",
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 25,
-  },
-  name: {
-    flex: 1,
-    height: 50,
-    borderColor: "black",
-    borderWidth: 1.1,
-    borderRadius: 8,
-    color: "black",
-    padding: 8,
-    textAlign: "center",
-    fontSize: 25,
-    fontFamily: "Lora-SemiBold",
-    letterSpacing: 1,
-  },
-  footerContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 75,
-    padding: 30,
-  },
-  navButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 5,
-  },
-  navButton: {
-    height: 70,
-    width: 70,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 20,
-  },
-  optionsScreen: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  optionsMenu: {
-    flexDirection: "column",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    gap: 7,
-    minWidth: 180,
-    backgroundColor: "white",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-});
+const s = (t: Theme) =>
+  StyleSheet.create({
+    editor: {
+      flex: 1,
+      backgroundColor: t.surfaceSunken,
+      borderTopWidth: 1,
+      borderColor: t.inkA[10],
+    },
+    header: { paddingBottom: 15, paddingHorizontal: 15, gap: 25 },
+    headerAction: {
+      width: "100%",
+
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 25,
+    },
+    headerTitle: {
+      width: "100%",
+
+      paddingBottom: 10,
+      borderBottomWidth: 1,
+      borderColor: t.inkA[16],
+    },
+
+    footer: {
+      width: "100%",
+      flexDirection: "row",
+      gap: 15,
+      padding: 15,
+      paddingBottom: 40,
+      borderTopWidth: 1,
+      borderTopColor: t.inkA[10],
+    },
+    navButtonContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 5,
+    },
+    navButton: {
+      height: 70,
+      width: 70,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+      borderRadius: 20,
+    },
+    optionsScreen: {
+      ...StyleSheet.absoluteFillObject,
+    },
+
+    modalTitleRow: {
+      paddingHorizontal: 20,
+      paddingTop: 15,
+      paddingBottom: 13,
+      borderBottomWidth: 1,
+      borderBottomColor: t.inkA[10],
+    },
+    modalRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 13,
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: t.inkA[8],
+    },
+  });

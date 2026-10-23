@@ -3,6 +3,10 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
+import { ItemsType } from "@/db/schemas/items";
+import { OutfitType } from "@/db/schemas/outfits";
+import { PresetType } from "@/db/schemas/presets";
+
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
@@ -48,7 +52,22 @@ export const itemTypesArray = [
   "Accessories",
 ];
 
-export const itemSubTypes = [
+export type ItemTypeType =
+  | "Tops"
+  | "Bottoms"
+  | "Outerwear"
+  | "Dresses"
+  | "Shoes"
+  | "Belt"
+  | "Headwear"
+  | "Accessories";
+
+export interface SubType {
+  key: ItemTypeType;
+  value: string;
+}
+
+export const itemSubTypes: SubType[] = [
   // Tops
   { key: "Tops", value: "T-Shirt" },
   { key: "Tops", value: "Long Sleeve Tee" },
@@ -66,6 +85,7 @@ export const itemSubTypes = [
   { key: "Bottoms", value: "Sweatpants" },
   { key: "Bottoms", value: "Cargo Pants" },
   { key: "Bottoms", value: "Leggings" },
+  { key: "Bottoms", value: "Pants" },
   { key: "Bottoms", value: "Shorts" },
   { key: "Bottoms", value: "Denim Shorts" },
   { key: "Bottoms", value: "Skirt" },
@@ -82,6 +102,7 @@ export const itemSubTypes = [
   { key: "Outerwear", value: "Blazer" },
   { key: "Outerwear", value: "Bomber Jacket" },
   { key: "Outerwear", value: "Denim Jacket" },
+  { key: "Outerwear", value: "Jacket" },
   { key: "Outerwear", value: "Raincoat" },
   { key: "Outerwear", value: "Fleece" },
   { key: "Outerwear", value: "Windbreaker" },
@@ -178,15 +199,132 @@ export const COLOR_NAMES_MAP = new Map([
   ["FFFFFF", "White"],
 ]);
 
-export type NewItemType = {
-  name: string;
-  type: string;
-  color: string;
-  tags: string[];
-  imgUrl: string;
-  backgroundRemoved: boolean;
-};
+export const DEFAULT_PRESETS: NewPresetType[] = [
+  {
+    name: "Everyday Casual",
+    types: {
+      Tops: ["T-Shirt", "Long Sleeve Tee", "Polo"],
+      Bottoms: ["Jeans", "Cargo Pants", "Shorts"],
+      Shoes: ["Sneakers", "Sandals"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Smart Casual",
+    types: {
+      Tops: ["Button Down", "Polo", "Sweater"],
+      Bottoms: ["Jeans", "Dress Pants"],
+      Shoes: ["Loafers", "Sneakers", "Boots"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Office Ready",
+    types: {
+      Tops: ["Dress Shirt", "Button Down", "Blouse", "Polo"],
+      Bottoms: ["Dress Pants", "Midi Skirt"],
+      Shoes: ["Dress Shoes", "Loafers", "Heels", "Flats"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Summer Day",
+    types: {
+      Tops: ["T-Shirt", "Tank Top"],
+      Bottoms: ["Shorts", "Denim Shorts", "Mini Skirt", "Midi Skirt"],
+      Shoes: ["Sandals", "Slides", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Easy Dress",
+    types: {
+      Dresses: ["Dresses"],
+      Shoes: ["Sandals", "Flats", "Heels", "Mules"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Night Out",
+    types: {
+      Tops: ["Blouse", "Button Down"],
+      Bottoms: ["Jeans", "Mini Skirt", "Dress Pants"],
+      Shoes: ["Boots", "Heels", "Loafers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Athleisure",
+    types: {
+      Tops: ["T-Shirt", "Tank Top", "Long Sleeve Tee"],
+      Bottoms: ["Leggings", "Sweatpants", "Shorts"],
+      Shoes: ["Running Shoes", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Cold Weather",
+    types: {
+      Tops: ["Sweater", "Long Sleeve Tee"],
+      Bottoms: ["Jeans", "Cargo Pants", "Dress Pants"],
+      Outerwear: ["Coat", "Puffer Jacket", "Trench Coat"],
+      Shoes: ["Boots", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Date Night (Guys)",
+    types: {
+      Tops: ["Button Down", "Dress Shirt", "Sweater", "Polo"],
+      Bottoms: ["Jeans", "Dress Pants"],
+      Outerwear: ["Blazer", "Bomber Jacket", "Denim Jacket"],
+      Shoes: ["Loafers", "Boots", "Dress Shoes", "Sneakers"],
+    },
+    favorited: false,
+  },
+  {
+    name: "Date Night (Girls)",
+    types: {
+      Dresses: [
+        "Mini Dress",
+        "Midi Dress",
+        "Slip Dress",
+        "Wrap Dress",
+        "Bodycon Dress",
+      ],
+      Shoes: ["Heels", "Mules", "Flats", "Boots"],
+    },
+    favorited: false,
+  },
+];
 
+export const NOTIFICATIONS = [
+  {
+    weekday: 2,
+    hour: 8,
+    minute: 0,
+    title: "Start Your Week Right!",
+    body: "Kick off your week strong! Open the app to plan your outfit.",
+  },
+  {
+    weekday: 6,
+    hour: 20,
+    minute: 0,
+    title: "Friday Night! 🎉",
+    body: "Friday night’s here! Make sure you outfit is as good as your plans.",
+  },
+  {
+    weekday: 7,
+    hour: 9,
+    minute: 0,
+    title: "Weekend Vibes 🌴",
+    body: "Your weekend starts now! Check Lookbook for outfit ideas.",
+  },
+];
+
+export type NewItemType = Omit<ItemsType, "id" | "size">;
+export type NewOutfitType = Omit<OutfitType, "id">;
+export type NewPresetType = Omit<PresetType, "id">;
 export type ItemPosition = {
   x: number;
   y: number;
@@ -194,3 +332,4 @@ export type ItemPosition = {
 };
 
 export type OutfitPositions = Record<number, ItemPosition>;
+export type PresetTypesType = Record<string, string[]>;

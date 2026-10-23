@@ -51,7 +51,6 @@ export default Skeleton;
 
 const styles = StyleSheet.create({
   skeleton: {
-    borderRadius: 10,
     position: "absolute",
     zIndex: 100,
   },

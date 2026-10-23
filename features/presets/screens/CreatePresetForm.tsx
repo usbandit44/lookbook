@@ -1,0 +1,367 @@
+import AppButton from "@/components/ui/AppButton";
+import { AppIcon } from "@/components/ui/AppIcon";
+import AppText from "@/components/ui/AppText";
+import {
+  itemSubTypes,
+  itemTypesArray,
+  PresetTypesType,
+} from "@/constants/constants";
+import { Theme } from "@/constants/themes";
+import { PresetType } from "@/db/schemas/presets";
+import { diffPresetTypes, getPresetOrigin } from "@/functions/presetAnalytics";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { useRepo } from "@/hooks/RepoProvider";
+import { useTheme } from "@/hooks/ThemeProvider";
+import { useGenerateOutfit } from "@/hooks/useGenerateOutfit";
+import { useSnackbar } from "@/hooks/useSnackBar";
+import { clearCurrentItemId } from "@/redux/slices/itemSlice";
+import { clearAllItems, setOutfitItems } from "@/redux/slices/outfitSlice";
+import {
+  addToTypes,
+  clearPresetState,
+  clearPresetType,
+  clearPresetTypes,
+  removeFromTypes,
+  selectCurrentPreset,
+  setPresetState,
+} from "@/redux/slices/presetSlice";
+import { useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, TextInput, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+
+const CreatePresetForm = () => {
+  const posthog = usePostHog();
+  const { theme } = useTheme();
+  const t = theme;
+  const styles = s(t);
+  const { presetsRepo } = useRepo();
+  const dispatch = useAppDispatch();
+  const preset = useAppSelector(selectCurrentPreset);
+  const [currentPreset, setCurrentPreset] = useState<PresetType>({
+    id: -1,
+    name: "",
+    types: {},
+    favorited: false,
+  });
+  const [name, setName] = useState<string>("");
+  const [placeholder, setPlaceholder] = useState<string>("");
+  const [disablePrimary, setDisablePrimaey] = useState<boolean>(false);
+  const router = useRouter();
+  const { generate } = useGenerateOutfit();
+  // useEffect(() => {
+  //   dispatch(setPresetName({ name: name }));
+  // }, [name]);
+  const snackbarSettingsContext = useSnackbar();
+  if (!snackbarSettingsContext) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+
+  const { setSettings, showSnackbar, hideSnackbar, settings } =
+    snackbarSettingsContext;
+
+  const disable = preset == currentPreset;
+  useEffect(() => {
+    if (preset.id == -1) {
+      async function getPlaceholder() {
+        const count = await presetsRepo.getTotalPresets();
+        setPlaceholder("Preset #" + (count + 1));
+      }
+      getPlaceholder();
+    } else {
+      async function setupCurrentPreset() {
+        const current = await presetsRepo.getPreset(preset.id);
+        dispatch(setPresetState(current));
+        setCurrentPreset(current);
+        setName(current.name);
+      }
+      setupCurrentPreset();
+    }
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <AppButton
+          type="icon"
+          icon={<AppIcon name="arrowLeft" size={24} />}
+          onPress={() => {
+            dispatch(clearPresetState());
+            router.back();
+          }}
+        ></AppButton>
+        <AppButton
+          type="text"
+          label="reset"
+          textColor={theme.danger}
+          onPress={() => {
+            if (preset.id == -1) {
+              dispatch(clearPresetTypes());
+            }
+          }}
+        ></AppButton>
+      </View>
+      <ScrollView
+        style={styles.form}
+        contentContainerStyle={styles.formContent}
+      >
+        <View style={{ gap: 8 }}>
+          <AppText type="m5" text="Preset Name"></AppText>
+          <TextInput
+            value={name}
+            onChangeText={(value: string) => setName(value)}
+            placeholder={placeholder}
+            placeholderTextColor={theme.inkA[38]}
+            style={[theme.text.p4, styles.presetName]}
+          ></TextInput>
+        </View>
+        <AppText
+          text={
+            "Pick the categories to include in your outfit, we will take it from there."
+          }
+          type={"p5"}
+        ></AppText>
+
+        {itemTypesArray.map((type, index) => {
+          const selected = (preset.types[type] ?? []).includes(type);
+
+          const subtypeArray = itemSubTypes
+            .filter((i) => i.key === type)
+            .map((i) => i.value);
+
+          return (
+            <View style={{ gap: 10 }} key={index}>
+              <AppText type="m5" text={type}></AppText>
+              <View key={index} style={styles.typesSection}>
+                <AppButton
+                  onPress={() => {
+                    dispatch(clearPresetType({ key: type }));
+                    if (selected) {
+                      return;
+                    } else {
+                      dispatch(addToTypes({ key: type, value: type }));
+                    }
+                  }}
+                  type={selected ? "primary" : "secondary"}
+                  key={index}
+                  label={"Any " + type}
+                  style={{ flex: 0 }}
+                ></AppButton>
+                {subtypeArray.map((subtype, index) => {
+                  const selected = (preset.types[type] ?? []).includes(subtype);
+                  return (
+                    <AppButton
+                      onPress={() => {
+                        if (selected) {
+                          if (preset.types[type].length > 1) {
+                            dispatch(
+                              removeFromTypes({ key: type, value: subtype }),
+                            );
+                          } else {
+                            dispatch(clearPresetType({ key: type }));
+                          }
+                        } else {
+                          dispatch(addToTypes({ key: type, value: subtype }));
+                          if ((preset.types[type] ?? []).includes(type)) {
+                            dispatch(
+                              removeFromTypes({ key: type, value: type }),
+                            );
+                          }
+                        }
+                      }}
+                      type={selected ? "primary" : "secondary"}
+                      key={index}
+                      label={subtype}
+                      style={{ flex: 0 }}
+                    ></AppButton>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
+      <View style={styles.footer}>
+        <AppButton
+          type={
+            Object.keys(preset.types).length === 0
+              ? "ghostSecondary"
+              : "secondary"
+          }
+          disabled={Object.keys(preset.types).length === 0 ? true : false}
+          label="Only Generate"
+          onPress={async () => {
+            dispatch(clearAllItems());
+            const result =
+              preset.buildingFromItem.id != -1
+                ? await generate(preset.types, preset.buildingFromItem)
+                : await generate(preset.types);
+            if (preset.id != -1) {
+              posthog.capture("preset_used", {
+                trigger: "editor",
+                preset_id: preset.id,
+                ...(await getPresetOrigin(preset.id, currentPreset.name)),
+                category_count: Object.keys(preset.types).length,
+                modified_before_generating: !presetsEqual(
+                  preset,
+                  currentPreset,
+                ),
+                succeeded: result.ok,
+                missing_category: result.ok ? null : result.missing,
+              });
+            }
+
+            if (result.ok) {
+              dispatch(setOutfitItems(result.items));
+              dispatch(clearCurrentItemId());
+              router.navigate("/outfit/create-outfit");
+            } else {
+              showSnackbar(
+                `Not in closet: Selected ${result.missing}`,
+                "error",
+              );
+              setTimeout(() => hideSnackbar(), 3000);
+            }
+          }}
+        ></AppButton>
+        <AppButton
+          label={preset.id == -1 ? "Save Preset" : "Update Preset"}
+          type={
+            preset.id != -1
+              ? presetsEqual(preset, currentPreset)
+                ? "ghostPrimary"
+                : "primary"
+              : Object.keys(preset.types).length === 0
+                ? "ghostPrimary"
+                : "primary"
+          }
+          disabled={
+            preset.id != -1
+              ? presetsEqual(preset, currentPreset)
+                ? true
+                : false
+              : Object.keys(preset.types).length === 0
+                ? true
+                : false
+          }
+          onPress={async () => {
+            if (preset.types && Object.keys(preset.types).length > 0) {
+              dispatch(clearAllItems());
+              const result =
+                preset.buildingFromItem.id != -1
+                  ? await generate(preset.types, preset.buildingFromItem)
+                  : await generate(preset.types);
+              if (result.ok) {
+                dispatch(clearCurrentItemId());
+                if (preset.id == -1) {
+                  const nameToSave =
+                    preset.name === "" ? placeholder : preset.name;
+                  posthog.capture("preset_saved", {
+                    action: "created",
+                    category_count: Object.keys(preset.types).length,
+                    categories: Object.keys(preset.types),
+                    used_default_name: preset.name === "",
+                  });
+                  await presetsRepo.addPreset({
+                    name: nameToSave,
+                    types: preset.types,
+                    favorited: preset.favorited,
+                  });
+                  showSnackbar("Preset Saved", "success");
+                  setTimeout(() => hideSnackbar(), 3000);
+                } else {
+                  const nameToSave = name === "" ? preset.name : name;
+                  posthog.capture("preset_saved", {
+                    action: "updated",
+                    preset_id: preset.id,
+                    ...(await getPresetOrigin(preset.id, currentPreset.name)),
+                    ...diffPresetTypes(currentPreset, {
+                      name: nameToSave,
+                      types: preset.types,
+                    }),
+                  });
+                  await presetsRepo.updatePreset({
+                    id: preset.id,
+                    name: nameToSave,
+                    types: preset.types,
+                    favorited: preset.favorited,
+                  });
+                  showSnackbar("Preset Updated", "success");
+                  setTimeout(() => hideSnackbar(), 3000);
+                }
+                dispatch(setOutfitItems(result.items));
+                router.navigate("/outfit/create-outfit");
+              } else {
+                showSnackbar(
+                  `Not in closet: Selected ${result.missing}`,
+                  "error",
+                );
+                setTimeout(() => hideSnackbar(), 3000);
+              }
+            }
+          }}
+        ></AppButton>
+      </View>
+    </View>
+  );
+};
+
+export default CreatePresetForm;
+
+const s = (t: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    header: {
+      paddingHorizontal: 15,
+      paddingBottom: 15,
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    form: {
+      flex: 1,
+      padding: 15,
+    },
+    formContent: { flexDirection: "column", gap: 25, paddingBottom: 30 },
+    footer: {
+      width: "100%",
+      flexDirection: "row",
+      gap: 15,
+      padding: 15,
+      paddingBottom: 40,
+      borderTopWidth: 1,
+      borderTopColor: t.inkA[10],
+    },
+    presetName: {
+      borderWidth: 1,
+      borderColor: t.inkA[10],
+      height: 52,
+      paddingHorizontal: 10,
+      color: t.ink,
+    },
+    typesSection: { flexDirection: "row", gap: 10, flexWrap: "wrap" },
+  });
+
+function presetsEqual(a: PresetType, b: PresetType): boolean {
+  if (a === b) return true;
+  if (a.id !== b.id || a.name !== b.name || a.favorited !== b.favorited) {
+    return false;
+  }
+  return typesEqual(a.types, b.types);
+}
+
+function typesEqual(a: PresetTypesType, b: PresetTypesType): boolean {
+  const aKeys = Object.keys(a);
+  if (aKeys.length !== Object.keys(b).length) return false;
+  return aKeys.every((key) => {
+    const aArr = a[key];
+    const bArr = b[key];
+    return (
+      !!bArr &&
+      aArr.length === bArr.length &&
+      aArr.every((v, i) => v === bArr[i])
+    );
+  });
+}
