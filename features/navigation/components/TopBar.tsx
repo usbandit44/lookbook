@@ -1,6 +1,6 @@
 import AppText from "@/components/ui/AppText";
 import { Colors } from "@/constants/constants";
-import { Theme } from "@/constants/themes";
+import { Theme } from "@/functions/themeBuilder";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { usePathname, useRouter } from "expo-router";
@@ -9,7 +9,7 @@ import { StyleSheet, View } from "react-native";
 
 export default function TopBar({ backgroundColor = Colors.light.background }) {
   const { outfitRepo, itemRepo } = useRepo();
-  const { theme } = useTheme();
+  const { theme, setThemeName } = useTheme();
   const styles = s(theme);
   const pathname = usePathname();
 
@@ -36,8 +36,14 @@ export default function TopBar({ backgroundColor = Colors.light.background }) {
   return (
     <View style={styles.textContainer}>
       <AppText type="p1" text="LOOKBOOK"></AppText>
+      {/* <AppButton
+        label="test"
+        onPress={() => {
+          setThemeName("default");
+        }}
+      ></AppButton> */}
       <AppText
-        type="m8"
+        type="m7"
         text={isOutfits ? outfitCount + " Outfits" : itemCount + " pieces"}
       ></AppText>
     </View>
@@ -50,9 +56,11 @@ const s = (t: Theme) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       paddingBottom: 15,
-      margin: 15,
+      marginHorizontal: 15,
+      marginTop: 15,
+      marginBottom: 5,
       borderBottomColor: t.inkA[14],
     },
   });

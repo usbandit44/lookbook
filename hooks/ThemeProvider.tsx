@@ -1,6 +1,16 @@
 // ThemeContext.tsx
-import { Theme, ThemeName, themes } from "@/constants/themes";
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import { ThemeName, themes } from "@/constants/themes";
+import { Theme } from "@/functions/themeBuilder";
+import { useRepo } from "@/hooks/RepoProvider";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface ThemeContextValue {
   theme: Theme;
@@ -19,13 +29,37 @@ export function ThemeProvider({
   children,
   initialTheme = "default",
 }: ThemeProviderProps) {
-  const [themeName, setThemeName] = useState<ThemeName>(initialTheme);
+  const { userRepo } = useRepo();
+  const [themeName, setName] = useState<ThemeName>(initialTheme);
+  const [ready, setReady] = useState(false);
 
-  const value: ThemeContextValue = {
-    theme: themes[themeName],
-    themeName,
-    setThemeName,
-  };
+  // load the saved theme once
+  useEffect(() => {
+    userRepo
+      .getTheme()
+      .then((theme: ThemeName) => {
+        if (theme && theme in themes) setName(theme as ThemeName);
+      })
+
+      .finally(() => setReady(true));
+  }, [userRepo]);
+
+  // change + save
+  const setThemeName = useCallback(
+    (name: ThemeName) => {
+      setName(name);
+      userRepo.setTheme(name).catch(() => {});
+    },
+    [userRepo],
+  );
+
+  const value = useMemo<ThemeContextValue>(
+    () => ({ theme: themes[themeName], themeName, setThemeName }),
+    [themeName, setThemeName],
+  );
+
+  // don't paint the default theme before the saved one loads
+  if (!ready) return null;
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

@@ -3,11 +3,12 @@ import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import Searchbar from "@/components/ui/SearchBar";
 import { itemTypesArray } from "@/constants/constants";
-import { Theme } from "@/constants/themes";
+
 import { items } from "@/db/schemas/items";
 import AddItemHeader from "@/features/create-outfit/components/AddItemHeader";
 import SelectableItem from "@/features/create-outfit/components/SelectableItem";
 import { normalizeSearchTerm } from "@/functions/normalizeSearchTerm";
+import { Theme } from "@/functions/themeBuilder";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useAppSelector } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
@@ -140,7 +141,11 @@ const AddItem = () => {
             bounces={true}
             horizontal={true}
             style={{ width: "100%", gap: 50 }}
-            contentContainerStyle={{ gap: 8 }}
+            contentContainerStyle={{
+              gap: 8,
+              paddingBottom: 5,
+              paddingRight: 5,
+            }}
             showsHorizontalScrollIndicator={false}
           >
             {["All", "Favorites", ...itemTypesArray].map((filt, index) => {
@@ -171,10 +176,11 @@ const AddItem = () => {
               alignItems: "center",
               gap: 10,
               backgroundColor: theme.surfaceSunken,
-              borderWidth: 1,
+              borderWidth: theme.shape.borderWidth,
               borderColor: theme.inkA[12],
               height: 42,
               paddingHorizontal: 10,
+              borderRadius: theme.shape.radius.field,
             }}
             onPress={() => {
               flatListRef.current?.scrollToOffset({
@@ -207,8 +213,9 @@ const AddItem = () => {
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <SelectableItem
+            index={index}
             id={item.id}
             imgUri={item.imgUrl ?? ""}
             type={item.type}
@@ -242,7 +249,7 @@ const s = (t: Theme) =>
       paddingHorizontal: 15,
     },
     listContent: {
-      paddingBottom: 90,
+      paddingBottom: 20,
     },
     header: {
       paddingHorizontal: 15,
@@ -263,7 +270,7 @@ const s = (t: Theme) =>
       gap: 15,
       padding: 15,
       paddingBottom: 40,
-      borderTopWidth: 1,
+      borderTopWidth: t.shape.borderWidth,
       borderTopColor: t.inkA[10],
     },
   });

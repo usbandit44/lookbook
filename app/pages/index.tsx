@@ -219,8 +219,15 @@ const Home = () => {
             ref={filterScrollRef}
             bounces={true}
             horizontal={true}
-            style={{ width: "100%", gap: 50 }}
-            contentContainerStyle={{ gap: 8 }}
+            style={{
+              width: "100%",
+              gap: 50,
+            }}
+            contentContainerStyle={{
+              gap: 8,
+              paddingBottom: 5,
+              paddingRight: 5,
+            }}
             showsHorizontalScrollIndicator={false}
           >
             {["All", "Favorites", ...itemTypesArray].map((filt, index) => {
@@ -255,10 +262,11 @@ const Home = () => {
               alignItems: "center",
               gap: 10,
               backgroundColor: theme.surfaceSunken,
-              borderWidth: 1,
+              borderWidth: theme.shape.borderWidth,
               borderColor: theme.inkA[12],
               height: 42,
               paddingHorizontal: 10,
+              borderRadius: theme.shape.radius.field,
             }}
             onPress={() => {
               flatListRef.current?.scrollToOffset({
@@ -293,8 +301,9 @@ const Home = () => {
           numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <ItemPreview
+              index={index}
               imgUri={item.imgUrl ?? ""}
               name={""}
               color={item.color}
@@ -317,16 +326,16 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 15,
   },
   list: {
     flex: 1,
+    paddingHorizontal: 15,
   },
   listContent: {
     paddingBottom: 100,
   },
   header: {
-    // paddingHorizontal: 15,
+    paddingHorizontal: 15,
     paddingTop: 15,
     alignSelf: "flex-start",
     width: "100%",

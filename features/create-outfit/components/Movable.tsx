@@ -1,6 +1,7 @@
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
-import { Theme } from "@/constants/themes";
+import { Theme } from "@/functions/themeBuilder";
+
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useAppModal } from "@/hooks/useAppModal";
@@ -40,6 +41,7 @@ export interface MovableProps {
   onClear?: () => void;
   isCapturing?: boolean;
   modalName: string;
+  index: number;
 }
 
 const Movable: React.FC<MovableProps> = ({
@@ -53,6 +55,7 @@ const Movable: React.FC<MovableProps> = ({
   onClear,
   isCapturing = false,
   modalName,
+  index,
 }) => {
   const { theme } = useTheme();
   const t = theme;
@@ -209,7 +212,19 @@ const Movable: React.FC<MovableProps> = ({
   // ────────────── Render ──────────────
   return (
     <GestureDetector gesture={composedGesture}>
-      <Animated.View style={[styles.box, boxStyle]}>
+      <Animated.View
+        style={[
+          styles.box,
+          boxStyle,
+          t.shape.tilt !== 0 && {
+            transform: [
+              {
+                rotate: `${index % 2 === 0 ? -t.shape.tilt : t.shape.tilt}deg`,
+              },
+            ],
+          },
+        ]}
+      >
         {children}
 
         {/* Regular View so JS state (isCapturing) hides it immediately */}
@@ -232,7 +247,7 @@ const s = (t: Theme) =>
   StyleSheet.create({
     box: {
       position: "absolute",
-      borderRadius: 8,
+      borderRadius: t.shape.radius.tile,
       backgroundColor: "transparent",
       justifyContent: "center",
       alignItems: "center",
@@ -247,7 +262,7 @@ const s = (t: Theme) =>
       paddingHorizontal: 20,
       paddingTop: 15,
       paddingBottom: 13,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[10],
     },
     modalRow: {
@@ -256,7 +271,7 @@ const s = (t: Theme) =>
       gap: 13,
       paddingHorizontal: 20,
       paddingVertical: 16,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[8],
     },
   });

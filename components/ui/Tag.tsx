@@ -1,6 +1,8 @@
+import { Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { AppIcon } from "./AppIcon";
 import AppText from "./AppText";
 
 const Tag: React.FC<{
@@ -8,15 +10,17 @@ const Tag: React.FC<{
   onClear?: () => void;
 }> = (props) => {
   const { theme } = useTheme();
-  const backgroundColor = theme.ink;
-  const labelColor = theme.onInk;
-  const clearColor = theme.whiteA[65];
+  const t = theme;
+  const styles = s(t);
+  const backgroundColor = theme.accent;
+  const labelColor = theme.onAccent;
+  const clearColor = theme.inkA[65];
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <AppText type="m3" text={props.label}></AppText>
       {props.onClear ? (
         <Pressable onPress={props.onClear} hitSlop={20}>
-          <Text style={[styles.clear, { color: clearColor }]}>✕</Text>
+          <AppIcon name={"close"} size={15}></AppIcon>
         </Pressable>
       ) : null}
     </View>
@@ -26,20 +30,21 @@ const Tag: React.FC<{
 
 export default Tag;
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingTop: 8,
-    paddingBottom: 8,
-    paddingLeft: 12,
-    paddingRight: 10, // tighter on the ✕ side
-    borderRadius: 0,
-  },
+const s = (t: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingTop: 8,
+      paddingBottom: 8,
+      paddingLeft: 12,
+      paddingRight: 10, // tighter on the ✕ side
+      borderRadius: t.shape.radius.chip,
+    },
 
-  clear: {
-    fontFamily: "Archivo-SemiBold",
-    fontSize: 10,
-  },
-});
+    clear: {
+      fontFamily: "Archivo-SemiBold",
+      fontSize: 10,
+    },
+  });

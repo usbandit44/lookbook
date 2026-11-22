@@ -1,3 +1,4 @@
+import { ThemeName } from "@/constants/themes";
 import { drizzleDb } from "@/db/db";
 import { user } from "@/db/schemas/user";
 import UserRepo from "@/repo/user_repo/UserRepo";
@@ -75,6 +76,24 @@ class SqliteUserRepo extends UserRepo {
       const current = result[0]?.customTags ?? [];
       const newTags = current.filter((currentTag) => currentTag !== tag);
       await this.drizzleDb.update(user).set({ customTags: newTags });
+    } catch (error) {
+      console.error("Failed to add custom tag:", error);
+      throw error;
+    }
+  }
+
+  async getTheme(): Promise<ThemeName> {
+    try {
+      const result = await this.drizzleDb.select().from(user).limit(1);
+      return result[0].theme;
+    } catch (error) {
+      console.error("Failed to get user:", error);
+      throw error;
+    }
+  }
+  async setTheme(theme: ThemeName): Promise<void> {
+    try {
+      await this.drizzleDb.update(user).set({ theme: theme });
     } catch (error) {
       console.error("Failed to add custom tag:", error);
       throw error;

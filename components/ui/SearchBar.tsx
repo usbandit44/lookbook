@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/ui/AppIcon";
-import { Theme } from "@/constants/themes";
+import { Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import React, { useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
@@ -55,11 +55,12 @@ const s = (t: Theme) =>
       alignItems: "center",
       gap: 10,
       backgroundColor: t.surfaceSunken,
-      borderWidth: 1,
+      borderWidth: t.shape.borderWidth,
       borderColor: t.inkA[12],
       height: 42,
       paddingHorizontal: 10,
       color: t.ink,
+      borderRadius: t.shape.radius.field,
     },
     input: { flex: 1 },
   });
