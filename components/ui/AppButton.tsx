@@ -1,4 +1,4 @@
-import { TextToken, Theme } from "@/constants/themes";
+import { shadowStyle, TextToken, Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
@@ -21,6 +21,7 @@ const AppButton: React.FC<{
   icon?: React.ReactNode | null;
   textColor?: string;
   disabled?: boolean;
+  children?: React.ReactNode;
 }> = ({ type = "primary", icon = null, ...props }) => {
   const { theme } = useTheme();
   const t = theme;
@@ -35,11 +36,11 @@ const AppButton: React.FC<{
   switch (type) {
     case "primary":
       typeStyling = {
-        backgroundColor: theme.ink,
+        backgroundColor: theme.accent,
         // paddingLeft: 25,
         // paddingRight: 25,
-        borderWidth: 1,
-        borderColor: theme.ink,
+        borderWidth: theme.shape.borderWidth,
+        borderColor: theme.accent,
         padding: 15,
       };
 
@@ -50,7 +51,7 @@ const AppButton: React.FC<{
         padding: 15,
         // paddingLeft: 25,
         // paddingRight: 25,
-        borderWidth: 1,
+        borderWidth: theme.shape.borderWidth,
         borderColor: theme.inkA[20],
         backgroundColor: theme.surface,
       };
@@ -59,14 +60,10 @@ const AppButton: React.FC<{
       break;
     case "ghostPrimary":
       typeStyling = {
-        backgroundColor: theme.inkA[35],
-        // paddingLeft: 25,
-        // paddingRight: 25,
-        borderWidth: 1,
-        borderColor: "transparent",
+        backgroundColor: theme.surface, // opaque, so the shadow comes out clean
+        borderWidth: 0, // otherwise the border ring shows the base colour
         padding: 15,
       };
-
       textType = "m3";
       break;
     case "ghostSecondary":
@@ -74,8 +71,9 @@ const AppButton: React.FC<{
         padding: 15,
         // paddingLeft: 25,
         // paddingRight: 25,
-        borderWidth: 1,
-        borderColor: theme.inkA[10],
+        borderWidth: theme.shape.borderWidth,
+        borderColor: theme.inkA[30],
+        backgroundColor: theme.surface,
       };
 
       textType = "m14";
@@ -116,7 +114,11 @@ const AppButton: React.FC<{
           <View
             style={[
               styles.pressOverlay,
-              { borderRadius: 25, width: "100%", height: "100%" },
+              {
+                borderRadius: theme.shape.radius.control,
+                width: "100%",
+                height: "100%",
+              },
             ]}
             pointerEvents="none"
           />
@@ -126,7 +128,7 @@ const AppButton: React.FC<{
           <AppText
             type={type == "text" ? "m4" : "m6"}
             text={props.label ?? ""}
-            style={{ color: props.textColor }}
+            style={props.textColor ? { color: props.textColor } : {}}
           ></AppText>
         )}
       </Pressable>
@@ -141,6 +143,18 @@ const AppButton: React.FC<{
       onPressIn={() => setIsPressed(true)}
       onPressOut={() => setIsPressed(false)}
     >
+      {type === "ghostPrimary" && (
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              backgroundColor: theme.accentA[70],
+              borderRadius: theme.shape.radius.control,
+            },
+          ]}
+        />
+      )}
       {isPressed && (
         <View
           style={[
@@ -154,9 +168,13 @@ const AppButton: React.FC<{
           pointerEvents="none"
         />
       )}
+      {props.children}
       <AppText
         type={textType}
-        style={[styles.label]}
+        style={[
+          styles.label,
+          props.textColor ? { color: props.textColor } : {},
+        ]}
         text={props.label ?? ""}
       ></AppText>
     </Pressable>
@@ -175,6 +193,8 @@ const s = (t: Theme) =>
       flexDirection: "row",
       gap: 9,
       height: 52,
+      borderRadius: t.shape.radius.control,
+      ...shadowStyle(t.shape.shadow.control),
     },
     label: {
       textAlign: "center",
@@ -182,5 +202,6 @@ const s = (t: Theme) =>
     pressOverlay: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: t.inkA[20],
+      borderRadius: t.shape.radius.control,
     },
   });

@@ -1,3 +1,4 @@
+import { ThemeName } from "@/constants/themes";
 import SqliteUserRepo from "@/repo/user_repo/SqliteUserRepo";
 import UserRepo from "@/repo/user_repo/UserRepo";
 
@@ -54,6 +55,21 @@ class AppUserRepo extends UserRepo {
   async removeCustomTag(tag: string): Promise<void> {
     try {
       const result = await this.sqliteRepo.removeCustomTag(tag);
+    } catch (err) {
+      throw err;
+    }
+  }
+  async getTheme(): Promise<ThemeName> {
+    try {
+      const result = await this.sqliteRepo.getTheme();
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+  async setTheme(theme: ThemeName): Promise<void> {
+    try {
+      const result = await this.sqliteRepo.setTheme(theme);
     } catch (err) {
       throw err;
     }

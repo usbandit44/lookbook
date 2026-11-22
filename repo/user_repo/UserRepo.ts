@@ -1,3 +1,5 @@
+import { ThemeName } from "@/constants/themes";
+
 abstract class UserRepo {
   constructor() {}
 
@@ -11,6 +13,8 @@ abstract class UserRepo {
   abstract getCustomTags(): Promise<string[]>;
   abstract addCustomTag(tag: string): Promise<void>;
   abstract removeCustomTag(tag: string): Promise<void>;
+  abstract getTheme(): Promise<ThemeName>;
+  abstract setTheme(theme: ThemeName): Promise<void>;
 }
 
 export default UserRepo;

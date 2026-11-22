@@ -2,8 +2,9 @@ import AppButton from "@/components/ui/AppButton";
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import Searchbar from "@/components/ui/SearchBar";
-import { Theme } from "@/constants/themes";
+
 import { presets } from "@/db/schemas/presets";
+import { Theme } from "@/functions/themeBuilder";
 import { useDrizzle } from "@/hooks/DrizzleContext";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
@@ -171,10 +172,10 @@ const s = (t: Theme) =>
       paddingBottom: 30,
     },
     presetList: {
-      borderWidth: 1,
+      borderWidth: t.shape.borderWidth,
       borderColor: t.inkA[12],
       backgroundColor: t.inkA[12], // shows through as 1px seams between rows
-      gap: 1,
+      gap: t.shape.borderWidth,
     },
     footer: {
       width: "100%",
@@ -182,7 +183,7 @@ const s = (t: Theme) =>
       gap: 15,
       padding: 15,
       paddingBottom: 40,
-      borderTopWidth: 1,
+      borderTopWidth: t.shape.borderWidth,
       borderTopColor: t.inkA[10],
     },
   });

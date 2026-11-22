@@ -2,8 +2,8 @@ import AppText from "@/components/ui/AppText";
 import Skeleton from "@/components/ui/Skeleton";
 import Swatch from "@/components/ui/Swatch";
 import { syncAnalyticsProperties } from "@/config/posthog";
-import { Theme } from "@/constants/themes";
 import { normalizeImageUri } from "@/functions/imageHandling";
+import { shadowStyle, Theme } from "@/functions/themeBuilder";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
@@ -30,6 +30,7 @@ const ItemPreview: React.FC<{
   itemType?: string;
   id: number;
   type: "outfit" | "item";
+  index: number;
 }> = (props) => {
   const { theme } = useTheme();
   const t = theme;
@@ -217,13 +218,29 @@ const ItemPreview: React.FC<{
     >
       {({ pressed }) => (
         <>
-          <Skeleton width={itemWidth} height={itemHeight} showing={isLoading} />
+          <Skeleton
+            width={itemWidth}
+            height={itemHeight}
+            showing={isLoading}
+            style={{ borderRadius: theme.shape.radius.tile }}
+          />
           <View
-            style={{
-              backgroundColor: theme.surfaceSunken,
-              borderWidth: 0.5,
-              borderColor: theme.inkA[9],
-            }}
+            style={[
+              {
+                backgroundColor: theme.surfaceSunken,
+                borderWidth: 0.5,
+                borderColor: theme.inkA[9],
+                borderRadius: t.shape.radius.tile,
+                ...shadowStyle(theme.shape.shadow.tile),
+              },
+              t.shape.tilt !== 0 && {
+                transform: [
+                  {
+                    rotate: `${props.index % 2 === 0 ? -t.shape.tilt : t.shape.tilt}deg`,
+                  },
+                ],
+              },
+            ]}
           >
             {props.favourite ? (
               <View
@@ -245,7 +262,13 @@ const ItemPreview: React.FC<{
             <Image
               source={{ uri: imageUri }}
               contentFit={props.type == "outfit" ? "cover" : "contain"}
-              style={[styles.img, { height: itemHeight }]}
+              style={[
+                styles.img,
+                {
+                  height: itemHeight,
+                  ...shadowStyle(theme.shape.shadow.image),
+                },
+              ]}
               onLoadStart={() => setIsLoading(true)}
               onLoadEnd={() => setIsLoading(false)}
             />
@@ -278,15 +301,13 @@ const s = (t: Theme) =>
   StyleSheet.create({
     container: {
       gap: 5,
+      borderRadius: t.shape.radius.tile,
     },
     img: {
       width: "100%",
+      borderRadius: t.shape.radius.tile,
     },
-    skeleton: {
-      borderRadius: 10,
-      position: "absolute",
-      // backgroundColor: "#E0E0E0",
-    },
+
     caption: {
       flexDirection: "row",
       alignItems: "center",
@@ -296,12 +317,13 @@ const s = (t: Theme) =>
     pressOverlay: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: t.inkA[20],
+      borderRadius: t.shape.radius.tile,
     },
     modalTitleRow: {
       paddingHorizontal: 20,
       paddingTop: 15,
       paddingBottom: 13,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[10],
     },
     modalRow: {
@@ -310,7 +332,7 @@ const s = (t: Theme) =>
       gap: 13,
       paddingHorizontal: 20,
       paddingVertical: 16,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[8], // last row: borderBottomWidth 0
     },
   });

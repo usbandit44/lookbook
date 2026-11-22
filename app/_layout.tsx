@@ -15,9 +15,23 @@ import {
   useFonts,
 } from "@expo-google-fonts/archivo";
 import {
+  BarlowSemiCondensed_600SemiBold,
+  BarlowSemiCondensed_700Bold,
+} from "@expo-google-fonts/barlow-semi-condensed";
+import { Caveat_600SemiBold, Caveat_700Bold } from "@expo-google-fonts/caveat";
+import { CourierPrime_400Regular } from "@expo-google-fonts/courier-prime";
+import {
+  Fredoka_400Regular,
+  Fredoka_500Medium,
+  Fredoka_600SemiBold,
+  Fredoka_700Bold,
+} from "@expo-google-fonts/fredoka";
+import {
   IBMPlexMono_500Medium,
   IBMPlexMono_600SemiBold,
 } from "@expo-google-fonts/ibm-plex-mono";
+import { PermanentMarker_400Regular } from "@expo-google-fonts/permanent-marker";
+import { SpecialElite_400Regular } from "@expo-google-fonts/special-elite";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import { Slot, usePathname } from "expo-router";
@@ -101,6 +115,17 @@ function AppShell() {
     Archivo_700Bold,
     IBMPlexMono_500Medium,
     IBMPlexMono_600SemiBold,
+    "Fredoka-Regular": Fredoka_400Regular,
+    "Fredoka-Medium": Fredoka_500Medium,
+    "Fredoka-SemiBold": Fredoka_600SemiBold,
+    "Fredoka-Bold": Fredoka_700Bold,
+    "BarlowSemiCondensed-SemiBold": BarlowSemiCondensed_600SemiBold,
+    "BarlowSemiCondensed-Bold": BarlowSemiCondensed_700Bold,
+    "PermanentMarker-Regular": PermanentMarker_400Regular,
+    "Caveat-SemiBold": Caveat_600SemiBold,
+    "Caveat-Bold": Caveat_700Bold,
+    "CourierPrime-Regular": CourierPrime_400Regular,
+    "SpecialElite-Regular": SpecialElite_400Regular,
   });
 
   // ← early returns AFTER all hooks

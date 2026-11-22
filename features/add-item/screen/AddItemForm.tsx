@@ -21,8 +21,9 @@ import { useTheme } from "@/hooks/ThemeProvider";
 import { useSnackbar } from "@/hooks/useSnackBar";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import Swatch from "@/components/ui/Swatch";
 import { syncAnalyticsProperties } from "@/config/posthog";
-import ColorSelector from "@/features/add-item/components/ColorSelector";
+import { shadowStyle, Theme } from "@/functions/themeBuilder";
 import { useRepo } from "@/hooks/RepoProvider";
 import {
   addItemTag,
@@ -59,7 +60,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -72,6 +72,8 @@ type FormValues = {
 const AddItemForm = () => {
   const posthog = usePostHog();
   const { theme } = useTheme();
+  const t = theme;
+  const styles = s(t);
   const drizzleDb = useDrizzle();
   const { data: liveUserData } = useLiveQuery(drizzleDb.select().from(user));
 
@@ -351,7 +353,7 @@ const AddItemForm = () => {
         {currentItemId == -1 ? (
           <AppText
             text={`${String(itemsIndex + 1).padStart(2, "0")}/${String(itemsList.length).padStart(2, "0")}`}
-            type="m8"
+            type="m7"
           />
         ) : (
           <AppButton
@@ -388,27 +390,47 @@ const AddItemForm = () => {
           contentContainerStyle={styles.form}
           bounces={true}
           ref={scrollRef}
+          showsHorizontalScrollIndicator={false}
         >
           <View style={[styles.imageBlock]}>
-            <Image
-              source={{ uri: item.imgUrl }}
-              contentFit="contain"
+            <View
               style={[
-                styles.imageWrapper,
                 {
-                  backgroundColor: theme.surfaceSunken,
-                  borderColor: theme.inkA[10],
+                  ...shadowStyle(t.shape.shadow.tile),
+                },
+                t.shape.tilt !== 0 && {
+                  transform: [
+                    {
+                      rotate: `${0 % 2 === 0 ? -t.shape.tilt : t.shape.tilt}deg`,
+                    },
+                  ],
                 },
               ]}
-            />
+            >
+              <Image
+                source={{ uri: item.imgUrl }}
+                contentFit="contain"
+                style={[
+                  styles.imageWrapper,
+                  {
+                    backgroundColor: theme.surfaceSunken,
+                    borderColor: theme.inkA[10],
+                    ...shadowStyle(theme.shape.shadow.image),
+                  },
+                ]}
+              />
+            </View>
+
             <AppButton
               type="icon"
               style={{
                 position: "absolute",
-                top: 1,
-                right: 1,
+                top: theme.shape.borderWidth - 1,
+                right: theme.shape.borderWidth - 1,
                 padding: 9,
                 backgroundColor: theme.surface,
+                borderTopRightRadius: theme.shape.radius.tile,
+                borderBottomLeftRadius: theme.shape.radius.tile,
               }}
               icon={
                 item.favorited ? (
@@ -600,10 +622,10 @@ const AddItemForm = () => {
                   const selected = item.tags.includes(color);
 
                   return (
-                    <ColorSelector
-                      key={index}
+                    <AppButton
                       label={color}
-                      selected={selected}
+                      type={selected ? "primary" : "secondary"}
+                      style={styles.tagSelects}
                       onPress={() => {
                         if (selected) {
                           dispatch(
@@ -627,7 +649,37 @@ const AddItemForm = () => {
                           );
                         }
                       }}
-                    ></ColorSelector>
+                    >
+                      <Swatch color={color} width={14} height={14}></Swatch>
+                    </AppButton>
+                    // <ColorSelector
+                    //   key={index}
+                    //   label={color}
+                    //   selected={selected}
+                    //   onPress={() => {
+                    //     if (selected) {
+                    //       dispatch(
+                    //         removeItemTag({ index: itemsIndex, tag: color }),
+                    //       );
+                    //       dispatch(clearItemColor({ index: itemsIndex }));
+                    //     } else {
+                    //       if (item.color != "") {
+                    //         dispatch(
+                    //           removeItemTag({
+                    //             index: itemsIndex,
+                    //             tag: item.color || "",
+                    //           }),
+                    //         );
+                    //       }
+                    //       dispatch(
+                    //         addItemTag({ index: itemsIndex, tag: color }),
+                    //       );
+                    //       dispatch(
+                    //         setItemColor({ index: itemsIndex, color: color }),
+                    //       );
+                    //     }
+                    //   }}
+                    // ></ColorSelector>
                   );
                 })}
               </View>
@@ -649,25 +701,6 @@ const AddItemForm = () => {
                 onChangeText={setSearchCustomTags}
                 scrollRef={scrollRef}
                 footer={
-                  // <View style={{ paddingHorizontal: 15, paddingVertical: 10 }}>
-                  //   <Pressable
-                  //     onPress={() => {
-                  //       if (!customTags.includes(searchCustomTags.trim())) {
-                  //         userRepo.addCustomTag(searchCustomTags.trim());
-
-                  //         dispatch(
-                  //           addItemTag({
-                  //             index: itemsIndex,
-                  //             tag: searchCustomTags.trim(),
-                  //           }),
-                  //         );
-                  //       }
-                  //     }}
-                  //     style={{ width: "100%", alignItems: "center" }}
-                  //   >
-                  //     <AppText style={{ color: "black" }}>+ Add Tag</AppText>
-                  //   </Pressable>
-                  // </View>
                   <Pressable
                     onPress={() => {
                       if (!customTags.includes(searchCustomTags.trim())) {
@@ -686,19 +719,20 @@ const AddItemForm = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor: theme.surfaceAlt,
+                      borderBottomLeftRadius: theme.shape.radius.field,
+                      borderBottomRightRadius: theme.shape.radius.field,
                     }}
                     disabled={!searchCustomTags.trim()}
                   >
-                    <Text
-                      style={[
-                        styles.addTagLabel,
+                    <AppText
+                      type="m6"
+                      text="+ Add tag"
+                      style={
                         !searchCustomTags.trim()
                           ? { color: theme.inkA[30] }
-                          : { color: theme.ink },
-                      ]}
-                    >
-                      + Add tag
-                    </Text>
+                          : undefined
+                      }
+                    />
                   </Pressable>
                 }
                 onClearItem={(item) => {
@@ -817,75 +851,69 @@ const AddItemForm = () => {
 
 export default AddItemForm;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // paddingLeft: 20,
-    // paddingRight: 20,
-    // paddingBottom: 20,
-    // justifyContent: "space-between",
-  },
-  header: {
-    paddingHorizontal: 15,
-    paddingBottom: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  form: {
-    paddingTop: 6,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    alignItems: "center",
-    gap: 20,
-  },
-  imageBlock: {
-    alignItems: "center",
-    gap: 10,
-  },
-  imageWrapper: {
-    position: "relative",
-    width: "90%",
-    aspectRatio: 1,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  clearIcon: {
-    position: "absolute",
-    top: -15,
-    right: -15,
-    backgroundColor: Colors.light.background,
-    borderRadius: 50,
-    padding: 1,
-    zIndex: 2,
-  },
-  cameraButton: {
-    borderStyle: "dashed",
-    borderWidth: 2,
-    borderColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    aspectRatio: 1,
-  },
-  tagSelects: { flex: 0, height: "auto" },
-  tagSection: {
-    width: "100%",
-    //aspectRatio: 1,
+const s = (t: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      // paddingLeft: 20,
+      // paddingRight: 20,
+      // paddingBottom: 20,
+      // justifyContent: "space-between",
+    },
+    header: {
+      paddingHorizontal: 15,
+      paddingBottom: 15,
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    form: {
+      paddingTop: 6,
+      paddingHorizontal: 20,
+      paddingBottom: 24,
+      alignItems: "center",
+      gap: 20,
+    },
+    imageBlock: {
+      alignItems: "center",
+      gap: 10,
+    },
+    imageWrapper: {
+      position: "relative",
+      width: "100%",
+      aspectRatio: 1,
+      borderWidth: t.shape.borderWidth,
+      borderRadius: t.shape.radius.tile,
+      overflow: "hidden",
+    },
+    clearIcon: {
+      position: "absolute",
+      top: -15,
+      right: -15,
+      backgroundColor: Colors.light.background,
+      borderRadius: 50,
+      padding: 1,
+      zIndex: 2,
+    },
 
-    justifyContent: "flex-start",
-    gap: 20,
-  },
-  footer: {
-    flexDirection: "row",
-    gap: 15,
-    padding: 15,
-    paddingBottom: 40,
-    borderTopWidth: 1,
-  },
-  addTagLabel: {
-    fontFamily: "IBMPlexMono-SemiBold",
-    fontSize: 9.5,
-    letterSpacing: 1.14, // .12em × 9.5
-    textTransform: "uppercase",
-  },
-});
+    tagSelects: { flex: 0, height: "auto" },
+    tagSection: {
+      width: "100%",
+      //aspectRatio: 1,
+
+      justifyContent: "flex-start",
+      gap: 20,
+    },
+    footer: {
+      flexDirection: "row",
+      gap: 15,
+      padding: 15,
+      paddingBottom: 40,
+      borderTopWidth: t.shape.borderWidth,
+    },
+    addTagLabel: {
+      fontFamily: "IBMPlexMono-SemiBold",
+      fontSize: 9.5,
+      letterSpacing: 1.14, // .12em × 9.5
+      textTransform: "uppercase",
+    },
+  });

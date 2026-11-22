@@ -1,4 +1,5 @@
 import { itemColors } from "@/constants/constants";
+import { Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import React from "react";
 import { StyleSheet, View } from "react-native";
@@ -33,6 +34,8 @@ const Swatch: React.FC<{ color: string; width: number; height: number }> = ({
   height,
 }) => {
   const { theme } = useTheme();
+  const t = theme;
+  const styles = s(t);
 
   if (color === "Multicolor") {
     return (
@@ -68,14 +71,15 @@ const Swatch: React.FC<{ color: string; width: number; height: number }> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    borderWidth: 1,
-  },
-  multi: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    overflow: "hidden",
-  },
-});
+const s = (t: Theme) =>
+  StyleSheet.create({
+    container: {
+      borderWidth: 1,
+    },
+    multi: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      overflow: "hidden",
+    },
+  });
 export default Swatch;
