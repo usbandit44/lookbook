@@ -55,7 +55,7 @@
 //   },
 // });
 
-import { Theme } from "@/constants/themes";
+import { Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { BlurView } from "expo-blur";
 import React from "react";

@@ -5,8 +5,9 @@ import {
   itemTypesArray,
   NewItemType,
 } from "@/constants/constants";
-import { Theme } from "@/constants/themes";
+
 import { getClassification } from "@/functions/getClassification";
+import { Theme } from "@/functions/themeBuilder";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { useBackgroundRemover } from "@/hooks/useBackgroundRemover";
@@ -35,7 +36,6 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -44,6 +44,7 @@ import AppButton from "./ui/AppButton";
 import { AppIcon } from "./ui/AppIcon";
 import AppText from "./ui/AppText";
 
+const WHITE = "#FFFFFF"; // camera chrome is white-on-dark in every
 const MAX_MENU_HEIGHT = 500;
 const CAMERA_ASPECT = 4 / 5; // width / height
 
@@ -295,9 +296,11 @@ export function Camera() {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: "center" }}>
-          We need your permission to use the camera
-        </Text>
+        <AppText
+          type="p5"
+          text="We need your permission to use the camera"
+          style={{ color: theme.whiteA[70], textAlign: "center" }}
+        />
         <Button
           onPress={
             permission.canAskAgain
@@ -533,7 +536,7 @@ export function Camera() {
             type="text"
             label="Close"
             onPress={() => setActive(false)}
-            textColor={theme.onInk}
+            textColor={t.whiteA[85]}
           />
         </View>
         <FlatList
@@ -572,22 +575,22 @@ export function Camera() {
         />
         <View style={styles.menuButtons}>
           <AppButton
-            type="primary"
+            type="ghostSecondary"
             label="Take More"
-            style={{ borderWidth: 1, borderColor: t.whiteA[16] }}
-            onPress={() => {
-              setActive(false);
-            }}
-          ></AppButton>
+            textColor={t.whiteA[80]}
+            style={{ backgroundColor: t.inkAlt, borderColor: t.whiteA[30] }}
+            onPress={() => setActive(false)}
+          />
           <AppButton
-            type="secondary"
+            type="primary"
             label="Continue"
-            style={{ borderWidth: 1, borderColor: t.whiteA[16] }}
+            textColor={t.inkAlt}
+            style={{ backgroundColor: WHITE, borderColor: WHITE }}
             onPress={() => {
               startProcessing();
               setActive(false);
             }}
-          ></AppButton>
+          />
         </View>
       </Animated.View>
     </>
@@ -699,7 +702,7 @@ const s = (t: Theme) =>
     tile: {
       backgroundColor: t.inkA[7],
       objectFit: "cover",
-      borderWidth: 1,
+      borderWidth: t.shape.borderWidth,
       borderColor: t.whiteA[16],
     },
     removeTile: {

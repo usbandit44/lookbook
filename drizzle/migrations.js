@@ -18,6 +18,7 @@ import m0013 from './0013_bouncy_the_hand.sql';
 import m0014 from './0014_loud_wasp.sql';
 import m0015 from './0015_bright_morg.sql';
 import m0016 from './0016_condemned_purifiers.sql';
+import m0017 from './0017_confused_luckman.sql';
 
   export default {
     journal,
@@ -38,7 +39,8 @@ m0012,
 m0013,
 m0014,
 m0015,
-m0016
+m0016,
+m0017
     }
   }
   

@@ -124,11 +124,7 @@ export function LoginPage() {
   return (
     <View
       style={{ flex: 1, backgroundColor: Colors.light.background, gap: 20 }}
-    >
-      {/* <Text>LoginPage</Text>
-      <Link href="/pages">View App</Link>
-      <Link href="/playground">Playground</Link> */}
-    </View>
+    ></View>
   );
 }
 

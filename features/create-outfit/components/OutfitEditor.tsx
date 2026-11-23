@@ -3,12 +3,12 @@ import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import { syncAnalyticsProperties } from "@/config/posthog";
 import { OutfitPositions } from "@/constants/constants";
-import { Theme } from "@/constants/themes";
 import { ItemsType } from "@/db/schemas/items";
 import {
   ensurePersistedItemImageUri,
   normalizeImageUri,
 } from "@/functions/imageHandling";
+import { shadowStyle, Theme } from "@/functions/themeBuilder";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
@@ -406,7 +406,7 @@ const OutfitEditor: React.FC = () => {
       >
         {parentSize.width > 0 &&
           parentSize.height > 0 &&
-          outfit.map((item) => {
+          outfit.map((item, index) => {
             const pos = itemsPositions[item.id] ?? { x: 0, y: 0, scale: 1 };
             return (
               <Movable
@@ -423,11 +423,17 @@ const OutfitEditor: React.FC = () => {
                 }}
                 isCapturing={isCapturing}
                 modalName={item.color + " / " + item.type}
+                index={index}
               >
                 <Image
                   source={{ uri: normalizeImageUri(item.imgUrl ?? "") }}
                   contentFit="contain"
-                  style={{ width: "100%", height: "100%", borderRadius: 8 }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: theme.shape.radius.tile,
+                    ...shadowStyle(theme.shape.shadow.image),
+                  }}
                 />
               </Movable>
             );
@@ -461,7 +467,7 @@ const s = (t: Theme) =>
     editor: {
       flex: 1,
       backgroundColor: t.surfaceSunken,
-      borderTopWidth: 1,
+      borderTopWidth: t.shape.borderWidth,
       borderColor: t.inkA[10],
     },
     header: { paddingBottom: 15, paddingHorizontal: 15, gap: 25 },
@@ -477,7 +483,7 @@ const s = (t: Theme) =>
       width: "100%",
 
       paddingBottom: 10,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderColor: t.inkA[16],
     },
 
@@ -487,7 +493,7 @@ const s = (t: Theme) =>
       gap: 15,
       padding: 15,
       paddingBottom: 40,
-      borderTopWidth: 1,
+      borderTopWidth: t.shape.borderWidth,
       borderTopColor: t.inkA[10],
     },
     navButtonContainer: {
@@ -495,14 +501,7 @@ const s = (t: Theme) =>
       alignItems: "center",
       gap: 5,
     },
-    navButton: {
-      height: 70,
-      width: 70,
-      justifyContent: "center",
-      alignItems: "center",
-      borderWidth: 1,
-      borderRadius: 20,
-    },
+
     optionsScreen: {
       ...StyleSheet.absoluteFillObject,
     },
@@ -511,7 +510,7 @@ const s = (t: Theme) =>
       paddingHorizontal: 20,
       paddingTop: 15,
       paddingBottom: 13,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[10],
     },
     modalRow: {
@@ -520,7 +519,7 @@ const s = (t: Theme) =>
       gap: 13,
       paddingHorizontal: 20,
       paddingVertical: 16,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[8],
     },
   });

@@ -1,5 +1,11 @@
+import { ThemeName, themes } from "@/constants/themes";
 import { sql } from "drizzle-orm";
-import { customType, integer, sqliteTable } from "drizzle-orm/sqlite-core";
+import {
+  customType,
+  integer,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 const stringArrayJson = customType<{ data: string[]; driverData: string }>({
   dataType() {
@@ -25,6 +31,11 @@ export const user = sqliteTable("user", {
   customTags: stringArrayJson("customTags")
     .notNull()
     .default(sql`(json_array())`),
+  theme: text("theme", {
+    enum: Object.keys(themes) as [ThemeName, ...ThemeName[]],
+  })
+    .notNull()
+    .default("default"),
 });
 
 export type UserType = typeof user.$inferSelect;

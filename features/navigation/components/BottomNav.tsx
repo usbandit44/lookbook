@@ -1,8 +1,9 @@
 import AppButton from "@/components/ui/AppButton";
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
-import { Theme } from "@/constants/themes";
+
 import { emitScrollToTop } from "@/features/navigation/hooks/scrollEvents";
+import { Theme } from "@/functions/themeBuilder";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import { clearCurrentItemId } from "@/redux/slices/itemSlice";
@@ -13,12 +14,10 @@ import {
   Animated,
   Pressable,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Line } from "react-native-svg";
 
 const ADD_MENU_HEIGHT = 320;
 
@@ -107,9 +106,11 @@ const BottomNav = () => {
         color={on ? t.ink : t.inkA[45]}
         name={key === "items" ? "shirt" : "hanger"}
       />
-      <Text style={[styles.tabLabel, on && styles.tabLabelActive]}>
-        {label}
-      </Text>
+      <AppText
+        type="m11"
+        text={label}
+        style={{ color: on ? theme.ink : theme.inkA[45] }}
+      />
     </Pressable>
   );
 
@@ -159,17 +160,7 @@ const BottomNav = () => {
                 pressed && styles.addPressed,
               ]}
             >
-              <Svg
-                width={18}
-                height={18}
-                viewBox="0 0 24 24"
-                stroke={t.onInk}
-                strokeWidth={2}
-                strokeLinecap="round"
-              >
-                <Line x1={12} y1={4.5} x2={12} y2={19.5} />
-                <Line x1={4.5} y1={12} x2={19.5} y2={12} />
-              </Svg>
+              <AppIcon name="plus" color={theme.onAccent}></AppIcon>
             </Pressable>
             {renderTab("outfits", "OUTFITS", page == "outfits")}
           </BlurView>
@@ -276,18 +267,13 @@ const s = (t: Theme) =>
     },
     tabActive: { backgroundColor: t.inkA[7] },
     tabPressed: { backgroundColor: t.inkA[7] },
-    tabLabel: {
-      fontFamily: "IBMPlexMono-SemiBold",
-      fontSize: 7.5,
-      letterSpacing: 0.9,
-      color: t.inkA[45],
-    },
+
     tabLabelActive: { color: t.ink },
     add: {
       width: 46,
       height: 46,
       borderRadius: 23,
-      backgroundColor: t.ink,
+      backgroundColor: t.accent,
       alignItems: "center",
       justifyContent: "center",
     },

@@ -1,12 +1,11 @@
-import { Theme } from "@/constants/themes";
 import { SnackbarAction } from "@/constants/types";
+import { Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Pressable,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -70,12 +69,20 @@ const Snackbar: React.FC<{
       <View style={{ ...styles.snackbar, backgroundColor: bgColor }}>
         <View style={styles.message}>
           <View style={styles.dot}></View>
-          <AppText type="m16" text={props.children} style={{}}></AppText>
+          <AppText
+            type="m16"
+            text={props.children}
+            style={styles.text}
+          ></AppText>
         </View>
         <View style={styles.action}>
           {props.action ? (
             <Pressable onPress={props.action.actionFn}>
-              <Text style={styles.text}>{props.action.actionMsg}</Text>
+              <AppText
+                type="m3"
+                text={props.action.actionMsg}
+                style={styles.text}
+              />
             </Pressable>
           ) : null}
           {/* <Pressable
@@ -134,6 +141,6 @@ const s = (t: Theme) =>
       gap: 10,
     },
     action: { flexDirection: "row", alignItems: "center", gap: 30 },
-    text: { color: "#ffffff", fontWeight: "bold" },
+    text: { color: t.onInk },
     dot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: t.onInk },
   });

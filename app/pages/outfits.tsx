@@ -41,16 +41,6 @@ const OutfitsPage = () => {
 
   const [showSearch, setShowSearch] = useState(true);
 
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: any[] }) => {
-      const topRowsVisible = viewableItems.some(
-        (vi) => vi.index !== null && vi.index < 1,
-      );
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setShowSearch(topRowsVisible);
-    },
-  ).current;
-
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
   }).current;
@@ -100,7 +90,7 @@ const OutfitsPage = () => {
     }
 
     if (tagFilters.length > 0) {
-      filtered = itemsData.filter((outfit) => {
+      filtered = filtered.filter((outfit) => {
         return tagFilters.every((tag) => {
           const normalized = normalizeSearchTerm(tag) ?? tag;
           const fuse = new Fuse([outfit.name], { threshold: 0.2 });
@@ -121,6 +111,20 @@ const OutfitsPage = () => {
     //setFilteredData(formattedData);
     return formattedData;
   }, [debouncedSearch, itemsData, filter]);
+
+  const itemCountRef = useRef(0);
+  itemCountRef.current = filteredData.length;
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: any[] }) => {
+      const topRowsVisible = viewableItems.some(
+        (vi) => vi.index !== null && vi.index < 1,
+      );
+      const next = topRowsVisible || itemCountRef.current <= 6;
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setShowSearch(next);
+    },
+  ).current;
 
   const posthog = usePostHog();
 
@@ -220,7 +224,7 @@ const OutfitsPage = () => {
     }
   };
   return (
-    <View style={{ flex: 1, paddingHorizontal: 15 }}>
+    <View style={{ flex: 1 }}>
       {showSearch ? (
         <View style={[styles.header, { backgroundColor: theme.surface }]}>
           <SearchBar
@@ -233,7 +237,11 @@ const OutfitsPage = () => {
             bounces={true}
             horizontal={true}
             style={{ width: "100%", gap: 50 }}
-            contentContainerStyle={{ gap: 8 }}
+            contentContainerStyle={{
+              gap: 8,
+              paddingBottom: 5,
+              paddingRight: 5,
+            }}
             showsHorizontalScrollIndicator={false}
           >
             {["All", "Favorites"].map((filt, index) => {
@@ -268,10 +276,11 @@ const OutfitsPage = () => {
               alignItems: "center",
               gap: 10,
               backgroundColor: theme.surfaceSunken,
-              borderWidth: 1,
+              borderWidth: theme.shape.borderWidth,
               borderColor: theme.inkA[12],
               height: 42,
               paddingHorizontal: 10,
+              borderRadius: theme.shape.radius.field,
             }}
             onPress={() => {
               flatListRef.current?.scrollToOffset({
@@ -293,6 +302,7 @@ const OutfitsPage = () => {
       )}
       {filteredData.length > 0 ? (
         <FlatList
+          style={styles.list}
           initialNumToRender={6} // render first 3 rows only
           maxToRenderPerBatch={6} // render 3 more rows per batch
           windowSize={5}
@@ -305,7 +315,7 @@ const OutfitsPage = () => {
           numColumns={2}
           columnWrapperStyle={styles.itemsGrid}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             // <View>
             //   <Image
             //     source={{ uri: item.imgUrl ?? undefined }}
@@ -314,6 +324,7 @@ const OutfitsPage = () => {
             //   />
             // </View>
             <ItemPreview
+              index={index}
               id={item.id}
               imgUri={item.imgUrl ?? ""}
               name={item.name ?? ""}
@@ -333,6 +344,10 @@ const OutfitsPage = () => {
 export default OutfitsPage;
 
 const styles = StyleSheet.create({
+  list: {
+    flex: 1,
+    paddingHorizontal: 15,
+  },
   listContent: {
     paddingBottom: 100,
   },
@@ -341,7 +356,7 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   header: {
-    // paddingHorizontal: 15,
+    paddingHorizontal: 15,
     paddingTop: 15,
     alignSelf: "flex-start",
     width: "100%",

@@ -6,9 +6,10 @@ import {
   itemTypesArray,
   PresetTypesType,
 } from "@/constants/constants";
-import { Theme } from "@/constants/themes";
+
 import { PresetType } from "@/db/schemas/presets";
 import { diffPresetTypes, getPresetOrigin } from "@/functions/presetAnalytics";
+import { Theme } from "@/functions/themeBuilder";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";

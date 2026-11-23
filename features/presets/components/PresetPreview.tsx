@@ -2,8 +2,9 @@ import AppButton from "@/components/ui/AppButton";
 import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import { PresetTypesType } from "@/constants/constants";
-import { Theme } from "@/constants/themes";
+
 import { getPresetOrigin } from "@/functions/presetAnalytics";
+import { Theme } from "@/functions/themeBuilder";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { useRepo } from "@/hooks/RepoProvider";
 import { useTheme } from "@/hooks/ThemeProvider";
@@ -338,7 +339,7 @@ const s = (t: Theme) =>
       paddingHorizontal: 20,
       paddingTop: 15,
       paddingBottom: 13,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[10],
     },
     modalRow: {
@@ -347,7 +348,7 @@ const s = (t: Theme) =>
       gap: 13,
       paddingHorizontal: 20,
       paddingVertical: 16,
-      borderBottomWidth: 1,
+      borderBottomWidth: t.shape.borderWidth,
       borderBottomColor: t.inkA[8],
     },
   });

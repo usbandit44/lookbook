@@ -1,4 +1,5 @@
 import AppText from "@/components/ui/AppText";
+import { Theme } from "@/functions/themeBuilder";
 import { useTheme } from "@/hooks/ThemeProvider";
 import Fuse from "fuse.js";
 import { useRef, useState } from "react";
@@ -31,6 +32,7 @@ const SearchableDropdown: React.FC<{
   onClearItem,
 }) => {
   const { theme } = useTheme();
+  const styles = s(theme);
   const [open, setOpen] = useState(false);
 
   const fuse = new Fuse(options, { threshold: 0.4 });
@@ -156,37 +158,38 @@ const SearchableDropdown: React.FC<{
 
 export default SearchableDropdown;
 
-const styles = StyleSheet.create({
-  input: { flex: 1 },
-  container: {
-    height: 46,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 1,
-    borderRadius: 0,
-  },
-  fieldOpen: { borderBottomWidth: 1 },
-  dropdown: {
-    borderWidth: 1,
-    borderTopWidth: 0, // shares the seam with the field above
-    borderRadius: 0,
-  },
-  option: {
-    height: 44,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    borderBottomWidth: 1,
-  },
-  optionLabel: {
-    flex: 1,
-  },
-  empty: {
-    padding: 14,
-    textAlign: "center",
-  },
-});
+const s = (t: Theme) =>
+  StyleSheet.create({
+    input: { flex: 1 },
+    container: {
+      height: 46,
+      paddingHorizontal: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      borderWidth: t.shape.borderWidth,
+      borderRadius: t.shape.radius.field,
+    },
+    fieldOpen: { borderBottomWidth: 1 },
+    dropdown: {
+      borderWidth: t.shape.borderWidth,
+      borderTopWidth: 0, // shares the seam with the field above
+      borderRadius: t.shape.radius.field,
+    },
+    option: {
+      height: 44,
+      paddingHorizontal: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+      borderBottomWidth: t.shape.borderWidth,
+    },
+    optionLabel: {
+      flex: 1,
+    },
+    empty: {
+      padding: 14,
+      textAlign: "center",
+    },
+  });

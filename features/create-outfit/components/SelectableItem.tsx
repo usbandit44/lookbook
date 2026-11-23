@@ -2,8 +2,8 @@ import { AppIcon } from "@/components/ui/AppIcon";
 import AppText from "@/components/ui/AppText";
 import Skeleton from "@/components/ui/Skeleton";
 import Swatch from "@/components/ui/Swatch";
-import { Theme } from "@/constants/themes";
 import { normalizeImageUri } from "@/functions/imageHandling";
+import { shadowStyle, Theme } from "@/functions/themeBuilder";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { useTheme } from "@/hooks/ThemeProvider";
 import {
@@ -21,6 +21,7 @@ const SelectableItem: React.FC<{
   imgUri: string;
   type: string;
   color: string;
+  index: number;
 }> = (props) => {
   const { theme } = useTheme();
   const t = theme;
@@ -91,16 +92,30 @@ const SelectableItem: React.FC<{
           </View>
         ) : null}
         <View
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: theme.surfaceSunken,
-            borderWidth: selected ? 1 : 0.5,
-            borderColor: selected ? theme.ink : theme.inkA[9],
-          }}
+          style={[
+            {
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: theme.surfaceSunken,
+              borderWidth: selected
+                ? theme.shape.borderWidth
+                : theme.shape.borderWidth * 0.5,
+              borderColor: selected ? theme.ink : theme.inkA[9],
+              borderRadius: theme.shape.radius.tile,
+              ...shadowStyle(theme.shape.shadow.tile),
+            },
+            ,
+            t.shape.tilt !== 0 && {
+              transform: [
+                {
+                  rotate: `${props.index % 2 === 0 ? -t.shape.tilt : t.shape.tilt}deg`,
+                },
+              ],
+            },
+          ]}
         ></View>
         <Image
           source={{ uri: imageUri }}
@@ -118,7 +133,12 @@ const SelectableItem: React.FC<{
 
         <AppText type="m10" text={props.color + " / " + props.type}></AppText>
       </View>
-      <Skeleton width={"100%"} height={"100%"} showing={isLoading} />
+      <Skeleton
+        width={"100%"}
+        height={"100%"}
+        showing={isLoading}
+        style={{ borderRadius: theme.shape.radius.tile }}
+      />
     </Pressable>
   );
 };
@@ -130,7 +150,8 @@ const s = (t: Theme) =>
     img: {
       aspectRatio: 4 / 5,
       width: "100%",
-      borderRadius: 10,
+      borderRadius: t.shape.radius.tile,
+      ...shadowStyle(t.shape.shadow.image),
     },
     caption: {
       flexDirection: "row",
