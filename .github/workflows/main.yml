@@ -1,0 +1,49 @@
+name: pr-validation
+on:
+  pull_request:
+        types: [opened, reopened, edited]
+jobs:
+  pr-into-main:
+    name: Require UAT to be the source for a main PR
+    runs-on: ubuntu-slim
+    defaults:
+      run:
+        shell: bash
+    if: ${{ github.base_ref == 'main' }}
+    steps:
+    - name: Check source branch
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        if [ "$HEAD_REF" != "UAT" ]; then
+          echo "::error::PRs into main must come from the UAT branch (got '$HEAD_REF')."
+          exit 1
+        fi
+  pr-into-UAT:
+    name: Require develop to be the source for a UAT PR
+    runs-on: ubuntu-slim
+    if: ${{ github.base_ref == 'UAT' }}
+    steps:
+    - name: Check source branch
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        if [ "$HEAD_REF" != "develop" ]; then
+          echo "::error::PRs into UAT must come from the develop branch (got '$HEAD_REF')."
+          exit 1
+        fi
+  pr-into-develop:
+    name: Require feature/* to be the source for a develop PR
+    runs-on: ubuntu-slim
+    if: ${{ github.base_ref == 'develop' }}
+    steps:
+    - name: Check source branch
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        if [[ "$HEAD_REF" != feature/* ]]; then
+          echo "::error::PRs into develop must come from a branch formatted as feature/* (got '$HEAD_REF')."
+          exit 1
+        fi
+      
+  
